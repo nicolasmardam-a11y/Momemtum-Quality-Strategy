@@ -1,0 +1,512 @@
+{
+  "generated": "2026-05-15 23:26:50",
+  "source_portfolio": "reports/production/current_portfolio_clean.csv",
+  "basis": "cleaned-sector, trust-excluded v2.5 top-50",
+  "verdict": "PASS",
+  "n_total": 50,
+  "n_tradable": 50,
+  "n_blocked": 0,
+  "blocked_tickers": [],
+  "tradable": [
+    {
+      "model_ticker": "MA",
+      "conId": 38685693,
+      "symbol": "MA",
+      "exchange": "SMART",
+      "primaryExchange": "NYSE",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Mastercard"
+    },
+    {
+      "model_ticker": "FIX",
+      "conId": 6607708,
+      "symbol": "FIX",
+      "exchange": "SMART",
+      "primaryExchange": "NYSE",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Comfort Systems USA"
+    },
+    {
+      "model_ticker": "BBSE3.SA",
+      "conId": 128937802,
+      "symbol": "BBSE3",
+      "exchange": "SMART",
+      "primaryExchange": "B3",
+      "currency": "BRL",
+      "country": "BR",
+      "company_name": "BB Seguridade"
+    },
+    {
+      "model_ticker": "ZURN.SW",
+      "conId": 262834,
+      "symbol": "ZURN",
+      "exchange": "SMART",
+      "primaryExchange": "EBS",
+      "currency": "CHF",
+      "country": "CH",
+      "company_name": "Zurich Insurance"
+    },
+    {
+      "model_ticker": "CNA.L",
+      "conId": 31765913,
+      "symbol": "CNA",
+      "exchange": "SMART",
+      "primaryExchange": "LSE",
+      "currency": "GBP",
+      "country": "GB",
+      "company_name": "Centrica"
+    },
+    {
+      "model_ticker": "032830.KS",
+      "conId": 78591105,
+      "symbol": "032830",
+      "exchange": "SMART",
+      "primaryExchange": "KRX",
+      "currency": "KRW",
+      "country": "KR",
+      "company_name": "Samsung Life Insurance"
+    },
+    {
+      "model_ticker": "VRT",
+      "conId": 402783527,
+      "symbol": "VRT",
+      "exchange": "SMART",
+      "primaryExchange": "NYSE",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Vertiv"
+    },
+    {
+      "model_ticker": "000660.KS",
+      "conId": 17382246,
+      "symbol": "000660",
+      "exchange": "SMART",
+      "primaryExchange": "KRX",
+      "currency": "KRW",
+      "country": "KR",
+      "company_name": "SK Hynix"
+    },
+    {
+      "model_ticker": "STX",
+      "conId": 491932113,
+      "symbol": "STX",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Seagate Technology"
+    },
+    {
+      "model_ticker": "APP",
+      "conId": 481863646,
+      "symbol": "APP",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "AppLovin"
+    },
+    {
+      "model_ticker": "WDC",
+      "conId": 13681,
+      "symbol": "WDC",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Western Digital"
+    },
+    {
+      "model_ticker": "VACN.SW",
+      "conId": 229275382,
+      "symbol": "VACN",
+      "exchange": "SMART",
+      "primaryExchange": "EBS",
+      "currency": "CHF",
+      "country": "CH",
+      "company_name": "VAT Group"
+    },
+    {
+      "model_ticker": "IBKR",
+      "conId": 43645865,
+      "symbol": "IBKR",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Interactive Brokers"
+    },
+    {
+      "model_ticker": "NVDA",
+      "conId": 4815747,
+      "symbol": "NVDA",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Nvidia"
+    },
+    {
+      "model_ticker": "5802.T",
+      "conId": 13905609,
+      "symbol": "5802",
+      "exchange": "SMART",
+      "primaryExchange": "TSEJ",
+      "currency": "JPY",
+      "country": "JP",
+      "company_name": "Sumitomo Electric"
+    },
+    {
+      "model_ticker": "S68.SI",
+      "conId": 39861749,
+      "symbol": "S68",
+      "exchange": "SMART",
+      "primaryExchange": "SGX",
+      "currency": "SGD",
+      "country": "SG",
+      "company_name": "Singapore Exchange"
+    },
+    {
+      "model_ticker": "FTNT",
+      "conId": 70236214,
+      "symbol": "FTNT",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "Fortinet"
+    },
+    {
+      "model_ticker": "LUN.TO",
+      "conId": 32604529,
+      "symbol": "LUN",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Lundin Mining Corporation"
+    },
+    {
+      "model_ticker": "EBAY",
+      "conId": 4347086,
+      "symbol": "EBAY",
+      "exchange": "SMART",
+      "primaryExchange": "NASDAQ",
+      "currency": "USD",
+      "country": "US",
+      "company_name": "eBay Inc."
+    },
+    {
+      "model_ticker": "MULT3.SA",
+      "conId": 52289468,
+      "symbol": "MULT3",
+      "exchange": "SMART",
+      "primaryExchange": "B3",
+      "currency": "BRL",
+      "country": "BR",
+      "company_name": "Multiplan"
+    },
+    {
+      "model_ticker": "K.TO",
+      "conId": 6313288,
+      "symbol": "K",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Kinross Gold Corporation"
+    },
+    {
+      "model_ticker": "BHP.AX",
+      "conId": 4036812,
+      "symbol": "BHP",
+      "exchange": "SMART",
+      "primaryExchange": "ASX",
+      "currency": "AUD",
+      "country": "AU",
+      "company_name": "BHP"
+    },
+    {
+      "model_ticker": "BATS.L",
+      "conId": 908931,
+      "symbol": "BATS",
+      "exchange": "SMART",
+      "primaryExchange": "LSE",
+      "currency": "GBP",
+      "country": "GB",
+      "company_name": "British American Tobacco"
+    },
+    {
+      "model_ticker": "NESTLEIND.NS",
+      "conId": 675602753,
+      "symbol": "NESTLEIND",
+      "exchange": "SMART",
+      "primaryExchange": "NSE",
+      "currency": "INR",
+      "country": "IN",
+      "company_name": "Nestl\u00e9 India"
+    },
+    {
+      "model_ticker": "PETR4.SA",
+      "conId": 51283325,
+      "symbol": "PETR4",
+      "exchange": "SMART",
+      "primaryExchange": "B3",
+      "currency": "BRL",
+      "country": "BR",
+      "company_name": "Petrobras PN"
+    },
+    {
+      "model_ticker": "ZEAL.CO",
+      "conId": 290085857,
+      "symbol": "ZEAL",
+      "exchange": "SMART",
+      "primaryExchange": "CPH",
+      "currency": "DKK",
+      "country": "DK",
+      "company_name": "Zealand Pharma"
+    },
+    {
+      "model_ticker": "SOL.JO",
+      "conId": 290088138,
+      "symbol": "SOL",
+      "exchange": "SMART",
+      "primaryExchange": "JSE",
+      "currency": "ZAR",
+      "country": "ZA",
+      "company_name": "Sasol"
+    },
+    {
+      "model_ticker": "7741.T",
+      "conId": 14017564,
+      "symbol": "7741",
+      "exchange": "SMART",
+      "primaryExchange": "TSEJ",
+      "currency": "JPY",
+      "country": "JP",
+      "company_name": "Hoya"
+    },
+    {
+      "model_ticker": "NOVN.SW",
+      "conId": 1615110,
+      "symbol": "NOVN",
+      "exchange": "SMART",
+      "primaryExchange": "EBS",
+      "currency": "CHF",
+      "country": "CH",
+      "company_name": "Novartis"
+    },
+    {
+      "model_ticker": "6920.T",
+      "conId": 112131223,
+      "symbol": "6920",
+      "exchange": "SMART",
+      "primaryExchange": "TSEJ",
+      "currency": "JPY",
+      "country": "JP",
+      "company_name": "Lasertec"
+    },
+    {
+      "model_ticker": "WPM.TO",
+      "conId": 276051659,
+      "symbol": "WPM",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Wheaton Precious Metals Corp."
+    },
+    {
+      "model_ticker": "000270.KS",
+      "conId": 17382224,
+      "symbol": "000270",
+      "exchange": "SMART",
+      "primaryExchange": "KRX",
+      "currency": "KRW",
+      "country": "KR",
+      "company_name": "Kia"
+    },
+    {
+      "model_ticker": "PRY.MI",
+      "conId": 46114851,
+      "symbol": "PRY",
+      "exchange": "SMART",
+      "primaryExchange": "BVME",
+      "currency": "EUR",
+      "country": "IT",
+      "company_name": "Prysmian"
+    },
+    {
+      "model_ticker": "EVO.ST",
+      "conId": 366244347,
+      "symbol": "EVO",
+      "exchange": "SMART",
+      "primaryExchange": "SFB",
+      "currency": "SEK",
+      "country": "SE",
+      "company_name": "Evolution"
+    },
+    {
+      "model_ticker": "ITX.MC",
+      "conId": 162084958,
+      "symbol": "ITX",
+      "exchange": "SMART",
+      "primaryExchange": "BM",
+      "currency": "EUR",
+      "country": "ES",
+      "company_name": "Inditex"
+    },
+    {
+      "model_ticker": "009150.KS",
+      "conId": 17382647,
+      "symbol": "009150",
+      "exchange": "SMART",
+      "primaryExchange": "KRX",
+      "currency": "KRW",
+      "country": "KR",
+      "company_name": "Samsung Electro-Mechanics"
+    },
+    {
+      "model_ticker": "FRES.L",
+      "conId": 51069466,
+      "symbol": "FRES",
+      "exchange": "SMART",
+      "primaryExchange": "LSE",
+      "currency": "GBP",
+      "country": "GB",
+      "company_name": "Fresnillo plc"
+    },
+    {
+      "model_ticker": "ABEV3.SA",
+      "conId": 137936366,
+      "symbol": "ABEV3",
+      "exchange": "SMART",
+      "primaryExchange": "B3",
+      "currency": "BRL",
+      "country": "BR",
+      "company_name": "Ambev"
+    },
+    {
+      "model_ticker": "9983.T",
+      "conId": 14019486,
+      "symbol": "9983",
+      "exchange": "SMART",
+      "primaryExchange": "TSEJ",
+      "currency": "JPY",
+      "country": "JP",
+      "company_name": "Fast Retailing"
+    },
+    {
+      "model_ticker": "PAAS.TO",
+      "conId": 14893065,
+      "symbol": "PAAS",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Pan American Silver Corp."
+    },
+    {
+      "model_ticker": "6857.T",
+      "conId": 13905743,
+      "symbol": "6857",
+      "exchange": "SMART",
+      "primaryExchange": "TSEJ",
+      "currency": "JPY",
+      "country": "JP",
+      "company_name": "Advantest"
+    },
+    {
+      "model_ticker": "CNQ.TO",
+      "conId": 5027019,
+      "symbol": "CNQ",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Canadian Natural Resources Limited"
+    },
+    {
+      "model_ticker": "ELE.MC",
+      "conId": 30314174,
+      "symbol": "ELE",
+      "exchange": "SMART",
+      "primaryExchange": "BM",
+      "currency": "EUR",
+      "country": "ES",
+      "company_name": "Endesa"
+    },
+    {
+      "model_ticker": "ENGI.PA",
+      "conId": 35052259,
+      "symbol": "ENGI",
+      "exchange": "SMART",
+      "primaryExchange": "SBF",
+      "currency": "EUR",
+      "country": "FR",
+      "company_name": "Engie"
+    },
+    {
+      "model_ticker": "B3SA3.SA",
+      "conId": 312180324,
+      "symbol": "B3SA3",
+      "exchange": "SMART",
+      "primaryExchange": "B3",
+      "currency": "BRL",
+      "country": "BR",
+      "company_name": "B3"
+    },
+    {
+      "model_ticker": "WRT1V.HE",
+      "conId": 12542999,
+      "symbol": "WRT",
+      "exchange": "SMART",
+      "primaryExchange": "HEX",
+      "currency": "EUR",
+      "country": "FI",
+      "company_name": "Wartsila"
+    },
+    {
+      "model_ticker": "ASML.AS",
+      "conId": 117589399,
+      "symbol": "ASML",
+      "exchange": "SMART",
+      "primaryExchange": "AEB",
+      "currency": "EUR",
+      "country": "NL",
+      "company_name": "ASML Holding"
+    },
+    {
+      "model_ticker": "BEZ.L",
+      "conId": 229115041,
+      "symbol": "BEZ",
+      "exchange": "SMART",
+      "primaryExchange": "LSE",
+      "currency": "GBP",
+      "country": "GB",
+      "company_name": "Beazley"
+    },
+    {
+      "model_ticker": "SU.TO",
+      "conId": 64731259,
+      "symbol": "SU",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Suncor Energy Inc."
+    },
+    {
+      "model_ticker": "CVE.TO",
+      "conId": 70009773,
+      "symbol": "CVE",
+      "exchange": "SMART",
+      "primaryExchange": "TSE",
+      "currency": "CAD",
+      "country": "CA",
+      "company_name": "Cenovus Energy Inc."
+    }
+  ]
+}

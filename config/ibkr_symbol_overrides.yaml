@@ -1,0 +1,73 @@
+# Manual yfinance -> IBKR symbol overrides.
+#
+# Use ONLY for genuine vendor symbol-string differences for the SAME local
+# listing (verified via ib.reqMatchingSymbols / reqContractDetails). This is
+# NOT a place to change currency or exchange to force a resolution — an ADR or
+# wrong-currency line must still be rejected by the validator.
+#
+# Schema (per entry, keyed by the yfinance/model ticker):
+#   ibkr_symbol       : the symbol string IBKR expects
+#   exchange          : routing exchange to try (SMART preferred)
+#   primary_exchange  : expected IBKR primaryExchange of the local line
+#   currency          : expected local currency (must match security_master)
+#   reason            : why the override exists + what to reject
+#   verified          : date the mapping was confirmed against IBKR
+#
+# The validator still applies ALL hard rules to the overridden contract
+# (currency match, non-US venue, secType STK, name match, ambiguity).
+
+overrides:
+  WRT1V.HE:
+    ibkr_symbol: WRT
+    exchange: SMART
+    primary_exchange: HEX
+    currency: EUR
+    reason: >-
+      yfinance 'WRT1V.HE' = IBKR symbol 'WRT' (Wartsila Oyj Abp) on HEX/EUR,
+      conId 12542999. The US line 'WRTBY' on PINK/USD is an ADR and must be
+      rejected; only the Helsinki EUR common is tradable.
+    verified: 2026-05-15
+
+# Accepted-name whitelist: model_ticker -> a substring that, if present in the
+# IBKR longName (accent/punct-insensitive), confirms it IS the same company
+# despite a legal-name / rebrand / translation difference. ONLY for cases
+# verified by hand to be the same issuer. The contract still must pass currency,
+# venue (non-US for non-US), secType and ambiguity checks — this only relaxes
+# the longName string comparison (rule 7).
+name_aliases:
+  ITX.MC:    "INDUSTRIA DE DISENO TEXTIL"     # Inditex
+  INDIGO.NS: "INTERGLOBE AVIATION"            # IndiGo
+  SOL.AX:    "WASHINGTON H SOUL PATTINSON"    # Soul Patts
+  MUV2.DE:   "MUENCHENER RUECKVER"            # Munich Re
+  SBSP3.SA:  "CIA SANEAMENTO BASICO"          # Sabesp
+  DHL.DE:    "DHL GROUP"                      # Deutsche Post -> DHL Group (2023 rebrand)
+  CFR.SW:    "CIE FINANCIERE RICHEMONT"       # Richemont
+  GE:        "GENERAL ELECTRIC"               # GE Aerospace (2024 rename)
+  SLB:       "SLB"                            # Schlumberger -> SLB
+  NU:        "NU HOLDINGS"                    # Nubank
+  BBVA.MC:   "BANCO BILBAO VIZCAYA"           # BBVA
+  BMW.DE:    "BAYERISCHE MOTOREN WERKE"       # BMW
+  GBLB.BR:   "GROUPE BRUXELLES LAMBERT"       # GBL
+  9501.T:    "TOKYO ELECTRIC POWER"           # TEPCO
+  ANZ.AX:    "ANZ GROUP HOLDINGS"             # ANZ Banking Group
+  015760.KS: "KOREA ELECTRIC POWER"           # KEPCO
+  O39.SI:    "OVERSEA-CHINESE BANKING"        # OCBC Bank
+  Z74.SI:    "SINGAPORE TELECOMMUNICATIONS"   # Singtel
+  2330.TW:   "TAIWAN SEMICONDUCTOR"           # TSMC
+  2303.TW:   "UNITED MICROELECTRONICS"        # UMC
+  0388.HK:   "HONG KONG EXCHANGES"            # HKEX
+  0981.HK:   "SEMICONDUCTOR MANUFACTURI"      # SMIC (IBKR truncates legal name)
+  CFR.SW:    "CIE FINANCIERE RICHEMO"         # Richemont (IBKR truncates to RICHEMO-A REG)
+  SEB-A.ST:  "SKANDINAVISKA ENSKILDA"         # SEB A
+  ROCK-B.CO: "ROCKWOOL"                       # Rockwool International
+
+# Known symbol collisions left DELIBERATELY BLOCKED for execution safety:
+# the bare symbol resolves to a DIFFERENT issuer on the wrong exchange and a
+# correct contract could not be confidently confirmed read-only. The bot must
+# NOT trade these until a verified per-ticker override is added above.
+known_collisions:
+  SAN.PA:  "yfinance Sanofi (Paris) — symbol 'SAN' resolves to BANCO SANTANDER (BM). Real Sanofi line unconfirmed."
+  MTS.MC:  "yfinance ArcelorMittal (Madrid) — symbol 'MTS' resolves to MIT SOCIETA (BVME, Milan). Real line unconfirmed."
+  SAB.MC:  "yfinance Banco Sabadell (Madrid) — symbol 'SAB' resolves to SABAF SPA (BVME, Milan). Real line unconfirmed."
+  KRX.IR:  "yfinance Kerry Group (Dublin) — symbol 'KRX' resolves to KINGSPAN GROUP (ISED). Real Kerry line unconfirmed."
+  3661.TW: "yfinance WPG Holdings (Taiwan) — symbol resolves to ALCHIP TECHNOLOGIES (TWSE). Wrong issuer."

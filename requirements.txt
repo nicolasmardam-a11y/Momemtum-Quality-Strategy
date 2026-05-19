@@ -1,0 +1,16 @@
+# Global Equity Bot v2.5 — runtime deps for the daily strategy check.
+# Requires Python >= 3.11 (the original `python>=3.11` line was removed
+# because `pip install -r` cannot install the interpreter itself).
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14            # parquet I/O (benchmarks_wide / EEM / fx_history)
+pyyaml>=6.0            # config_loader
+yfinance>=1.2.0        # daily_update overlay/data refresh (needs internet)
+tabulate>=0.9          # REQUIRED: daily_strategy_check .to_markdown()
+requests>=2.31
+beautifulsoup4>=4.12
+scipy>=1.10
+matplotlib>=3.7
+# ib_async is intentionally OMITTED: the daily strategy check is fully
+# account-decoupled and never imports/connects a broker. Add `ib_async>=2.0`
+# only if you also run the paper-trading scripts (not needed for the routine).

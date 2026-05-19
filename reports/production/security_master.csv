@@ -1,0 +1,1226 @@
+ticker,name,country,exchange,currency,sector,industry,market_cap_usd,data_source,price_source,fundamentals_source,sector_source,name_source,region,price_last_date,price_stale_days
+NVDA,Nvidia,US,US,USD,Information Technology,Unknown,5701390638820.123,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GOOGL,Alphabet Inc. (Class A),US,US,USD,Communication Services,Internet Content & Information,4843209436939.712,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+GOOG,Alphabet Inc. (Class C),US,US,USD,Communication Services,Internet Content & Information,4801956364384.703,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+AAPL,Apple Inc.,US,US,USD,Information Technology,Consumer Electronics,4392253632510.9863,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MSFT,Microsoft,US,US,USD,Information Technology,Unknown,3039046812938.4785,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AMZN,Amazon,US,US,USD,Consumer Discretionary,Internet Retail,2880753775648.4287,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+AVGO,Broadcom,US,US,USD,Information Technology,Semiconductors,2065451602351.166,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+TSLA,"Tesla, Inc.",US,US,USD,Consumer Discretionary,Unknown,1684855230753.8237,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+META,Meta Platforms,US,US,USD,Communication Services,Unknown,1576766951342.0923,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+WMT,Walmart,US,US,USD,Consumer Staples,Unknown,1052290307972.6185,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BRK-B,Berkshire Hathaway,US,US,USD,Financials,Insurance - Diversified,1040703744119.3582,SP500,yfinance,yfinance_proxy,yf_raw_sector,universe,US,2026-05-15,0.0
+LLY,Lilly (Eli),US,US,USD,Health Care,Unknown,895187977825.7778,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MU,Micron Technology,US,US,USD,Information Technology,Unknown,886928966050.8865,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+JPM,JPMorgan Chase,US,US,USD,Financials,Unknown,810525382663.7163,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AMD,Advanced Micro Devices,US,US,USD,Information Technology,Semiconductors,733313721361.5593,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+XOM,ExxonMobil,US,US,USD,Energy,Oil & Gas Integrated,630508660316.5048,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ASML,ASML Holding,US,US,USD,Information Technology,Unknown,614625813844.6069,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+V,Visa Inc.,US,US,USD,Financials,Unknown,611524731685.0708,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+INTC,Intel,US,US,USD,Information Technology,Semiconductors,583593979263.3057,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ORCL,Oracle Corporation,US,US,USD,Information Technology,Unknown,570434953107.605,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+JNJ,Johnson & Johnson,US,US,USD,Health Care,Unknown,554743143620.7068,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CSCO,Cisco,US,US,USD,Information Technology,Communication Equipment,464119544364.0002,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+COST,Costco,US,US,USD,Consumer Staples,Discount Stores,458803285072.36084,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MA,Mastercard,US,US,USD,Financials,Unknown,434391912714.375,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CAT,Caterpillar Inc.,US,US,USD,Industrials,Farm & Heavy Construction Machinery,421245918474.6857,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+LRCX,Lam Research,US,US,USD,Information Technology,Unknown,374323822078.0945,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ABBV,AbbVie,US,US,USD,Health Care,Drug Manufacturers - General,373747341492.32764,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+NFLX,Netflix,US,US,USD,Communication Services,Unknown,370802490459.44775,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CVX,Chevron Corporation,US,US,USD,Energy,Oil & Gas Integrated,370596509617.28436,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+UNH,UnitedHealth Group,US,US,USD,Health Care,Unknown,363339047840.7511,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BAC,Bank of America,US,US,USD,Financials,Banks - Diversified,357135929925.844,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+AMAT,Applied Materials,US,US,USD,Information Technology,Semiconductor Equipment & Materials,353918249505.9857,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+KO,Coca-Cola Company (The),US,US,USD,Consumer Staples,Beverages - Non-Alcoholic,347296386033.01373,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+PG,Procter & Gamble,US,US,USD,Consumer Staples,Unknown,334514883342.06195,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PLTR,Palantir Technologies,US,US,USD,Information Technology,Unknown,318962365855.86554,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MS,Morgan Stanley,US,US,USD,Financials,Unknown,308154126995.704,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+HD,Home Depot (The),US,US,USD,Consumer Discretionary,Home Improvement Retail,303499579158.2015,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+GE,GE Aerospace,US,US,USD,Industrials,Aerospace & Defense,303000584870.0,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+PM,Philip Morris International,US,US,USD,Consumer Staples,Unknown,300147265416.48645,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GS,Goldman Sachs,US,US,USD,Financials,Capital Markets,286425647200.5474,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+GEV,GE Vernova,US,US,USD,Industrials,Specialty Industrial Machinery,285653487829.45435,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+TXN,Texas Instruments,US,US,USD,Information Technology,Unknown,280672611189.6344,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MRK,Merck & Co.,US,US,USD,Health Care,Unknown,279053113036.2362,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+KLAC,KLA Corporation,US,US,USD,Information Technology,Unknown,247413101202.04285,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+RTX,RTX Corporation,US,US,USD,Industrials,Unknown,237622286760.84833,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+LIN,Linde plc,US,US,USD,Materials,Unknown,237033901510.36194,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ARM,Arm Holdings,US,US,USD,Information Technology,Unknown,234638277934.5931,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+WFC,Wells Fargo,US,US,USD,Financials,Unknown,226943664081.78864,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AXP,American Express,US,US,USD,Financials,Credit Services,213800165150.86594,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+C,Citigroup,US,US,USD,Financials,Banks - Diversified,213165225689.7224,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+QCOM,Qualcomm,US,US,USD,Information Technology,Unknown,212518025146.48438,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ADI,Analog Devices,US,US,USD,Information Technology,Semiconductors,208846417090.10202,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+IBM,International Business Machines Corporation,US,US,USD,Information Technology,Information Technology Services,206943934066.4746,SP500,yfinance,ciq_pit,yf_raw_sector,yfinance,US,2026-05-15,0.0
+SNDK,Sandisk,US,US,USD,Information Technology,Unknown,206659257289.0,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PEP,PepsiCo,US,US,USD,Consumer Staples,Unknown,204344012516.171,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+TMUS,T-Mobile US,US,US,USD,Communication Services,Unknown,204130864744.125,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+NEE,NextEra Energy,US,US,USD,Utilities,Unknown,197554824106.95142,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+VZ,Verizon,US,US,USD,Communication Services,Unknown,196814962214.31302,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MCD,McDonald's,US,US,USD,Consumer Discretionary,Unknown,195481480455.9369,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PANW,Palo Alto Networks,US,US,USD,Information Technology,Unknown,192677381484.98535,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ANET,Arista Networks,US,US,USD,Information Technology,Computer Hardware,184002436123.22827,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+DIS,Walt Disney Company (The),US,US,USD,Communication Services,Unknown,183809731580.69385,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BA,Boeing,US,US,USD,Industrials,Aerospace & Defense,181841642609.1328,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+AMGN,Amgen,US,US,USD,Health Care,Drug Manufacturers - General,181839594726.5625,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+STX,Seagate Technology,US,US,USD,Information Technology,Unknown,181475253927.39844,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GLW,Corning Inc.,US,US,USD,Information Technology,Electronic Components,178642599638.7497,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+T,AT&T,US,US,USD,Communication Services,Telecom Services,172145091986.5441,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+BLK,BlackRock,US,US,USD,Financials,Asset Management,171706642226.77808,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+WDC,Western Digital,US,US,USD,Information Technology,Unknown,169714589344.79822,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+TMO,Thermo Fisher Scientific,US,US,USD,Health Care,Unknown,168708716763.45535,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GILD,Gilead Sciences,US,US,USD,Health Care,Drug Manufacturers - General,164874269144.44766,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+TJX,TJX Companies,US,US,USD,Consumer Discretionary,Unknown,162654215895.05722,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MRVL,Marvell Technology,US,US,USD,Information Technology,Unknown,162080747645.80225,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+DELL,Dell Technologies,US,US,USD,Information Technology,Computer Hardware,159796884492.3059,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+APP,AppLovin,US,US,USD,Communication Services,Advertising Agencies,158620598897.6584,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+DE,Deere & Company,US,US,USD,Industrials,Farm & Heavy Construction Machinery,158331484584.43518,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SCHW,Charles Schwab Corporation,US,US,USD,Financials,Capital Markets,157930891144.7337,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+UNP,Union Pacific Corporation,US,US,USD,Industrials,Unknown,157892093314.71515,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ETN,Eaton Corporation,US,US,USD,Industrials,Specialty Industrial Machinery,157884725765.9912,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SCCO,Southern Copper,US,US,USD,Materials,Copper,156340115024.94708,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+APH,Amphenol,US,US,USD,Information Technology,Electronic Components,154775792521.94794,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+WELL,Welltower,US,US,USD,Real Estate,Unknown,153974056387.1521,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ISRG,Intuitive Surgical,US,US,USD,Health Care,Medical Instruments & Supplies,152945225479.33844,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+UBER,Uber,US,US,USD,Industrials,Unknown,150786990675.81982,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BX,Blackstone Inc.,US,US,USD,Financials,Asset Management,150607124023.03903,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ABT,Abbott Laboratories,US,US,USD,Health Care,Medical Devices,148141214063.2919,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+CRWD,CrowdStrike,US,US,USD,Information Technology,Software - Infrastructure,147829976694.32593,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+PFE,Pfizer,US,US,USD,Health Care,Unknown,147017162774.18808,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+COP,ConocoPhillips,US,US,USD,Energy,Oil & Gas E&P,144362969330.38754,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+VRT,Vertiv,US,US,USD,Industrials,Unknown,143445442024.02832,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+HON,Honeywell,US,US,USD,Industrials,Conglomerates,137882922561.9117,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+CRM,Salesforce,US,US,USD,Information Technology,Unknown,137846150127.12305,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PDD,PDD Holdings,US,US,USD,Information Technology,Unknown,135941475193.83485,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PLD,Prologis,US,US,USD,Real Estate,Unknown,133072598756.62231,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+LOW,Lowe's,US,US,USD,Consumer Discretionary,Unknown,125420485625.76105,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+SHOP,Shopify,US,US,USD,Information Technology,Unknown,124834369521.8724,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CVS,CVS Health,US,US,USD,Health Care,Healthcare Plans,124326359909.1369,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+NEM,Newmont,US,US,USD,Materials,Unknown,124289833806.61249,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CB,Chubb Limited,US,US,USD,Financials,Insurance - Property & Casualty,123548961479.4743,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SBUX,Starbucks,US,US,USD,Consumer Discretionary,Unknown,123366829630.27954,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BKNG,Booking Holdings,US,US,USD,Consumer Discretionary,Travel Services,120989518524.09174,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SPGI,S&P Global,US,US,USD,Financials,Unknown,120969160400.39062,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MO,Altria,US,US,USD,Consumer Staples,Tobacco,120866723002.80673,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+LMT,Lockheed Martin,US,US,USD,Industrials,Unknown,119840051033.35547,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+DHR,Danaher Corporation,US,US,USD,Health Care,Diagnostics & Research,118353405110.91782,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SYK,Stryker Corporation,US,US,USD,Health Care,Unknown,116938451440.57904,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PWR,Quanta Services,US,US,USD,Industrials,Unknown,116014877178.89471,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BMY,Bristol Myers Squibb,US,US,USD,Health Care,Drug Manufacturers - General,115601654539.05138,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+COF,Capital One,US,US,USD,Financials,Credit Services,115553548394.53949,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+PGR,Progressive Corporation,US,US,USD,Financials,Unknown,115377233033.54663,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+VRTX,Vertex Pharmaceuticals,US,US,USD,Health Care,Unknown,115341874853.86066,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PH,Parker Hannifin,US,US,USD,Industrials,Unknown,111699935093.38098,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CME,CME Group,US,US,USD,Financials,Financial Data & Stock Exchanges,107841759952.67175,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+HWM,Howmet Aerospace,US,US,USD,Industrials,Aerospace & Defense,107464867393.73264,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+INTU,Intuit,US,US,USD,Information Technology,Software - Application,106421610082.10077,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+EQIX,Equinix,US,US,USD,Real Estate,REIT - Specialty,106391401132.80371,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+TT,Trane Technologies,US,US,USD,Industrials,Unknown,105524145619.3601,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+SO,Southern Company,US,US,USD,Utilities,Unknown,104996823579.67001,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ACN,Accenture,US,US,USD,Information Technology,Information Technology Services,101799131903.98087,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+CEG,Constellation Energy,US,US,USD,Utilities,Utilities - Independent Power Producers,99850997325.40839,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MDT,Medtronic,US,US,USD,Health Care,Unknown,98731010367.54099,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CMI,Cummins,US,US,USD,Industrials,Specialty Industrial Machinery,98545586186.03345,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SNPS,Synopsys,US,US,USD,Information Technology,Unknown,97721537768.87146,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CDNS,Cadence Design Systems,US,US,USD,Information Technology,Software - Application,97361667573.24219,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+DUK,Duke Energy,US,US,USD,Utilities,Utilities - Regulated Electric,96475031853.75,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+HCA,HCA Healthcare,US,US,USD,Health Care,Medical Care Facilities,95797077855.19409,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ADBE,Adobe Inc.,US,US,USD,Information Technology,Software - Application,95488210220.33691,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+NOW,ServiceNow,US,US,USD,Information Technology,Unknown,94380150990.53955,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+FCX,Freeport-McMoRan,US,US,USD,Materials,Copper,94339866140.625,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MAR,Marriott International,US,US,USD,Consumer Discretionary,Unknown,93656923185.82684,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+WMB,Williams Companies,US,US,USD,Energy,Unknown,93485990362.43561,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BK,BNY Mellon,US,US,USD,Financials,Banks - Diversified,93175949250.0,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+GD,General Dynamics,US,US,USD,Industrials,Aerospace & Defense,92400394497.3599,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+CMCSA,Comcast,US,US,USD,Communication Services,Telecom Services,90752468943.4397,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SPOT,Spotify,US,US,USD,Communication Services,Internet Content & Information,90472826840.0,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+MCK,McKesson Corporation,US,US,USD,Health Care,Unknown,90029826163.05579,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+FDX,FedEx,US,US,USD,Industrials,Integrated Freight & Logistics,89896289521.85205,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+KKR,KKR & Co.,US,US,USD,Financials,Unknown,89351825175.59685,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+JCI,Johnson Controls,US,US,USD,Industrials,Unknown,88252613124.45604,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+FTNT,Fortinet,US,US,USD,Information Technology,Software - Infrastructure,88247496460.08455,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ICE,Intercontinental Exchange,US,US,USD,Financials,Financial Data & Stock Exchanges,87908915621.94283,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+WM,Waste Management,US,US,USD,Industrials,Unknown,87862765923.53284,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ELV,Elevance Health,US,US,USD,Health Care,Healthcare Plans,86199348775.11841,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+PNC,PNC Financial Services,US,US,USD,Financials,Unknown,85842473098.3092,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+UPS,United Parcel Service,US,US,USD,Industrials,Unknown,84626623062.02936,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CSX,CSX Corporation,US,US,USD,Industrials,Railroads,84062204964.26437,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ADP,Automatic Data Processing,US,US,USD,Information Technology,Software - Application,83798294011.264,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MNST,Monster Beverage,US,US,USD,Consumer Staples,Unknown,83619693405.0,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+USB,U.S. Bancorp,US,US,USD,Financials,Unknown,83335213942.08429,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+SLB,Schlumberger,US,US,USD,Energy,Unknown,83125203670.32306,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CIEN,Ciena,US,US,USD,Information Technology,Communication Equipment,82431744528.21497,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MELI,Mercado Libre,US,US,USD,Consumer Discretionary,Unknown,80593691444.44434,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AMT,American Tower,US,US,USD,Real Estate,REIT - Specialty,80564560378.61781,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ABNB,Airbnb,US,US,USD,Consumer Discretionary,Travel Services,79589013796.76657,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+MPWR,Monolithic Power Systems,US,US,USD,Information Technology,Unknown,79565831451.396,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BSX,Boston Scientific,US,US,USD,Health Care,Medical Devices,79549729860.4794,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+MDLZ,Mondelez International,US,US,USD,Consumer Staples,Unknown,78848185897.20294,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CI,Cigna,US,US,USD,Health Care,Healthcare Plans,78839915994.8866,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+BAM,Brookfield Asset Management,US,US,USD,Financials,Asset Management,78649717561.47691,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+COHR,Coherent Corp.,US,US,USD,Information Technology,Scientific & Technical Instruments,78636248312.25018,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+APO,Apollo Global Management,US,US,USD,Financials,Asset Management,78244957568.11673,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+NOC,Northrop Grumman,US,US,USD,Industrials,Unknown,78222093463.38867,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MRSH,Marsh McLennan,US,US,USD,Financials,Unknown,77653230168.99513,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+EMR,Emerson Electric,US,US,USD,Industrials,Specialty Industrial Machinery,77607454632.56836,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+LITE,Lumentum,US,US,USD,Information Technology,Unknown,77394660290.52734,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MCO,Moody's Corporation,US,US,USD,Financials,Unknown,77057635322.45734,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+SHW,Sherwin-Williams,US,US,USD,Materials,Unknown,76363319769.7445,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MMM,3M,US,US,USD,Industrials,Conglomerates,76227052011.75607,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+REGN,Regeneron Pharmaceuticals,US,US,USD,Health Care,Unknown,75322915587.84668,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+NXPI,NXP Semiconductors,US,US,USD,Information Technology,Unknown,75023043172.05276,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ORLY,O’Reilly Automotive,US,US,USD,Consumer Discretionary,Unknown,74455907284.37009,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+RKLB,Rocket Lab,US,US,USD,Industrials,Aerospace & Defense,74386864038.21686,R1000,yfinance,mixed,yf_info_sector,universe,US,2026-05-15,0.0
+KMI,Kinder Morgan,US,US,USD,Energy,Unknown,73897587858.23647,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MPC,Marathon Petroleum,US,US,USD,Energy,Unknown,72934530056.60194,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CRH,CRH plc,US,US,USD,Materials,Building Materials,72706863871.61182,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+DDOG,Datadog,US,US,USD,Information Technology,Software - Application,72423662443.80943,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+EOG,EOG Resources,US,US,USD,Energy,Oil & Gas E&P,72421501874.28131,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ITW,Illinois Tool Works,US,US,USD,Industrials,Specialty Industrial Machinery,72346479446.41113,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+HLT,Hilton Worldwide,US,US,USD,Consumer Discretionary,Lodging,72218027956.72705,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+VLO,Valero Energy,US,US,USD,Energy,Unknown,72083400527.21951,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+FIX,Comfort Systems USA,US,US,USD,Industrials,Engineering & Construction,71460920720.0,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+CL,Colgate-Palmolive,US,US,USD,Consumer Staples,Household & Personal Products,71380888863.74039,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+RCL,Royal Caribbean Group,US,US,USD,Consumer Discretionary,Unknown,71341206432.43579,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GM,General Motors,US,US,USD,Consumer Discretionary,Auto Manufacturers,71159415538.40172,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+HOOD,Robinhood Markets,US,US,USD,Financials,Unknown,70887759186.28934,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+NET,Cloudflare,US,US,USD,Information Technology,Software - Infrastructure,70527119832.43265,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+ECL,Ecolab,US,US,USD,Materials,Specialty Chemicals,70519796937.44983,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+NSC,Norfolk Southern,US,US,USD,Industrials,Unknown,70419204992.67819,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AEP,American Electric Power,US,US,USD,Utilities,Utilities - Regulated Electric,69493095351.23071,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ROST,Ross Stores,US,US,USD,Consumer Discretionary,Unknown,69202660162.48535,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PSX,Phillips 66,US,US,USD,Energy,Unknown,68954852483.8916,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+WBD,Warner Bros. Discovery,US,US,USD,Communication Services,Unknown,68156509904.91455,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AON,Aon plc,US,US,USD,Financials,Insurance Brokers,67600311141.30359,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+DLR,Digital Realty,US,US,USD,Real Estate,REIT - Specialty,67455911556.49368,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+DASH,DoorDash,US,US,USD,Consumer Discretionary,Internet Retail,67030966596.83038,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+APD,Air Products,US,US,USD,Materials,Specialty Chemicals,66911094975.72308,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+MSI,Motorola Solutions,US,US,USD,Information Technology,Unknown,66535181181.46326,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CTAS,Cintas,US,US,USD,Industrials,Specialty Business Services,66070599836.926636,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+SPG,Simon Property Group,US,US,USD,Real Estate,Unknown,65649250577.00342,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+TDG,TransDigm Group,US,US,USD,Industrials,Unknown,65635540181.246216,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MSTR,MicroStrategy,US,US,USD,Information Technology,Unknown,65271920463.78076,NDX100,yfinance,mixed,sector_hint,universe,US,2026-05-15,0.0
+BKR,Baker Hughes,US,US,USD,Energy,Oil & Gas Equipment & Services,63953704919.040924,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+RSG,Republic Services,US,US,USD,Industrials,Unknown,63360342827.913025,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+TRV,Travelers Companies (The),US,US,USD,Financials,Unknown,63334094584.39188,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+NKE,"Nike, Inc.",US,US,USD,Consumer Discretionary,Unknown,62956357997.76825,SP500,yfinance,mixed,sector_hint,universe,US,2026-05-15,0.0
+NU,Nubank,US,US,USD,Financials,Banks - Regional,62944759243.864265,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+KEYS,Keysight Technologies,US,US,USD,Information Technology,Unknown,61994739478.30505,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+TEL,TE Connectivity,US,US,USD,Information Technology,Unknown,60696813156.69623,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+URI,United Rentals,US,US,USD,Industrials,Unknown,60695054041.71472,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+SRE,Sempra,US,US,USD,Utilities,Unknown,60237538736.35185,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GWW,W. W. Grainger,US,US,USD,Industrials,Unknown,60060752711.74719,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+PCAR,Paccar,US,US,USD,Industrials,Unknown,59428240015.02113,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AFL,Aflac,US,US,USD,Financials,Insurance - Life,59385815227.49866,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+TFC,Truist Financial,US,US,USD,Financials,Unknown,58861565016.63237,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+F,Ford Motor Company,US,US,USD,Consumer Discretionary,Auto Manufacturers,57846182710.527695,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+O,Realty Income,US,US,USD,Real Estate,Unknown,57628037642.56466,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+LHX,L3Harris,US,US,USD,Industrials,Unknown,57566072243.398315,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+OKE,Oneok,US,US,USD,Energy,Unknown,56879365109.47693,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+OXY,Occidental Petroleum,US,US,USD,Energy,Unknown,56803588381.186844,SP500,yfinance,mixed,sector_hint,universe,US,2026-05-15,0.0
+TER,Teradyne,US,US,USD,Information Technology,Unknown,56693309963.19452,SP500,yfinance,mixed,sector_hint,universe,US,2026-05-15,0.0
+TRGP,Targa Resources,US,US,USD,Energy,Unknown,56614477951.411865,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AZO,AutoZone,US,US,USD,Consumer Discretionary,Auto Parts,56449387398.68164,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+FANG,Diamondback Energy,US,US,USD,Energy,Oil & Gas E&P,56144508330.36003,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+CTVA,Corteva,US,US,USD,Materials,Agricultural Inputs,55742803716.430664,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+TGT,Target Corporation,US,US,USD,Consumer Staples,Unknown,55591173325.817955,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+COIN,Coinbase,US,US,USD,Financials,Financial Data & Stock Exchanges,55575733213.51428,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ALL,Allstate,US,US,USD,Financials,Insurance - Property & Casualty,55561732588.4964,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+CARR,Carrier Global,US,US,USD,Industrials,Building Products & Equipment,55266822106.83909,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+D,Dominion Energy,US,US,USD,Utilities,Utilities - Regulated Electric,55097791758.777176,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+DVN,Devon Energy,US,US,USD,Energy,Oil & Gas E&P,54104051679.43849,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+PSA,Public Storage,US,US,USD,Real Estate,Unknown,53631422478.74243,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+FLEX,Flex Ltd.,US,US,USD,Information Technology,Electronic Components,53239185317.25177,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+NUE,Nucor,US,US,USD,Materials,Unknown,53138698021.72687,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AME,Ametek,US,US,USD,Industrials,Specialty Industrial Machinery,53012360793.741486,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+SNOW,Snowflake Inc.,US,US,USD,Information Technology,Software - Application,52408122109.98535,R1000,yfinance,mixed,yf_info_sector,universe,US,2026-05-15,0.0
+MCHP,Microchip Technology,US,US,USD,Information Technology,Unknown,52146517254.17995,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+NDAQ,"Nasdaq, Inc.",US,US,USD,Financials,Unknown,51859468129.02896,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AU,AngloGold Ashanti,US,US,USD,Materials,Gold,51397512864.51874,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+ETR,Entergy,US,US,USD,Utilities,Utilities - Regulated Electric,51313090626.94281,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+MET,MetLife,US,US,USD,Financials,Unknown,51233653527.875,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+AJG,Arthur J. Gallagher & Co.,US,US,USD,Financials,Insurance Brokers,50910487723.17505,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ROK,Rockwell Automation,US,US,USD,Industrials,Unknown,50833835367.927765,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+COR,Cencora,US,US,USD,Health Care,Medical Distribution,50461353671.58447,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+FAST,Fastenal,US,US,USD,Industrials,Industrial Distribution,50444659003.75377,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+LNG,Cheniere Energy,US,US,USD,Energy,Oil & Gas Midstream,50347979437.11969,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+EA,Electronic Arts,US,US,USD,Communication Services,Electronic Gaming & Multimedia,50228029147.85376,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+EBAY,eBay Inc.,US,US,USD,Consumer Discretionary,Internet Retail,50196420135.49805,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+CVNA,Carvana,US,US,USD,Consumer Discretionary,Auto & Truck Dealerships,50004090408.09906,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+XEL,Xcel Energy,US,US,USD,Utilities,Unknown,49941564800.0,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ADSK,Autodesk,US,US,USD,Information Technology,Software - Application,49656085048.28917,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+FER,Ferrovial,US,US,USD,Information Technology,Unknown,49162895640.653946,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+VST,Vistra Corp.,US,US,USD,Utilities,Unknown,47389309347.66046,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+EW,Edwards Lifesciences,US,US,USD,Health Care,Medical Devices,47106196594.23828,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+DAL,Delta Air Lines,US,US,USD,Industrials,Airlines,46876545156.506195,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ON,ON Semiconductor,US,US,USD,Information Technology,Unknown,46236739789.77299,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+HPE,Hewlett Packard Enterprise,US,US,USD,Information Technology,Communication Equipment,45809639447.343666,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+WAB,Wabtec,US,US,USD,Industrials,Unknown,45325910265.482666,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+EXC,Exelon,US,US,USD,Utilities,Utilities - Regulated Electric,45317889545.95503,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+FERG,Ferguson Enterprises,US,US,USD,Industrials,Industrial Distribution,45288361956.111786,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+GRMN,Garmin,US,US,USD,Information Technology,Scientific & Technical Instruments,45253707560.79913,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+CAH,Cardinal Health,US,US,USD,Health Care,Medical Distribution,45053593096.337585,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+TTWO,Take-Two Interactive,US,US,USD,Communication Services,Unknown,44955970200.17871,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+VTR,Ventas,US,US,USD,Real Estate,Unknown,43823338534.48555,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+FITB,Fifth Third Bancorp,US,US,USD,Financials,Banks - Regional,43421386126.38783,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+AMP,Ameriprise Financial,US,US,USD,Financials,Asset Management,42643579449.38818,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+IDXX,Idexx Laboratories,US,US,USD,Health Care,Diagnostics & Research,42613385542.63898,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+STT,State Street Corporation,US,US,USD,Financials,Unknown,42411781657.24672,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+XYZ,"Block, Inc.",US,US,USD,Information Technology,Software - Infrastructure,42210235430.19104,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+KR,Kroger,US,US,USD,Consumer Staples,Unknown,42100291401.176186,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CMG,Chipotle Mexican Grill,US,US,USD,Consumer Discretionary,Restaurants,41842781709.89227,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+RKT,Rocket Companies,US,US,USD,Financials,Mortgage Finance,41818970535.62075,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+YUM,Yum! Brands,US,US,USD,Consumer Discretionary,Unknown,41635338101.216675,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+MSCI,MSCI Inc.,US,US,USD,Financials,Unknown,41545272936.924805,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+ODFL,Old Dominion,US,US,USD,Industrials,Unknown,41527105226.2348,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CBRE,CBRE Group,US,US,USD,Real Estate,Real Estate Services,41260785219.21634,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+EME,Emcor,US,US,USD,Industrials,Engineering & Construction,41141633816.0083,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+HEI,HEICO (Common),US,US,USD,Industrials,Aerospace & Defense,40887121164.118744,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+CCEP,Coca-Cola Europacific Partners,US,US,USD,Consumer Staples,Unknown,40724418406.15084,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+GFS,GlobalFoundries,US,US,USD,Information Technology,Semiconductors,40272959932.492676,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+AIG,American International Group,US,US,USD,Financials,Insurance - Diversified,40253255327.48341,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+DHI,D. R. Horton,US,US,USD,Consumer Discretionary,Residential Construction,40161962691.125,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+LYV,Live Nation Entertainment,US,US,USD,Communication Services,Unknown,40147613077.73634,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+SATS,EchoStar,US,US,USD,Communication Services,Telecom Services,40034835055.431885,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+PYPL,PayPal,US,US,USD,Financials,Unknown,39946147115.90639,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+BDX,Becton Dickinson,US,US,USD,Health Care,Medical Instruments & Supplies,39851413302.42224,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+KDP,Keurig Dr Pepper,US,US,USD,Consumer Staples,Unknown,39653506405.109695,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+UI,Ubiquiti,US,US,USD,Information Technology,Communication Equipment,39399877335.0,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+VIK,Viking Holdings,US,US,USD,Consumer Discretionary,Travel Services,39392539871.39917,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+ADM,Archer Daniels Midland,US,US,USD,Consumer Staples,Farm Products,39356571759.797516,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ED,Consolidated Edison,US,US,USD,Utilities,Utilities - Regulated Electric,39309221321.22402,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+ALNY,Alnylam Pharmaceuticals,US,US,USD,Health Care,Unknown,39240680819.367645,NDX100,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+HSY,Hershey Company (The),US,US,USD,Consumer Staples,Confectioners,39045321790.53192,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+IBKR,Interactive Brokers,US,US,USD,Financials,Capital Markets,38772768066.15393,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+CCI,Crown Castle,US,US,USD,Real Estate,REIT - Specialty,38547439005.365425,SP500,yfinance,mixed,yf_raw_sector,universe,US,2026-05-15,0.0
+PEG,Public Service Enterprise Group,US,US,USD,Utilities,Unknown,38525226372.015015,SP500,yfinance,ciq_pit,sector_hint,universe,US,2026-05-15,0.0
+CBOE,Cboe Global Markets,US,US,USD,Financials,Financial Data & Stock Exchanges,38065198224.156006,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+IRM,Iron Mountain,US,US,USD,Real Estate,REIT - Specialty,37880842294.12267,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+ALAB,Astera Labs,US,US,USD,Information Technology,Semiconductors,37661752566.31821,R1000,yfinance,ciq_pit,yf_info_sector,universe,US,2026-05-15,0.0
+JBL,Jabil,US,US,USD,Information Technology,Electronic Components,37478486394.8512,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+HIG,Hartford (The),US,US,USD,Financials,Insurance - Diversified,36722566487.67792,SP500,yfinance,ciq_pit,yf_raw_sector,universe,US,2026-05-15,0.0
+HSBA.L,HSBC,GB,LSE,GBP,Financials,Unknown,312004065300.6319,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+AZN.L,AstraZeneca,GB,LSE,GBP,Health Care,Unknown,287186339181.4546,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+SHEL.L,Shell plc,GB,LSE,GBP,Energy,Unknown,236406864571.94974,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+JMG.L,JPMorgan Emerging Markets Growth & Income,GB,LSE,GBP,Other,Unknown,219486173662.41782,FTSE250,yfinance,none,unresolved,universe,UK,2026-05-15,0.0
+RIO.L,Rio Tinto,GB,LSE,GBP,Materials,Unknown,178717147962.29965,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BATS.L,British American Tobacco,GB,LSE,GBP,Consumer Staples,Unknown,144656100042.3786,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+RR.L,Rolls-Royce Holdings,GB,LSE,GBP,Industrials,Unknown,134045918326.96318,FTSE100,yfinance,yfinance_proxy,override,universe,UK,2026-05-15,0.0
+ULVR.L,Unilever,GB,LSE,GBP,Consumer Staples,Unknown,124010940525.79852,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+BP.L,BP,GB,LSE,GBP,Energy,Unknown,112588023194.36893,FTSE100,yfinance,yfinance_proxy,override,universe,UK,2026-05-15,0.0
+GSK.L,GSK plc,GB,LSE,GBP,Health Care,Unknown,101325277034.35199,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+GLEN.L,Glencore,GB,LSE,GBP,Materials,Unknown,94088894061.05106,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+NG.L,National Grid plc,GB,LSE,GBP,Utilities,Unknown,86537955239.54674,FTSE100,yfinance,yfinance_proxy,override,universe,UK,2026-05-15,0.0
+BARC.L,Barclays,GB,LSE,GBP,Financials,Unknown,79878888599.70563,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+CPG.L,Compass Group,GB,LSE,GBP,Industrials,Unknown,76332818310.52986,FTSE100,none,ciq_pit,sector_hint,universe,UK,,
+BA.L,BAE Systems,GB,LSE,GBP,Industrials,Unknown,76090058082.05182,FTSE100,yfinance,yfinance_proxy,override,universe,UK,2026-05-15,0.0
+LLOY.L,Lloyds Banking Group,GB,LSE,GBP,Financials,Unknown,75805713458.48521,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+NWG.L,NatWest Group,GB,LSE,GBP,Financials,Unknown,61162459796.101006,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+LSEG.L,London Stock Exchange Group,GB,LSE,GBP,Financials,Unknown,60904382976.98985,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+AAL.L,Anglo American plc,GB,LSE,GBP,Materials,Unknown,58673487056.63186,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+STAN.L,Standard Chartered,GB,LSE,GBP,Financials,Unknown,56646713949.0821,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+REL.L,RELX,GB,LSE,GBP,Communication Services,Unknown,56454622352.23797,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+ANTO.L,Antofagasta plc,GB,LSE,GBP,Materials,Unknown,55924293102.18481,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+DGE.L,Diageo,GB,LSE,GBP,Consumer Staples,Unknown,44952400755.80163,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+CCEP.L,Coca-Cola Europacific Partners,GB,LSE,GBP,Consumer Staples,Unknown,40101642582.08217,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SSE.L,SSE plc,GB,LSE,GBP,Utilities,Unknown,39947953715.89068,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+PRU.L,Prudential plc,GB,LSE,GBP,Financials,Unknown,39473881082.08823,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+HLN.L,Haleon,GB,LSE,GBP,Information Technology,Unknown,39327958838.60757,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+RKT.L,Reckitt,GB,LSE,GBP,Consumer Staples,Unknown,39221452233.83423,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+TSCO.L,Tesco,GB,LSE,GBP,Consumer Discretionary,Unknown,38541686966.70841,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+FRES.L,Fresnillo plc,GB,LSE,GBP,Materials,Unknown,36815877100.00672,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+VOD.L,Vodafone Group,GB,LSE,GBP,Communication Services,Unknown,35999044001.74002,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+EXPN.L,Experian,GB,LSE,GBP,Industrials,Unknown,30979585393.11837,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BT-A.L,BT Group,GB,LSE,GBP,Communication Services,Unknown,30785403951.76826,FTSE100,yfinance,none,override,universe,UK,2026-05-15,0.0
+IHG.L,IHG Hotels & Resorts,GB,LSE,GBP,Consumer Discretionary,Unknown,30396917875.734863,FTSE100,none,ciq_pit,sector_hint,universe,UK,,
+IMB.L,Imperial Brands,GB,LSE,GBP,Consumer Staples,Unknown,29868222284.36433,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+III.L,3i,GB,LSE,GBP,Financials,Unknown,28973727558.70952,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+AV.L,Aviva,GB,LSE,GBP,Financials,Unknown,25418958445.76367,FTSE100,yfinance,yfinance_proxy,override,universe,UK,2026-05-15,0.0
+HLMA.L,Halma plc,GB,LSE,GBP,Information Technology,Unknown,23894600901.142323,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+IAG.L,International Airlines Group,GB,LSE,GBP,Consumer Discretionary,Unknown,23124644846.22382,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SMT.L,Scottish Mortgage Investment Trust,GB,LSE,GBP,Financials,Unknown,21327823111.835484,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+CCH.L,Coca-Cola HBC,GB,LSE,GBP,Consumer Staples,Unknown,20493086809.446136,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+LGEN.L,Legal & General,GB,LSE,GBP,Financials,Unknown,19661787691.837624,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+NXT.L,Next plc,GB,LSE,GBP,Consumer Discretionary,Unknown,19558122413.743988,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+AAF.L,Airtel Africa,GB,LSE,GBP,Communication Services,Unknown,18106521364.87256,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+ABF.L,Associated British Foods,GB,LSE,GBP,Consumer Staples,Unknown,16999776411.647732,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+RTO.L,Rentokil Initial,GB,LSE,GBP,Industrials,Unknown,16138959385.641285,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+EDV.L,Endeavour Mining,GB,LSE,GBP,Materials,Unknown,15877326963.608315,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+UU.L,United Utilities,GB,LSE,GBP,Utilities,Unknown,13846477244.956532,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+INF.L,Informa,GB,LSE,GBP,Communication Services,Unknown,13627367979.53158,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+ADM.L,Admiral Group,GB,LSE,GBP,Financials,Unknown,13269673126.561237,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SGRO.L,Segro,GB,LSE,GBP,Real Estate,Unknown,12815839820.100166,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SVT.L,Severn Trent,GB,LSE,GBP,Utilities,Unknown,12717638256.185745,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SN.L,Smith & Nephew,GB,LSE,GBP,Health Care,Unknown,12701536788.48218,FTSE100,yfinance,yfinance_proxy,sector_hint,universe,UK,2026-05-15,0.0
+DPLM.L,Diploma,GB,LSE,GBP,Industrials,Unknown,12388744880.21242,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+CNA.L,Centrica,GB,LSE,GBP,Utilities,Unknown,12341982206.849373,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+SDR.L,Schroders,GB,LSE,GBP,Financials,Unknown,12252137461.315968,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+ITRK.L,Intertek,GB,LSE,GBP,Industrials,Unknown,11740086320.46551,FTSE100,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+SGE.L,Sage Group,GB,LSE,GBP,Information Technology,Unknown,10458754297.442472,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SDLF.L,Standard Life,GB,LSE,GBP,Financials,Unknown,10337221423.965708,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SMIN.L,Smiths Group,GB,LSE,GBP,Industrials,Unknown,10322589857.10303,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+PCT.L,Polar Capital Technology Trust,GB,LSE,GBP,Financials,Unknown,10293892921.532434,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BEZ.L,Beazley,GB,LSE,GBP,Financials,Unknown,10198975811.611183,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BNZL.L,Bunzl,GB,LSE,GBP,Industrials,Unknown,10167203673.65144,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+MNG.L,M&G,GB,LSE,GBP,Financials,Unknown,9908201632.250277,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+PSH.L,Pershing Square Holdings,GB,LSE,GBP,Financials,Unknown,9578470297.481783,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+SBRY.L,Sainsbury's,GB,LSE,GBP,Consumer Discretionary,Unknown,9223170776.425097,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+PSON.L,Pearson plc,GB,LSE,GBP,Communication Services,Unknown,8969208942.715582,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+IMI.L,IMI,GB,LSE,GBP,Industrials,Unknown,8840982961.028591,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+WEIR.L,Weir Group,GB,LSE,GBP,Industrials,Unknown,8775263599.810886,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+MKS.L,Marks & Spencer,GB,LSE,GBP,Consumer Discretionary,Unknown,8749487165.65851,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+GAW.L,Games Workshop,GB,LSE,GBP,Consumer Discretionary,Unknown,8715557965.621637,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+FCIT.L,F & C Investment Trust,GB,LSE,GBP,Financials,Unknown,8473442787.982516,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+MRO.L,Melrose Industries,GB,LSE,GBP,Industrials,Unknown,8188597841.96307,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+STJ.L,St. James's Place,GB,LSE,GBP,Financials,Unknown,8177347329.591394,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+MTLN.L,Metlen Energy & Metals,GB,LSE,GBP,Utilities,Unknown,7795154767.054488,FTSE100,none,ciq_pit,sector_hint,universe,UK,,
+ICG.L,ICG,GB,LSE,GBP,Financials,Unknown,7278492267.459979,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+INVP.L,Investec,GB,LSE,GBP,Financials,Capital Markets,7248858858.509662,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+SPX.L,Spirax Group,GB,LSE,GBP,Industrials,Unknown,7106277167.434055,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+HSX.L,Hiscox,GB,LSE,GBP,Financials,Unknown,7092166141.297447,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+IGG.L,IG Group,GB,LSE,GBP,Financials,Unknown,6857023189.44124,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+DCC.L,DCC plc,GB,LSE,GBP,Industrials,Unknown,6855989487.98563,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+ALW.L,Alliance Witan,GB,LSE,GBP,Financials,Unknown,6591615155.630921,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+KGF.L,Kingfisher plc,GB,LSE,GBP,Consumer Discretionary,Unknown,6446674331.524754,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BAB.L,Babcock International,GB,LSE,GBP,Industrials,Unknown,6431620777.891587,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BGEO.L,Lion Finance Group,GB,LSE,GBP,Financials,Unknown,6320104734.992767,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+ITH.L,Ithaca Energy,GB,LSE,GBP,Energy,Oil & Gas E&P,6215499064.52002,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HBR.L,Harbour Energy,GB,LSE,GBP,Energy,Oil & Gas E&P,6119194191.352267,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+LAND.L,Land Securities,GB,LSE,GBP,Real Estate,Unknown,5859080150.534616,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+LMP.L,LondonMetric Property,GB,LSE,GBP,Real Estate,Unknown,5844210965.223723,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+CCC.L,Computacenter,GB,LSE,GBP,Information Technology,Information Technology Services,5751113237.313486,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+CTEC.L,Convatec,GB,LSE,GBP,Health Care,Unknown,5510551216.827961,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+ABDN.L,Aberdeen Group,GB,LSE,GBP,Financials,Asset Management,5449567152.636368,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BBOX.L,Tritax Big Box REIT,GB,LSE,GBP,Real Estate,Unknown,5429140947.102253,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+AUTO.L,Autotrader Group,GB,LSE,GBP,Communication Services,Unknown,5399067757.199104,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BBY.L,Balfour Beatty,GB,LSE,GBP,Industrials,Engineering & Construction,5397094748.739443,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HWDN.L,Howdens Joinery,GB,LSE,GBP,Industrials,Unknown,5352997896.671159,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+WTB.L,Whitbread,GB,LSE,GBP,Consumer Discretionary,Unknown,5264874821.875493,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BRBY.L,Burberry Group,GB,LSE,GBP,Consumer Discretionary,Unknown,5228396796.842114,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+BLND.L,British Land,GB,LSE,GBP,Real Estate,Unknown,5218800614.279896,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+CRDA.L,Croda International,GB,LSE,GBP,Materials,Unknown,5194931621.198407,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+RSW.L,Renishaw,GB,LSE,GBP,Information Technology,Scientific & Technical Instruments,5156271331.643876,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+JMAT.L,Johnson Matthey,GB,LSE,GBP,Materials,Specialty Chemicals,4863878306.547593,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BTRW.L,Barratt Redrow,GB,LSE,GBP,Industrials,Unknown,4728305475.303116,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+PSN.L,Persimmon,GB,LSE,GBP,Industrials,Unknown,4640003273.029827,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+ENT.L,Entain,GB,LSE,GBP,Consumer Discretionary,Unknown,4577792789.788477,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+HOC.L,Hochschild Mining,GB,LSE,GBP,Materials,Other Precious Metals & Mining,4562301378.452478,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+JD.L,JD Sports,GB,LSE,GBP,Consumer Discretionary,Unknown,4552158153.149123,FTSE100,yfinance,none,sector_hint,universe,UK,2026-05-15,0.0
+MNDI.L,Mondi,GB,LSE,GBP,Materials,Unknown,4547112735.953767,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+3IN.L,3i Infrastructure,GB,LSE,GBP,Financials,Asset Management,4524857671.490192,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+JGGI.L,JPMorgan Global Growth & Income,GB,LSE,GBP,Other,Unknown,4412952289.397007,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+EMG.L,Man Group,GB,LSE,GBP,Financials,Asset Management,4307619825.733484,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+PLUS.L,Plus500,GB,LSE,GBP,Financials,Capital Markets,4180258904.824564,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+RMV.L,Rightmove,GB,LSE,GBP,Communication Services,Unknown,4120681959.919915,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+HIK.L,Hikma Pharmaceuticals,GB,LSE,GBP,Health Care,Drug Manufacturers - Specialty & Generic,4114196535.71979,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BKG.L,Berkeley Group Holdings,GB,LSE,GBP,Industrials,Unknown,4091353377.8578706,FTSE100,yfinance,ciq_pit,sector_hint,universe,UK,2026-05-15,0.0
+PAF.L,Pan African Resources,GB,LSE,GBP,Materials,Gold,4076594439.6728587,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+ITV.L,ITV,GB,LSE,GBP,Communication Services,Broadcasting,4052575135.3693414,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+RCP.L,RIT Capital Partners,GB,LSE,GBP,Other,Unknown,4040026294.3515844,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+TEM.L,Templeton Emerging Markets Investment Trust,GB,LSE,GBP,Other,Unknown,3993069674.009631,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+INCH.L,Inchcape,GB,LSE,GBP,Consumer Discretionary,Auto & Truck Dealerships,3907054241.153283,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+FRAS.L,Frasers Group,GB,LSE,GBP,Consumer Discretionary,Specialty Retail,3904460117.396772,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+RS1.L,RS Group,GB,LSE,GBP,Industrials,Industrial Distribution,3900840360.750937,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+DRX.L,Drax Group,GB,LSE,GBP,Utilities,Utilities - Renewable,3838033794.894923,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+WPP.L,WPP,GB,LSE,GBP,Communication Services,Unknown,3821451852.420105,FTSE250,yfinance,ciq_pit,override,universe,UK,2026-05-15,0.0
+CTY.L,City of London Investment Trust,GB,LSE,GBP,Other,Unknown,3780403778.2046313,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+CWK.L,Cranswick,GB,LSE,GBP,Consumer Staples,Packaged Foods,3772692996.4837933,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+TW.L,Taylor Wimpey,GB,LSE,GBP,Consumer Discretionary,Residential Construction,3731620893.1766233,FTSE250,yfinance,none,yf_info_sector,universe,UK,2026-05-15,0.0
+SCT.L,Softcat,GB,LSE,GBP,Information Technology,Electronics & Computer Distribution,3616653204.869119,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+SRP.L,Serco,GB,LSE,GBP,Industrials,Specialty Business Services,3587745297.1185803,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+EZJ.L,EasyJet,GB,LSE,GBP,Industrials,Airlines,3508027407.2643547,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+UTG.L,Unite Group,GB,LSE,GBP,Real Estate,REIT - Diversified,3416565802.3601255,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+PNN.L,Pennon Group,GB,LSE,GBP,Utilities,Utilities - Regulated Water,3392715906.6359205,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+TBCG.L,TBC Bank,GB,LSE,GBP,Financials,Banks - Regional,3389605913.842455,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HTWS.L,Helios Towers,GB,LSE,GBP,Communication Services,Telecom Services,3382709359.8306756,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+QLT.L,Quilter,GB,LSE,GBP,Financials,Asset Management,3355349753.831742,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+MNKS.L,Monks Investment Trust,GB,LSE,GBP,Other,Unknown,3353570497.1135297,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+ROR.L,Rotork,GB,LSE,GBP,Industrials,Specialty Industrial Machinery,3314176371.494703,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+PHP.L,Primary Health Properties,GB,LSE,GBP,Real Estate,REIT - Healthcare Facilities,3249270321.7894077,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+TATE.L,Tate & Lyle,GB,LSE,GBP,Consumer Staples,Packaged Foods,3244267757.1935277,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+ATT.L,Allianz Technology Trust,GB,LSE,GBP,Other,Unknown,3238990343.317622,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+SHC.L,Shaftesbury Capital,GB,LSE,GBP,Real Estate,REIT - Retail,3174404831.4509525,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HICL.L,HICL Infrastructure Company,GB,LSE,GBP,Other,Unknown,3170758078.4607167,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+INPP.L,International Public Partnerships,GB,LSE,GBP,Financials,Asset Management,3147410146.3605666,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BPT.L,Bridgepoint Group,GB,LSE,GBP,Financials,Asset Management,3143055563.2044325,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+TCAP.L,TP ICAP,GB,LSE,GBP,Financials,Capital Markets,3127597115.4102783,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HVPE.L,HarbourVest Global Private Equity,GB,LSE,GBP,Financials,Asset Management,3089615129.070914,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+JTC.L,JTC,GB,LSE,GBP,Financials,Asset Management,3015667006.9038324,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+MTO.L,Mitie,GB,LSE,GBP,Industrials,Specialty Business Services,2930269371.145353,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BWY.L,Bellway,GB,LSE,GBP,Consumer Discretionary,Residential Construction,2926612552.153981,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+QQ.L,Qinetiq,GB,LSE,GBP,Industrials,Aerospace & Defense,2913989844.860866,FTSE250,yfinance,none,yf_info_sector,universe,UK,2026-05-15,0.0
+MGNS.L,Morgan Sindall Group,GB,LSE,GBP,Industrials,Engineering & Construction,2912389043.042912,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+UKW.L,Greencoat UK Wind,GB,LSE,GBP,Other,Unknown,2903245963.244503,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+MYI.L,Murray International Trust,GB,LSE,GBP,Other,Unknown,2867757732.7646914,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+HILS.L,Hill & Smith,GB,LSE,GBP,Industrials,Engineering & Construction,2767457536.102295,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+AJB.L,AJ Bell,GB,LSE,GBP,Financials,Asset Management,2766609255.204787,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+RAT.L,Rathbones,GB,LSE,GBP,Financials,Asset Management,2754743543.238297,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+FEV.L,Fidelity European Trust,GB,LSE,GBP,Other,Unknown,2752243468.651332,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+JAM.L,JPMorgan American Investment Trust,GB,LSE,GBP,Other,Unknown,2727797363.9676166,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+N91.L,Ninety One,GB,LSE,GBP,Financials,Asset Management,2681129651.717634,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+DLN.L,Derwent London,GB,LSE,GBP,Real Estate,REIT - Office,2609237880.7858224,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+CLDN.L,Caledonia Investments,GB,LSE,GBP,Other,Unknown,2601107478.899655,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+BRWM.L,BlackRock World Mining Trust,GB,LSE,GBP,Other,Unknown,2582248079.747724,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+GNC.L,Greencore,GB,LSE,GBP,Consumer Staples,Packaged Foods,2534464286.3321548,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+IWG.L,International Workplace Group,GB,LSE,GBP,Real Estate,Real Estate Services,2453921884.5840797,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+PFD.L,Premier Foods,GB,LSE,GBP,Consumer Staples,Packaged Foods,2364425157.1651955,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+GRG.L,Greggs,GB,LSE,GBP,Consumer Discretionary,Restaurants,2345578094.555583,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+OSB.L,OSB Group,GB,LSE,GBP,Financials,Mortgage Finance,2316754413.706775,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+OXIG.L,Oxford Instruments,GB,LSE,GBP,Information Technology,Scientific & Technical Instruments,2307478731.908779,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HMSO.L,Hammerson,GB,LSE,GBP,Real Estate,REIT - Retail,2303617510.7802825,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+PIN.L,Pantheon International,GB,LSE,GBP,Other,Unknown,2257975740.3830166,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+BYG.L,Big Yellow Group,GB,LSE,GBP,Real Estate,REIT - Industrial,2257083298.289821,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+MRC.L,Mercantile Investment Trust,GB,LSE,GBP,Other,Unknown,2256815658.9548054,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+TRIG.L,The Renewables Infrastructure Group,GB,LSE,GBP,Utilities,Utilities - Renewable,2255770453.678697,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+PNL.L,Personal Assets Trust,GB,LSE,GBP,Other,Unknown,2243539575.81618,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+KLR.L,Keller Group,GB,LSE,GBP,Industrials,Engineering & Construction,2186857967.7326055,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+ENOG.L,Energean,GB,LSE,GBP,Energy,Oil & Gas E&P,2185781381.362299,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BME.L,B&M,GB,LSE,GBP,Consumer Staples,Discount Stores,2184865746.9793806,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+SHAW.L,Shawbrook Bank,GB,LSE,GBP,Financials,Banks - Regional,2181764735.681991,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+GFTU.L,Grafton Group,GB,LSE,GBP,Industrials,Industrial Distribution,2166582489.7690344,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+COA.L,Coats Group,GB,LSE,GBP,Consumer Discretionary,Textile Manufacturing,2158230334.5855794,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+LWDB.L,Law Debenture,GB,LSE,GBP,Other,Unknown,2120473348.9546206,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+GNS.L,Genus,GB,LSE,GBP,Health Care,Biotechnology,2115971671.556807,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+SRE.L,Sirius Real Estate,GB,LSE,GBP,Real Estate,Real Estate Services,2115322305.4823246,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HGT.L,Hg Capital Trust,GB,LSE,GBP,Other,Unknown,2100191856.4214277,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+OCDO.L,Ocado Group,GB,LSE,GBP,Consumer Staples,Grocery Stores,2088577067.3950372,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+MAB.L,Mitchells & Butlers,GB,LSE,GBP,Consumer Discretionary,Restaurants,2007978605.064169,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+HRI.L,Herald Investment Trust,GB,LSE,GBP,Other,Unknown,1993081463.2347217,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+CKN.L,Clarkson,GB,LSE,GBP,Industrials,Marine Shipping,1990555936.7226238,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+WOSG.L,Watches of Switzerland,GB,LSE,GBP,Consumer Discretionary,Luxury Goods,1974229264.2901187,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+DNLM.L,Dunelm Group,GB,LSE,GBP,Consumer Discretionary,Specialty Retail,1959962713.7102735,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+ASHM.L,Ashmore Group,GB,LSE,GBP,Financials,Asset Management,1934730139.6274316,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+SAFE.L,Safestore,GB,LSE,GBP,Real Estate,REIT - Industrial,1929670960.4720554,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BHMG.L,BH Macro,GB,LSE,GBP,Financials,Asset Management,1927431047.7007296,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+LRE.L,Lancashire Holdings,GB,LSE,GBP,Financials,Insurance - Specialty,1927126756.2670724,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+CWR.L,Ceres Power,GB,LSE,GBP,Industrials,Electrical Equipment & Parts,1913609586.3950977,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+RPI.L,Raspberry Pi Holdings,GB,LSE,GBP,Information Technology,Electronic Components,1891281824.848511,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+BNKR.L,Bankers Investment Trust,GB,LSE,GBP,Financials,Asset Management,1857863456.8440583,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+FCSS.L,Fidelity China Special Situations,GB,LSE,GBP,Other,Unknown,1850572621.6541297,FTSE250,yfinance,none,unresolved,universe,UK,2026-05-15,0.0
+FSV.L,Fidelity Special Values,GB,LSE,GBP,Other,Unknown,1840358110.0996683,FTSE250,yfinance,ciq_pit,unresolved,universe,UK,2026-05-15,0.0
+ATYM.L,Atalaya Mining,GB,LSE,GBP,Materials,Copper,1817389639.8477993,FTSE250,yfinance,ciq_pit,yf_info_sector,universe,UK,2026-05-15,0.0
+ASML.AS,ASML Holding,NL,EZ,EUR,Information Technology,Unknown,615353855706.6366,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+MC.PA,LVMH,FR,Euronext-Paris,EUR,Consumer Discretionary,Unknown,265937284635.99237,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+SIE.DE,Siemens,DE,XETRA,EUR,Industrials,Unknown,243824898129.05316,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+LIN.DE,Linde,DE,EZ,EUR,Materials,Unknown,236735653828.34564,EZ_FB,yfinance,none,override,universe,EZ,2026-05-15,0.0
+OR.PA,L'Oréal,FR,Euronext-Paris,EUR,Consumer Staples,Unknown,223750776408.23758,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+TTE.PA,TotalEnergies,FR,Euronext-Paris,EUR,Energy,Unknown,203380991336.59866,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+RMS.PA,Hermès,FR,Euronext-Paris,EUR,Consumer Discretionary,Unknown,195112686028.31125,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+SAP.DE,SAP,DE,XETRA,EUR,Information Technology,Unknown,192574979496.10202,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ITX.MC,Inditex,ES,EZ,EUR,Consumer Discretionary,Unknown,179253673679.2589,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+SU.PA,Schneider Electric,FR,Euronext-Paris,EUR,Industrials,Unknown,177743365202.3475,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ENR.DE,Siemens Energy,DE,XETRA,EUR,Industrials,Unknown,175893719914.52573,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+SAN.MC,Banco Santander,ES,EZ,EUR,Financials,Unknown,172326422792.93405,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ALV.DE,Allianz,DE,XETRA,EUR,Financials,Unknown,168468313715.12897,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+AIR.PA,Airbus,FR,Euronext-Paris,EUR,Industrials,Unknown,158824803346.33438,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ABI.BR,Anheuser-Busch InBev,BE,EZ,EUR,Consumer Discretionary,Unknown,157628224745.70145,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+DTE.DE,Deutsche Telekom,DE,XETRA,EUR,Communication Services,Unknown,157199005109.68536,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+IBE.MC,Iberdrola,ES,EZ,EUR,Utilities,Unknown,154462791674.5435,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+SAF.PA,Safran,FR,Euronext-Paris,EUR,Industrials,Unknown,137460789620.9167,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+UCG.MI,UniCredit,IT,EZ,EUR,Financials,Unknown,126606366083.7644,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+UNA.AS,Unilever,NL,EZ,EUR,Consumer Discretionary,Unknown,124172185855.15456,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+BBVA.MC,BBVA,ES,EZ,EUR,Financials,Unknown,123531874405.19016,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+AI.PA,Air Liquide,FR,Euronext-Paris,EUR,Materials,Unknown,120620818744.21841,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+BNP.PA,BNP Paribas,FR,Euronext-Paris,EUR,Financials,Unknown,118407272812.25967,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ISP.MI,Intesa Sanpaolo,IT,EZ,EUR,Financials,Unknown,118314570138.92679,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ENEL.MI,Enel,IT,EZ,EUR,Utilities,Unknown,112618964316.46902,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+IFX.DE,Infineon Technologies,DE,XETRA,EUR,Information Technology,Unknown,103313414256.99161,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+SAN.PA,Sanofi,FR,Euronext-Paris,EUR,Health Care,Unknown,102473970442.84561,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+PRX.AS,Prosus,NL,EZ,EUR,Consumer Discretionary,Unknown,96520132150.84282,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+CS.PA,Axa,FR,Euronext-Paris,EUR,Financials,Unknown,93798649252.7408,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+EL.PA,EssilorLuxottica,FR,Euronext-Paris,EUR,Consumer Discretionary,Unknown,92902071167.02435,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+CABK.MC,CaixaBank,ES,EZ,EUR,Financials,Unknown,89324516664.86829,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+INGA.AS,ING Group,NL,EZ,EUR,Financials,Unknown,86951635601.82442,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+DG.PA,Vinci,FR,Euronext-Paris,EUR,Industrials,Unknown,82071034235.50626,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ENGI.PA,Engie,FR,Euronext-Paris,EUR,Utilities,Unknown,81136589168.7607,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ENI.MI,Eni,IT,EZ,EUR,Energy,Unknown,81000254853.2639,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+NOKIA.HE,Nokia,FI,EZ,EUR,Information Technology,Unknown,77719937718.46623,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+MUV2.DE,Munich Re,DE,XETRA,EUR,Financials,Unknown,69974025496.50041,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+G.MI,Generali,IT,EZ,EUR,Financials,Unknown,68473929394.17985,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+DHL.DE,Deutsche Post,DE,XETRA,EUR,Industrials,Unknown,62628995294.37307,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+RHM.DE,Rheinmetall,DE,XETRA,EUR,Industrials,Aerospace & Defense,62142996852.197975,DAX,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+MRK.DE,Merck,DE,XETRA,EUR,Health Care,Unknown,61316784582.586075,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+DBK.DE,Deutsche Bank,DE,XETRA,EUR,Financials,Unknown,61247158861.386894,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+ACA.PA,Crédit Agricole,FR,Euronext-Paris,EUR,Financials,Unknown,60658955982.472946,CAC40,yfinance,mixed,override,universe,EZ,2026-05-15,0.0
+RACE.MI,Ferrari,IT,EZ,EUR,Consumer Discretionary,Unknown,59092376774.10901,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ORA.PA,Orange,FR,Euronext-Paris,EUR,Communication Services,Telecom Services,57568104893.49719,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+GLE.PA,Société Générale,FR,Euronext-Paris,EUR,Financials,Unknown,57519461107.59242,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+STMPA.PA,STMicroelectronics,FR,Euronext-Paris,EUR,Information Technology,Semiconductors,57259853111.51632,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+REN.AS,RELX,NL,EZ,EUR,Information Technology,Unknown,56598050523.83133,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+EOAN.DE,E.ON,DE,XETRA,EUR,Utilities,Unknown,56216886598.10557,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+BAS.DE,BASF,DE,XETRA,EUR,Materials,Unknown,55143803871.7562,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+BMW.DE,BMW,DE,XETRA,EUR,Consumer Discretionary,Unknown,54160778769.943665,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+HO.PA,Thales,FR,Euronext-Paris,EUR,Industrials,Unknown,53518305764.8095,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+UCB.BR,UCB,BE,EZ,EUR,Health Care,Unknown,53426580102.67261,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+MBG.DE,Mercedes-Benz Group,DE,XETRA,EUR,Consumer Discretionary,Unknown,52726677093.42522,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+KBC.BR,KBC Group,BE,EZ,EUR,Financials,Unknown,52724137856.18328,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+PRY.MI,Prysmian,IT,EZ,EUR,Industrials,Unknown,52374451299.65185,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+VOW3.DE,Volkswagen Group,DE,XETRA,EUR,Consumer Discretionary,Unknown,52014799451.37151,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+DB1.DE,Deutsche Börse,DE,XETRA,EUR,Financials,Financial Data & Stock Exchanges,51726424651.397354,DAX,yfinance,yfinance_proxy,yf_info_sector,universe,EZ,2026-05-15,0.0
+ASM.AS,ASM International,NL,EZ,EUR,Information Technology,Unknown,51375481343.47586,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+FER.MC,Ferrovial,ES,EZ,EUR,Industrials,Unknown,49234980874.75542,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+MTS.MC,ArcelorMittal,ES,EZ,EUR,Materials,Unknown,48830089910.758354,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+LR.PA,Legrand,FR,Euronext-Paris,EUR,Industrials,Unknown,47229417705.328064,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+RWE.DE,RWE,DE,XETRA,EUR,Utilities,Unknown,47087605637.549286,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+CBK.DE,Commerzbank,DE,XETRA,EUR,Financials,Banks - Regional,46911538108.02942,DAX,yfinance,yfinance_proxy,yf_info_sector,universe,EZ,2026-05-15,0.0
+BN.PA,Danone,FR,Euronext-Paris,EUR,Consumer Staples,Packaged Foods,46252162536.69831,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+SHL.DE,Siemens Healthineers,DE,XETRA,EUR,Health Care,Unknown,44587572337.74168,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+EBS.VI,Erste Group,AT,EZ,EUR,Financials,Unknown,44048406235.132256,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+ELE.MC,Endesa,ES,EZ,EUR,Utilities,Unknown,43901432887.90551,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+BAYN.DE,Bayer,DE,XETRA,EUR,Health Care,Unknown,43808635134.679886,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+SGO.PA,Saint-Gobain,FR,Euronext-Paris,EUR,Industrials,Building Products & Equipment,43567489426.27891,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+HEIA.AS,Heineken,NL,EZ,EUR,Consumer Staples,Unknown,42237834800.32011,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ACS.MC,ACS,ES,EZ,EUR,Industrials,Unknown,41714579711.537994,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+AENA.MC,Aena,ES,EZ,EUR,Industrials,Unknown,41030135086.92186,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+AD.AS,Ahold Delhaize,NL,EZ,EUR,Consumer Staples,Unknown,37549572456.80822,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+HEI.DE,Heidelberg Materials,DE,XETRA,EUR,Materials,Unknown,37530618687.005295,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+DTG.DE,Daimler Truck,DE,XETRA,EUR,Industrials,Unknown,36368943883.102455,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+KER.PA,Kering,FR,Euronext-Paris,EUR,Consumer Discretionary,Unknown,34994492916.002914,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+LDO.MI,Leonardo,IT,EZ,EUR,Industrials,Unknown,33597023585.783066,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+HNR1.DE,Hannover Re,DE,XETRA,EUR,Financials,Insurance - Reinsurance,33240977432.0284,DAX,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+ADYEN.AS,Adyen,NL,EZ,EUR,Information Technology,Unknown,33076326399.3165,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+ABN.AS,ABN AMRO,NL,EZ,EUR,Financials,Unknown,31414954751.54042,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ADS.DE,Adidas,DE,XETRA,EUR,Consumer Discretionary,Unknown,30407411226.925045,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+HEN3.DE,Henkel,DE,XETRA,EUR,Consumer Staples,Unknown,30295219708.425488,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+KNEBV.HE,Kone,FI,EZ,EUR,Industrials,Unknown,30163601341.78977,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+DSY.PA,Dassault Systèmes,FR,Euronext-Paris,EUR,Information Technology,Unknown,30086687004.270172,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+VIE.PA,Veolia,FR,Euronext-Paris,EUR,Utilities,Unknown,29641011783.1159,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+REP.MC,Repsol,ES,EZ,EUR,Energy,Unknown,28673963997.008858,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+SAMPO.HE,Sampo,FI,EZ,EUR,Financials,Unknown,27409684100.686863,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+RYA.IR,Ryanair,IE,EZ,EUR,Industrials,Unknown,27220064352.17958,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+TEF.MC,Telefonica,ES,EZ,EUR,Communication Services,Unknown,26589483651.030674,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+AMS.MC,Amadeus IT,ES,EZ,EUR,Information Technology,Unknown,25825550785.61181,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+FRE.DE,Fresenius,DE,XETRA,EUR,Health Care,Unknown,25701566467.582123,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+EXO.AS,Exor,NL,EZ,EUR,Financials,Unknown,25604723039.413548,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+NESTE.HE,Neste,FI,EZ,EUR,Energy,Unknown,25591477234.642986,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+WRT1V.HE,Wartsila,FI,EZ,EUR,Industrials,Unknown,24925923344.059547,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+SRG.MI,Snam,IT,EZ,EUR,Energy,Unknown,24841165993.001175,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+BESI.AS,BE Semiconductor,NL,EZ,EUR,Information Technology,Unknown,24676533722.42133,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+PHIA.AS,Philips,NL,EZ,EUR,Health Care,Unknown,24528752039.696873,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+OMV.VI,OMV,AT,EZ,EUR,Energy,Unknown,23492485810.989353,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+EN.PA,Bouygues,FR,Euronext-Paris,EUR,Industrials,Unknown,23294277120.35889,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+NN.AS,NN Group,NL,EZ,EUR,Financials,Unknown,23292506423.67243,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+TRN.MI,Terna,IT,EZ,EUR,Utilities,Unknown,23283267471.303944,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+STLAM.MI,Stellantis,IT,EZ,EUR,Consumer Discretionary,Unknown,22680563308.96159,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+STLAP.PA,Stellantis,FR,Euronext-Paris,EUR,Consumer Discretionary,Auto Manufacturers,22670409985.80154,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+PUB.PA,Publicis,FR,Euronext-Paris,EUR,Communication Services,Unknown,22525734558.670403,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+CLNX.MC,Cellnex Telecom,ES,EZ,EUR,Communication Services,Unknown,22479865741.147686,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+VNA.DE,Vonovia,DE,XETRA,EUR,Real Estate,Unknown,21998413667.969265,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+EDP.LS,EDP,PT,EZ,EUR,Utilities,Unknown,21244167653.844822,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+FORTUM.HE,Fortum,FI,EZ,EUR,Utilities,Unknown,21210737404.756447,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+KPN.AS,KPN,NL,EZ,EUR,Communication Services,Unknown,20246558363.72253,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+DSFIR.AS,DSM-Firmenich,NL,EZ,EUR,Materials,Unknown,19745855597.834312,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+MB.MI,Mediobanca,IT,EZ,EUR,Financials,Unknown,19565192516.31537,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+SAB.MC,Banco Sabadell,ES,EZ,EUR,Financials,Unknown,19006523936.69092,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+CAP.PA,Capgemini,FR,Euronext-Paris,EUR,Information Technology,Unknown,18876989860.963997,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+BIRG.IR,Bank of Ireland,IE,EZ,EUR,Financials,Unknown,18642832826.463314,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+GALP.LS,Galp Energia,PT,EZ,EUR,Energy,Unknown,18217849611.28473,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+MTX.DE,MTU Aero Engines,DE,XETRA,EUR,Industrials,Unknown,18082110850.175552,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+BEI.DE,Beiersdorf,DE,XETRA,EUR,Consumer Staples,Household & Personal Products,18013791158.06208,DAX,yfinance,yfinance_proxy,yf_info_sector,universe,EZ,2026-05-15,0.0
+RI.PA,Pernod Ricard,FR,Euronext-Paris,EUR,Consumer Staples,Beverages - Wineries & Distilleries,17987738417.25924,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+URW.PA,Unibail-Rodamco-Westfield,FR,Euronext-Paris,EUR,Real Estate,REIT - Retail,17113188941.518225,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+AGS.BR,Ageas,BE,EZ,EUR,Financials,Unknown,16775846062.678047,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+ANA.MC,Acciona,ES,EZ,EUR,Industrials,Unknown,16602336968.724527,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ASRNL.AS,ASR Nederland,NL,EZ,EUR,Financials,Unknown,16362200717.692997,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+CON.DE,Continental,DE,XETRA,EUR,Consumer Discretionary,Unknown,16169604061.036366,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+MONC.MI,Moncler,IT,EZ,EUR,Consumer Discretionary,Unknown,16152517574.977629,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+KRX.IR,Kerry Group,IE,EZ,EUR,Consumer Discretionary,Unknown,16043171196.273891,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+UPM.HE,UPM-Kymmene,FI,EZ,EUR,Materials,Unknown,15606624614.02517,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+FBK.MI,FinecoBank,IT,EZ,EUR,Financials,Unknown,15456260008.7908,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+WKL.AS,Wolters Kluwer,NL,EZ,EUR,Industrials,Unknown,15145518227.820436,EZ_FB,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+MAP.MC,Mapfre,ES,EZ,EUR,Financials,Unknown,15072395007.296225,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+BKT.MC,Bankinter,ES,EZ,EUR,Financials,Unknown,14521681271.807308,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+CA.PA,Carrefour,FR,Euronext-Paris,EUR,Consumer Staples,Unknown,14202679195.953186,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+BVI.PA,Bureau Veritas,FR,Euronext-Paris,EUR,Industrials,Unknown,13775886759.159626,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+JMT.LS,Jeronimo Martins,PT,EZ,EUR,Consumer Discretionary,Unknown,13461205557.37752,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+AGN.AS,Aegon,NL,EZ,EUR,Financials,Unknown,12818132718.669876,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+REC.MI,Recordati,IT,EZ,EUR,Health Care,Unknown,12309483015.27829,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+AC.PA,Accor,FR,Euronext-Paris,EUR,Consumer Discretionary,Lodging,12206864050.156626,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+SY1.DE,Symrise,DE,XETRA,EUR,Materials,Unknown,12135779537.562918,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+ERF.PA,Eurofins Scientific,FR,Euronext-Paris,EUR,Health Care,Unknown,12120481627.15,CAC40,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+FME.DE,Fresenius Medical Care,DE,XETRA,EUR,Health Care,Medical Care Facilities,11602670581.568134,DAX,yfinance,yfinance_proxy,yf_info_sector,universe,EZ,2026-05-15,0.0
+PAH3.DE,Porsche SE,DE,XETRA,EUR,Consumer Discretionary,Auto Manufacturers,11496000054.332865,DAX,yfinance,yfinance_proxy,yf_info_sector,universe,EZ,2026-05-15,0.0
+LHA.DE,Lufthansa,DE,EZ,EUR,Industrials,Unknown,11082205775.46319,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+GBLB.BR,GBL,BE,EZ,EUR,Financials,Unknown,10860788583.95469,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+MRL.MC,Merlin Properties,ES,EZ,EUR,Real Estate,Unknown,10824292584.24287,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+G1A.DE,GEA Group,DE,XETRA,EUR,Industrials,Unknown,10543509449.352375,DAX,yfinance,ciq_pit,override,universe,EZ,2026-05-15,0.0
+BNR.DE,Brenntag,DE,XETRA,EUR,Materials,Unknown,10394667874.176594,DAX,yfinance,yfinance_proxy,override,universe,EZ,2026-05-15,0.0
+AKZA.AS,AkzoNobel,NL,EZ,EUR,Materials,Unknown,9973493476.586092,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+EVK.DE,Evonik,DE,EZ,EUR,Materials,Unknown,9677038875.070644,EZ_FB,yfinance,yfinance_proxy,sector_hint,universe,EZ,2026-05-15,0.0
+RNO.PA,Renault,FR,Euronext-Paris,EUR,Consumer Discretionary,Auto Manufacturers,9583485338.717518,CAC40,yfinance,ciq_pit,yf_info_sector,universe,EZ,2026-05-15,0.0
+VOE.VI,voestalpine,AT,EZ,EUR,Materials,Unknown,9251365263.741781,EZ_FB,yfinance,ciq_pit,sector_hint,universe,EZ,2026-05-15,0.0
+7203.T,Toyota Motor,JP,TSE,JPY,Consumer Discretionary,Unknown,242329914998.34067,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+9984.T,SoftBank Group,JP,TSE,JPY,Communication Services,Unknown,216714614996.8412,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8306.T,Mitsubishi UFJ,JP,TSE,JPY,Financials,Unknown,208942325513.08936,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8035.T,Tokyo Electron,JP,TSE,JPY,Information Technology,Unknown,148345609116.6537,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8316.T,Sumitomo Mitsui Financial,JP,TSE,JPY,Financials,Unknown,141303511946.00568,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+9983.T,Fast Retailing,JP,TSE,JPY,Consumer Discretionary,Unknown,140710336056.54767,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6758.T,Sony Group,JP,TSE,JPY,Information Technology,Unknown,136773655165.07484,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8058.T,Mitsubishi Corp,JP,TSE,JPY,Industrials,Unknown,135809211792.19707,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6501.T,Hitachi,JP,TSE,JPY,Industrials,Unknown,135194665402.08432,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6857.T,Advantest,JP,TSE,JPY,Information Technology,Unknown,129825461963.49998,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6861.T,Keyence,JP,TSE,JPY,Information Technology,Unknown,121863143998.89856,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8031.T,Mitsui & Co,JP,TSE,JPY,Industrials,Unknown,109927720418.52756,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8411.T,Mizuho Financial,JP,TSE,JPY,Financials,Unknown,108738697044.71251,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7011.T,Mitsubishi Heavy,JP,TSE,JPY,Industrials,Unknown,93645564869.48183,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8001.T,Itochu,JP,TSE,JPY,Industrials,Unknown,92360564154.21182,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8766.T,Tokio Marine,JP,TSE,JPY,Financials,Unknown,89620300963.35867,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4063.T,Shin-Etsu Chemical,JP,TSE,JPY,Materials,Unknown,87110540059.86635,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6503.T,Mitsubishi Electric,JP,TSE,JPY,Industrials,Unknown,83722948958.57417,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4519.T,Chugai Pharmaceutical,JP,TSE,JPY,Health Care,Unknown,81248734009.833,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6981.T,Murata Manufacturing,JP,TSE,JPY,Information Technology,Unknown,70107301003.25266,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+2914.T,Japan Tobacco,JP,TSE,JPY,Consumer Discretionary,Unknown,69394067394.75517,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6098.T,Recruit Holdings,JP,TSE,JPY,Communication Services,Unknown,68884699364.28757,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+5802.T,Sumitomo Electric,JP,TSE,JPY,Industrials,Unknown,63021289152.49366,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9433.T,KDDI,JP,TSE,JPY,Communication Services,Unknown,61176891773.7885,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8002.T,Marubeni,JP,TSE,JPY,Financials,Unknown,59468372956.83562,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7741.T,Hoya,JP,TSE,JPY,Health Care,Unknown,58738180975.25296,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8053.T,Sumitomo Corp,JP,TSE,JPY,Financials,Unknown,58199663010.72606,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7974.T,Nintendo,JP,TSE,JPY,Communication Services,Unknown,52071522895.96185,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+4502.T,Takeda Pharmaceutical,JP,TSE,JPY,Health Care,Unknown,51882787831.949036,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6752.T,Panasonic,JP,TSE,JPY,Information Technology,Unknown,48363193046.65304,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6367.T,Daikin,JP,TSE,JPY,Industrials,Unknown,47752057414.479,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8591.T,Orix,JP,TSE,JPY,Financials,Unknown,41817970699.55542,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8725.T,MS&AD Insurance,JP,TSE,JPY,Financials,Unknown,40509606510.993576,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6301.T,Komatsu,JP,TSE,JPY,Industrials,Unknown,37834297333.38984,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4578.T,Otsuka Holdings,JP,TSE,JPY,Health Care,Unknown,37173162260.403465,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6702.T,Fujitsu,JP,TSE,JPY,Information Technology,Unknown,36824961000.74743,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6701.T,NEC,JP,TSE,JPY,Information Technology,Unknown,35208817042.51491,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8630.T,Sompo Holdings,JP,TSE,JPY,Financials,Unknown,34335593976.409157,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8802.T,Mitsubishi Estate,JP,TSE,JPY,Real Estate,Unknown,34210678609.86957,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6273.T,SMC,JP,TSE,JPY,Industrials,Unknown,33646849127.78209,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+2802.T,Ajinomoto,JP,TSE,JPY,Consumer Discretionary,Unknown,33240054497.23625,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4568.T,Daiichi Sankyo,JP,TSE,JPY,Health Care,Unknown,31369760663.36113,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+7267.T,Honda Motor,JP,TSE,JPY,Consumer Discretionary,Unknown,31318277660.38637,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8801.T,Mitsui Fudosan,JP,TSE,JPY,Real Estate,Unknown,29267413713.54803,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+1605.T,Inpex,JP,TSE,JPY,Energy,Unknown,28889898839.61167,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+8830.T,Sumitomo Realty,JP,TSE,JPY,Real Estate,Unknown,28450961497.448925,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+3382.T,Seven & I,JP,TSE,JPY,Consumer Discretionary,Unknown,27394144847.38622,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4503.T,Astellas Pharma,JP,TSE,JPY,Health Care,Unknown,26935218543.096527,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9020.T,JR East,JP,TSE,JPY,Industrials,Unknown,26871192367.422314,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8267.T,Aeon,JP,TSE,JPY,Consumer Discretionary,Unknown,26643051164.402374,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+5108.T,Bridgestone,JP,TSE,JPY,Consumer Discretionary,Unknown,26411078927.66797,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+4901.T,Fujifilm Holdings,JP,TSE,JPY,Information Technology,Unknown,25021933333.89229,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+6920.T,Lasertec,JP,TSE,JPY,Information Technology,Unknown,24089055635.431557,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+5020.T,Eneos Holdings,JP,TSE,JPY,Energy,Unknown,22994905548.50311,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7751.T,Canon,JP,TSE,JPY,Information Technology,Unknown,22904555440.854435,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4661.T,Oriental Land,JP,TSE,JPY,Information Technology,Unknown,22503581816.60312,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7269.T,Suzuki Motor,JP,TSE,JPY,Consumer Discretionary,Unknown,22063211669.479412,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9022.T,JR Central,JP,TSE,JPY,Industrials,Unknown,21909055019.515877,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6326.T,Kubota,JP,TSE,JPY,Industrials,Unknown,20822931914.426598,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7013.T,IHI,JP,TSE,JPY,Industrials,Unknown,18994090754.08994,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+5713.T,Sumitomo Metal Mining,JP,TSE,JPY,Materials,Unknown,18516152825.8606,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+5401.T,Nippon Steel,JP,TSE,JPY,Materials,Unknown,18492375485.685673,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4543.T,Terumo,JP,TSE,JPY,Health Care,Unknown,18193834645.630054,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7012.T,Kawasaki Heavy,JP,TSE,JPY,Industrials,Unknown,18065446661.107986,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6594.T,Nidec,JP,TSE,JPY,Industrials,Unknown,17655392232.12194,N225_FB,yfinance,ciq_pit,override,universe,JP,2026-05-15,0.0
+4452.T,Kao,JP,TSE,JPY,Consumer Discretionary,Unknown,16665523289.53439,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9503.T,Kansai Electric,JP,TSE,JPY,Utilities,Unknown,16492822535.01223,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4307.T,Nomura Research,JP,TSE,JPY,Information Technology,Unknown,15768266672.585052,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+2502.T,Asahi Group,JP,TSE,JPY,Consumer Discretionary,Unknown,14207937426.106842,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9531.T,Tokyo Gas,JP,TSE,JPY,Utilities,Unknown,13933849345.26045,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9101.T,Nippon Yusen (NYK),JP,TSE,JPY,Industrials,Unknown,13676767556.639164,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+3659.T,Nexon,JP,TSE,JPY,Information Technology,Unknown,13132359204.03072,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9502.T,Chubu Electric,JP,TSE,JPY,Utilities,Unknown,13084658634.06157,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+2503.T,Kirin Holdings,JP,TSE,JPY,Consumer Discretionary,Unknown,12800783096.751436,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9104.T,Mitsui OSK,JP,TSE,JPY,Industrials,Unknown,12759288920.368332,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+3402.T,Toray Industries,JP,TSE,JPY,Materials,Unknown,10762003161.603579,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+5019.T,Idemitsu Kosan,JP,TSE,JPY,Energy,Unknown,10645752633.181408,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7270.T,Subaru,JP,TSE,JPY,Consumer Discretionary,Unknown,10616239701.354893,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+8113.T,Unicharm,JP,TSE,JPY,Consumer Discretionary,Unknown,10177129824.729424,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9107.T,Kawasaki Kisen,JP,TSE,JPY,Industrials,Unknown,10035343696.194582,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6479.T,Minebea Mitsumi,JP,TSE,JPY,Information Technology,Unknown,9942281740.130219,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4188.T,Mitsubishi Chemical,JP,TSE,JPY,Materials,Unknown,8653326597.465393,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4523.T,Eisai,JP,TSE,JPY,Health Care,Unknown,8410536307.088352,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4911.T,Shiseido,JP,TSE,JPY,Consumer Discretionary,Unknown,7837082428.477546,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9602.T,Toho,JP,TSE,JPY,Information Technology,Unknown,7179523246.145308,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4768.T,Otsuka Corp,JP,TSE,JPY,Information Technology,Unknown,7088870647.708255,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+3289.T,Tokyu Fudosan,JP,TSE,JPY,Real Estate,Unknown,6304729433.958516,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9501.T,TEPCO,JP,TSE,JPY,Utilities,Unknown,6210208094.763372,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9005.T,Tokyu,JP,TSE,JPY,Industrials,Unknown,5932123451.934136,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+3092.T,ZOZO,JP,TSE,JPY,Consumer Discretionary,Unknown,5694244122.297144,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+2413.T,M3,JP,TSE,JPY,Health Care,Unknown,5661224051.344856,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4005.T,Sumitomo Chemical,JP,TSE,JPY,Materials,Unknown,5642431897.919566,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4042.T,Tosoh,JP,TSE,JPY,Materials,Unknown,5391595073.749153,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+9143.T,SG Holdings,JP,TSE,JPY,Industrials,Unknown,5325784669.178423,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4324.T,Dentsu,JP,TSE,JPY,Information Technology,Unknown,5108095920.751046,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4385.T,Mercari,JP,TSE,JPY,Information Technology,Unknown,4379322504.497481,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+7261.T,Mazda Motor,JP,TSE,JPY,Consumer Discretionary,Unknown,4309015023.65817,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6473.T,Jtekt,JP,TSE,JPY,Industrials,Unknown,4105583448.881976,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+4751.T,CyberAgent,JP,TSE,JPY,Information Technology,Unknown,4031850980.4469886,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+6471.T,NSK,JP,TSE,JPY,Industrials,Unknown,3910618677.7026596,N225_FB,yfinance,ciq_pit,sector_hint,universe,JP,2026-05-15,0.0
+RY.TO,Royal Bank of Canada,CA,TSX,CAD,Financials,Unknown,254524004654.32236,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+TD.TO,Toronto-Dominion Bank,CA,TSX,CAD,Financials,Unknown,181568240544.06488,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+SHOP.TO,Shopify Inc.,CA,TSX,CAD,Information Technology,Unknown,125054140824.7057,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+ENB.TO,Enbridge Inc.,CA,TSX,CAD,Energy,Unknown,122677777566.32141,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+BN.TO,Brookfield Corporation,CA,TSX,CAD,Financials,Unknown,108170991116.05374,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+BMO.TO,Bank of Montreal,CA,TSX,CAD,Financials,Unknown,107822539420.83376,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+CM.TO,Canadian Imperial Bank of Commerce,CA,TSX,CAD,Financials,Unknown,103059210937.48071,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+CNQ.TO,Canadian Natural Resources Limited,CA,TSX,CAD,Energy,Unknown,99570408373.35109,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+AEM.TO,Agnico Eagle Mines Limited,CA,TSX,CAD,Materials,Unknown,96799814761.27858,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+BNS.TO,Bank of Nova Scotia,CA,TSX,CAD,Financials,Unknown,95279612231.62988,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+BAM.TO,Brookfield Asset Management Ltd.,CA,TSX,CAD,Financials,Unknown,78899130687.62332,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+SU.TO,Suncor Energy Inc.,CA,TSX,CAD,Energy,Unknown,78677264355.29182,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+CP.TO,Canadian Pacific Kansas City Limited,CA,TSX,CAD,Industrials,Unknown,77501055453.84782,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+ABX.TO,Barrick Gold Corporation,CA,TSX,CAD,Materials,Unknown,72892864511.04857,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+TRP.TO,TC Energy Corporation,CA,TSX,CAD,Energy,Unknown,71143127687.33627,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+CNR.TO,Canadian National Railway Company,CA,TSX,CAD,Industrials,Unknown,68723166932.69945,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+IMO.TO,Imperial Oil Limited,CA,TSX,CAD,Energy,Unknown,63783272292.12349,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+WPM.TO,Wheaton Precious Metals Corp.,CA,TSX,CAD,Materials,Unknown,63238610430.64779,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+MFC.TO,Manulife Financial Corporation,CA,TSX,CAD,Financials,Unknown,62638374691.22696,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+CVE.TO,Cenovus Energy Inc.,CA,TSX,CAD,Energy,Unknown,55914753760.1001,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+ATD.TO,Alimentation Couche-Tard Inc.,CA,TSX,CAD,Consumer Discretionary,Unknown,52818694840.05477,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+L.TO,Loblaw Companies Limited,CA,TSX,CAD,Consumer Staples,Unknown,52002920364.01898,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+GWO.TO,Great-West Lifeco Inc.,CA,TSX,CAD,Financials,Unknown,50608250983.55983,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+CCO.TO,Cameco Corporation,CA,TSX,CAD,Energy,Unknown,48779770953.9445,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+FNV.TO,Franco-Nevada Corporation,CA,TSX,CAD,Materials,Unknown,45641147697.04969,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+CLS.TO,Celestica Inc.,CA,TSX,CAD,Information Technology,Unknown,43486028862.02946,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+SLF.TO,Sun Life Financial Inc.,CA,TSX,CAD,Financials,Unknown,39695604499.26785,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+CSU.TO,Constellation Software Inc.,CA,TSX,CAD,Information Technology,Unknown,39606577014.497375,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+WCN.TO,Waste Connections Inc.,CA,TSX,CAD,Industrials,Unknown,39551687048.51046,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+POW.TO,Power Corporation of Canada,CA,TSX,CAD,Financials,Unknown,37045532057.183914,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+K.TO,Kinross Gold Corporation,CA,TSX,CAD,Materials,Unknown,37033407591.256,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+TRI.TO,Thomson Reuters Corporation,CA,TSX,CAD,Industrials,Unknown,34945926631.51235,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+DOL.TO,Dollarama Inc.,CA,TSX,CAD,Consumer Discretionary,Unknown,34629137308.56726,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+NTR.TO,Nutrien Ltd.,CA,TSX,CAD,Materials,Unknown,34386274514.642815,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+FFH.TO,Fairfax Financial Holdings Limited,CA,TSX,CAD,Financials,Unknown,33081145115.672184,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+IFC.TO,Intact Financial Corporation,CA,TSX,CAD,Financials,Unknown,32944715296.742714,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+TECK-B.TO,Teck Resources Limited,CA,TSX,CAD,Materials,Unknown,32415448108.50526,TSXC,yfinance,none,sector_hint,universe,CA,2026-05-15,0.0
+FTS.TO,Fortis Inc.,CA,TSX,CAD,Utilities,Unknown,28851601718.766968,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+PPL.TO,Pembina Pipeline Corporation,CA,TSX,CAD,Energy,Unknown,28152094920.674675,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+QSR.TO,Restaurant Brands International Inc.,CA,TSX,CAD,Consumer Discretionary,Unknown,26753431373.902996,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+WN.TO,George Weston Limited,CA,TSX,CAD,Consumer Staples,Unknown,26401009917.768906,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+PAAS.TO,Pan American Silver Corp.,CA,TSX,CAD,Materials,Unknown,25959660808.782524,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+H.TO,Hydro One Limited,CA,TSX,CAD,Utilities,Unknown,25896838110.69294,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+LUN.TO,Lundin Mining Corporation,CA,TSX,CAD,Materials,Unknown,25785808774.8012,TSXC,yfinance,ciq_pit,override,universe,CA,2026-05-15,0.0
+BCE.TO,BCE Inc.,CA,TSX,CAD,Communication Services,Unknown,22990952398.42431,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+FM.TO,First Quantum Minerals Ltd.,CA,TSX,CAD,Materials,Unknown,22395665713.962097,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+T.TO,Telus Corporation,CA,TSX,CAD,Communication Services,Unknown,19572003551.66363,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+RCI-B.TO,Rogers Communications Inc.,CA,TSX,CAD,Communication Services,Unknown,19530824309.420704,TSXC,yfinance,none,sector_hint,universe,CA,2026-05-15,0.0
+BBD-B.TO,Bombardier Inc.,CA,TSX,CAD,Industrials,Unknown,19290109982.55219,TSXC,yfinance,none,sector_hint,universe,CA,2026-05-15,0.0
+RBA.TO,"RB Global, Inc.",CA,TSX,CAD,Industrials,Unknown,19131477481.257675,TSXC,yfinance,ciq_pit,sector_hint,universe,CA,2026-05-15,0.0
+BHP.AX,BHP,AU,ASX,AUD,Materials,Unknown,227856367851.96854,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+RIO.AX,Rio Tinto,AU,ASX,AUD,Materials,Unknown,225592061658.09634,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CBA.AX,Commonwealth Bank,AU,ASX,AUD,Financials,Unknown,189011122433.46243,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NEM.AX,Newmont,AU,ASX,AUD,Materials,Unknown,126659059189.89728,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WBC.AX,Westpac,AU,ASX,AUD,Financials,Unknown,88148934377.48341,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NAB.AX,National Australia Bank,AU,ASX,AUD,Financials,Unknown,80570758646.41258,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ANZ.AX,Australia & New Zealand Banking Group,AU,ASX,AUD,Financials,Unknown,75808858147.22394,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+MQG.AX,Macquarie Group,AU,ASX,AUD,Financials,Unknown,67350611906.97375,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WES.AX,Wesfarmers,AU,ASX,AUD,Consumer Discretionary,Unknown,58847979777.90462,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+FMG.AX,Fortescue,AU,ASX,AUD,Materials,Unknown,51152914612.26008,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+GMG.AX,Goodman Group,AU,ASX,AUD,Real Estate,Unknown,46398685478.552376,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+TLS.AX,Telstra,AU,ASX,AUD,Communication Services,Unknown,43017947108.38881,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WDS.AX,Woodside Energy Group,AU,ASX,AUD,Energy,Unknown,42066547464.12834,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CSL.AX,CSL,AU,ASX,AUD,Health Care,Unknown,33660196850.382885,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+TCL.AX,Transurban,AU,ASX,AUD,Industrials,Unknown,32919991698.215782,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+RMD.AX,ResMed,AU,ASX,AUD,Health Care,Unknown,29350908933.67859,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WOW.AX,Woolworths Group,AU,ASX,AUD,Consumer Staples,Unknown,28725855698.412586,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+QBE.AX,QBE Insurance,AU,ASX,AUD,Financials,Unknown,24421762493.386696,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ALL.AX,Aristocrat Leisure,AU,ASX,AUD,Consumer Discretionary,Unknown,22396008021.880665,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NST.AX,Northern Star Resources,AU,ASX,AUD,Materials,Unknown,21832510985.858406,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+BXB.AX,Brambles,AU,ASX,AUD,Industrials,Unknown,21243721924.389088,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+COL.AX,Coles Group,AU,ASX,AUD,Consumer Staples,Unknown,20053001791.15845,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+EVN.AX,Evolution Mining,AU,ASX,AUD,Materials,Unknown,19418504924.497784,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+AMC.AX,Amcor,AU,ASX,AUD,Materials,Unknown,18088882451.32102,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+AAI.AX,Alcoa,AU,ASX,AUD,Materials,Unknown,18038258759.31148,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+STO.AX,Santos,AU,ASX,AUD,Energy,Unknown,18001459040.038445,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+REA.AX,REA Group,AU,ASX,AUD,Communication Services,Unknown,15339194459.439293,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+PLS.AX,PLS Group,AU,ASX,AUD,Materials,Unknown,14850395628.624437,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ORG.AX,Origin Energy,AU,ASX,AUD,Utilities,Unknown,14503548084.729822,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+S32.AX,South32,AU,ASX,AUD,Materials,Unknown,14378595165.906712,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SUN.AX,Suncorp,AU,ASX,AUD,Financials,Unknown,13398182965.294668,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+IAG.AX,Insurance Australia Group,AU,ASX,AUD,Financials,Unknown,13383094135.753447,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+LYC.AX,Lynas Rare Earths,AU,ASX,AUD,Materials,Unknown,13055882161.174,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CPU.AX,Computershare,AU,ASX,AUD,Information Technology,Unknown,12555823258.122501,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+FPH.AX,Fisher & Paykel Healthcare,AU,ASX,AUD,Health Care,Unknown,11840846388.882212,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SGH.AX,SGH,AU,ASX,AUD,Industrials,Unknown,11649947815.474302,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SOL.AX,Soul Patts,AU,ASX,AUD,Financials,Unknown,11591421839.4618,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+JHX.AX,James Hardie,AU,ASX,AUD,Materials,Unknown,11332576713.683706,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+APA.AX,APA Group,AU,ASX,AUD,Utilities,Unknown,10197420112.563944,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+MIN.AX,Mineral Resources,AU,ASX,AUD,Materials,Unknown,10020125035.336441,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+BSL.AX,BlueScope,AU,ASX,AUD,Materials,Unknown,9402298105.934273,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+QAN.AX,Qantas,AU,ASX,AUD,Industrials,Unknown,9393252002.811316,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+XRO.AX,Xero,AU,ASX,AUD,Information Technology,Unknown,9240058694.70645,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+PME.AX,Pro Medicus,AU,ASX,AUD,Health Care,Unknown,9180190450.260824,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+MPL.AX,Medibank,AU,ASX,AUD,Financials,Unknown,9134900544.516588,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WTC.AX,Wisetech Global,AU,ASX,AUD,Information Technology,Unknown,8906718170.407848,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+TLC.AX,The Lottery Corporation,AU,ASX,AUD,Consumer Discretionary,Unknown,8476526165.735513,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ASX.AX,ASX,AU,ASX,AUD,Financials,Unknown,8263755258.575798,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ALQ.AX,ALS,AU,ASX,AUD,Industrials,Unknown,8168068334.061767,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NXG.AX,Nexgen Energy,AU,ASX,AUD,Energy,Unknown,8006897765.309867,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NXT.AX,NextDC,AU,ASX,AUD,Information Technology,Unknown,7728378737.768866,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ORI.AX,Orica,AU,ASX,AUD,Materials,Unknown,7681372942.361381,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CSC.AX,Capstone Copper,AU,ASX,AUD,Materials,Unknown,7677654541.060887,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+GGP.AX,Greatland Resources,AU,ASX,AUD,Materials,Unknown,7172547342.736845,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CAR.AX,CAR Group,AU,ASX,AUD,Communication Services,Unknown,7164858277.897903,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CHC.AX,Charter Hall,AU,ASX,AUD,Real Estate,Unknown,6690676695.060469,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SFR.AX,Sandfire Resources,AU,ASX,AUD,Materials,Unknown,6664467246.051841,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SHL.AX,Sonic Healthcare,AU,ASX,AUD,Health Care,Unknown,6611030988.770673,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+GPT.AX,GPT Group,AU,ASX,AUD,Real Estate,Unknown,6519995538.855547,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+TNE.AX,TechnologyOne,AU,ASX,AUD,Information Technology,Unknown,6508099959.197269,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+QUB.AX,Qube Holdings,AU,ASX,AUD,Industrials,Unknown,6448096932.819864,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+LNW.AX,Light & Wonder,AU,ASX,AUD,Consumer Discretionary,Unknown,6443352035.649111,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+RHC.AX,Ramsay Health Care,AU,ASX,AUD,Health Care,Unknown,6055153936.500607,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ALD.AX,Ampol,AU,ASX,AUD,Energy,Unknown,5867143006.694384,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+REH.AX,Reece Group,AU,ASX,AUD,Industrials,Unknown,5720648552.786697,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+JBH.AX,JB Hi-Fi,AU,ASX,AUD,Consumer Discretionary,Unknown,5630249869.896122,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+PRU.AX,Perseus Mining,AU,ASX,AUD,Materials,Unknown,5487473963.565826,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+GMD.AX,Genesis Minerals,AU,ASX,AUD,Materials,Unknown,5340990906.773691,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CDA.AX,Codan,AU,ASX,AUD,Information Technology,Unknown,5286187049.919931,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ALX.AX,Atlas Arteria,AU,ASX,AUD,Industrials,Unknown,5001741575.873707,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+IGO.AX,IGO,AU,ASX,AUD,Materials,Unknown,4793804204.412427,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+APE.AX,Eagers Automotive,AU,ASX,AUD,Consumer Discretionary,Unknown,4770687981.012289,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+HUB.AX,HUB24,AU,ASX,AUD,Financials,Unknown,4769447600.922943,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+DXS.AX,Dexus,AU,ASX,AUD,Real Estate,Unknown,4642877352.489726,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CMM.AX,Capricorn Metals,AU,ASX,AUD,Materials,Unknown,4604653286.420165,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WHC.AX,Whitehaven Coal,AU,ASX,AUD,Energy,Unknown,4601023452.104865,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+AGL.AX,AGL Energy,AU,ASX,AUD,Utilities,Unknown,4550450867.607914,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+COH.AX,Cochlear,AU,ASX,AUD,Health Care,Unknown,4509585619.822877,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WOR.AX,Worley,AU,ASX,AUD,Energy,Unknown,4482193002.294389,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+CGF.AX,Challenger,AU,ASX,AUD,Financials,Unknown,4444927954.72697,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+BEN.AX,Bendigo & Adelaide Bank,AU,ASX,AUD,Financials,Unknown,4184790364.6868634,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NWL.AX,Netwealth Group,AU,ASX,AUD,Financials,Unknown,3945712297.317776,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+HVN.AX,Harvey Norman,AU,ASX,AUD,Consumer Discretionary,Unknown,3934852558.5829577,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+RRL.AX,Regis Resources,AU,ASX,AUD,Materials,Unknown,3721141155.445049,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+WGX.AX,Westgold Resources,AU,ASX,AUD,Materials,Unknown,3714325621.790159,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+DOW.AX,Downer Group,AU,ASX,AUD,Industrials,Unknown,3652904651.8590803,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+TLX.AX,Telix Pharmaceuticals,AU,ASX,AUD,Health Care,Unknown,3635524887.547451,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+VAU.AX,Vault Minerals,AU,ASX,AUD,Materials,Unknown,3521322038.155407,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+VNT.AX,Ventia Services Group,AU,ASX,AUD,Industrials,Unknown,3501135400.3582635,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+PDN.AX,Paladin Energy,AU,ASX,AUD,Energy,Unknown,3490824590.050021,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SEK.AX,Seek,AU,ASX,AUD,Communication Services,Unknown,3399761506.8078976,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+360.AX,Life360,AU,ASX,AUD,Information Technology,Unknown,3230610111.996822,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+A2M.AX,a2 Milk Company,AU,ASX,AUD,Consumer Staples,Unknown,3213515450.9107223,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+SGM.AX,Sims Metal,AU,ASX,AUD,Materials,Unknown,3132111647.3002033,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+NHC.AX,New Hope,AU,ASX,AUD,Energy,Unknown,3073143653.3092756,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+BRG.AX,Breville Group,AU,ASX,AUD,Consumer Discretionary,Unknown,2967317015.560125,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+EMR.AX,Emerald Resources,AU,ASX,AUD,Materials,Unknown,2955775790.28565,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+BOQ.AX,Bank of Queensland,AU,ASX,AUD,Financials,Unknown,2931565558.1538296,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+PNI.AX,Pinnacle Investment Management,AU,ASX,AUD,Financials,Unknown,2688196635.903636,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+ANN.AX,Ansell,AU,ASX,AUD,Health Care,Unknown,2633322910.3501987,ASX200,yfinance,ciq_pit,sector_hint,universe,AU,2026-05-15,0.0
+AZN.ST,AstraZeneca,SE,OMX-STO,SEK,Health Care,Drug Manufacturers - General,285821674355.06354,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+NOVO-B.CO,Novo Nordisk,DK,OMX-CPH,DKK,Health Care,Drug Manufacturers - General,208330832493.04736,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ABB.ST,ABB Ltd,SE,OMX-STO,SEK,Industrials,Electrical Equipment & Parts,190381536958.55908,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+INVE-B.ST,Investor B,SE,OMX-STO,SEK,Financials,Asset Management,119848178368.54753,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ATCO-A.ST,Atlas Copco A,SE,OMX-STO,SEK,Industrials,Specialty Industrial Machinery,91087918726.13306,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+VOLV-B.ST,Volvo B,SE,OMX-STO,SEK,Industrials,Farm & Heavy Construction Machinery,69207604558.91022,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+NDA-SE.ST,Nordea Bank Abp,SE,OMX-STO,SEK,Financials,Banks - Regional,60985101290.83943,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+DSV.CO,DSV,DK,OMX-CPH,DKK,Industrials,Integrated Freight & Logistics,59637995644.6127,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SAND.ST,Sandvik,SE,OMX-STO,SEK,Industrials,Specialty Industrial Machinery,48371346107.1829,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ERIC-B.ST,Ericsson B,SE,OMX-STO,SEK,Information Technology,Communication Equipment,41986784232.52943,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+DANSKE.CO,Danske Bank,DK,OMX-CPH,DKK,Financials,Banks - Regional,41035578020.00137,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ASSA-B.ST,Assa Abloy B,SE,OMX-STO,SEK,Industrials,Security & Protection Services,40360742867.90543,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SWED-A.ST,Swedbank A,SE,OMX-STO,SEK,Financials,Banks - Regional,38449567220.08756,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+EQT.ST,EQT,SE,OMX-STO,SEK,Financials,Asset Management,38239384622.62576,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SEB-A.ST,SEB A,SE,OMX-STO,SEK,Financials,Banks - Regional,37172017497.2422,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+EPI-A.ST,Epiroc A,SE,OMX-STO,SEK,Industrials,Farm & Heavy Construction Machinery,35297237995.685104,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ORSTED.CO,Ørsted,DK,OMX-CPH,DKK,Utilities,Utilities - Renewable,33730205634.98666,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+MAERSK-B.CO,A.P. Møller-Mærsk (class B),DK,OMX-CPH,DKK,Industrials,Marine Shipping,33371877416.88499,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+MAERSK-A.CO,A.P. Møller-Mærsk (class A),DK,OMX-CPH,DKK,Industrials,Marine Shipping,32747361167.164448,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+VWS.CO,Vestas Wind Systems,DK,OMX-CPH,DKK,Industrials,Specialty Industrial Machinery,29501275504.11977,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SAAB-B.ST,Saab B,SE,OMX-STO,SEK,Industrials,Aerospace & Defense,28378484007.0552,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+NSIS-B.CO,Novonesis,DK,OMX-CPH,DKK,Materials,Specialty Chemicals,27696776427.752712,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SHB-A.ST,Handelsbanken A,SE,OMX-STO,SEK,Financials,Banks - Diversified,27668000999.42495,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+HEXA-B.ST,Hexagon B,SE,OMX-STO,SEK,Information Technology,Scientific & Technical Instruments,27373992882.603447,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+HM-B.ST,Hennes & Mauritz B,SE,OMX-STO,SEK,Consumer Discretionary,Apparel Manufacturing,26881925079.99653,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ALFA.ST,Alfa Laval,SE,OMX-STO,SEK,Industrials,Specialty Industrial Machinery,23932224908.89855,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+INDU-C.ST,Industrivärden C,SE,OMX-STO,SEK,Financials,Asset Management,22188356832.036133,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+TELIA.ST,Telia Company,SE,OMX-STO,SEK,Communication Services,Telecom Services,20772725903.3887,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ESSITY-B.ST,Essity B,SE,OMX-STO,SEK,Consumer Staples,Household & Personal Products,18020352909.914093,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+CARL-B.CO,Carlsberg Group (class B),DK,OMX-CPH,DKK,Consumer Staples,Beverages - Brewers,17244095738.044647,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+BOL.ST,Boliden,SE,OMX-STO,SEK,Materials,Other Industrial Metals & Mining,16581251677.101376,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+GMAB.CO,Genmab,DK,OMX-CPH,DKK,Health Care,Biotechnology,16239498276.382627,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+COLO-B.CO,Coloplast (class B),DK,OMX-CPH,DKK,Health Care,Medical Instruments & Supplies,14135072288.42335,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+TRYG.CO,Tryg,DK,OMX-CPH,DKK,Financials,Insurance - Diversified,14077594225.778963,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+EVO.ST,Evolution,SE,OMX-STO,SEK,Consumer Discretionary,Gambling,13650727156.731604,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+LIFCO-B.ST,Lifco B,SE,OMX-STO,SEK,Industrials,Conglomerates,13543677104.661554,OMXS30,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+TEL2-B.ST,Tele2 B,SE,OMX-STO,SEK,Communication Services,Telecom Services,13487432686.491945,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SKF-B.ST,SKF B,SE,OMX-STO,SEK,Industrials,Tools & Accessories,11419507635.737547,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SKA-B.ST,Skanska B,SE,OMX-STO,SEK,Industrials,Engineering & Construction,11021817609.80165,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ADDT-B.ST,Addtech B,SE,OMX-STO,SEK,Industrials,Industrial Distribution,9407447850.09201,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+NIBE-B.ST,Nibe Industrier B,SE,OMX-STO,SEK,Industrials,Building Products & Equipment,8980482475.263664,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+NKT.CO,NKT,DK,OMX-CPH,DKK,Industrials,Electrical Equipment & Parts,8865925930.566053,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+JYSK.CO,Jyske Bank,DK,OMX-CPH,DKK,Financials,Banks - Regional,8048488484.127026,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+DEMANT.CO,Demant,DK,OMX-CPH,DKK,Health Care,Medical Devices,7811354149.454394,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+SCA-B.ST,SCA B,SE,OMX-STO,SEK,Materials,Paper & Paper Products,7485379554.301751,OMXS30,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ISS.CO,ISS,DK,OMX-CPH,DKK,Industrials,Specialty Business Services,6563420069.869754,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ROCK-B.CO,Rockwool International,DK,OMX-CPH,DKK,Industrials,Building Products & Equipment,6420840937.481403,OMXC25,yfinance,none,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+PNDORA.CO,Pandora,DK,OMX-CPH,DKK,Consumer Discretionary,Luxury Goods,6065017862.356438,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ZEAL.CO,Zealand Pharma,DK,OMX-CPH,DKK,Health Care,Biotechnology,3445273078.1951637,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+RBREW.CO,Royal Unibrew,DK,OMX-CPH,DKK,Consumer Staples,Beverages - Brewers,3083350014.409146,OMXC25,yfinance,ciq_pit,yf_info_sector,universe,NORDIC,2026-05-15,0.0
+ROG.SW,Roche,CH,SIX,CHF,Health Care,Unknown,325086063140.20215,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+NOVN.SW,Novartis,CH,SIX,CHF,Health Care,Unknown,284568043386.28674,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+NESN.SW,Nestle,CH,SIX,CHF,Consumer Staples,Unknown,252502359548.0569,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+ABBN.SW,ABB,CH,SIX,CHF,Industrials,Unknown,192080619453.10147,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+UBSG.SW,UBS Group,CH,SIX,CHF,Financials,Unknown,151591750040.00763,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+CFR.SW,Richemont,CH,SIX,CHF,Consumer Discretionary,Unknown,117525005126.2585,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+ZURN.SW,Zurich Insurance,CH,SIX,CHF,Financials,Unknown,107377582345.14825,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+HOLN.SW,Holcim,CH,SIX,CHF,Materials,Unknown,53859728424.115906,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+SREN.SW,Swiss Re,CH,SIX,CHF,Financials,Unknown,44981478691.6343,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+SCMN.SW,Swisscom,CH,SIX,CHF,Communication Services,Unknown,44845587151.270226,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+LONN.SW,Lonza,CH,SIX,CHF,Health Care,Unknown,42289841688.20641,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+SCHN.SW,Schindler,CH,SIX,CHF,Industrials,Unknown,34743763601.17718,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+GIVN.SW,Givaudan,CH,SIX,CHF,Materials,Unknown,31617575177.030365,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+ALC.SW,Alcon,CH,SIX,CHF,Health Care,Unknown,30893417878.278507,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+SLHN.SW,Swiss Life,CH,SIX,CHF,Financials,Unknown,29887698965.920734,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+PGHN.SW,Partners Group,CH,SIX,CHF,Financials,Unknown,29089441874.592274,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+SIKA.SW,Sika,CH,SIX,CHF,Materials,Unknown,28874843597.547485,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+KNIN.SW,Kuehne + Nagel,CH,SIX,CHF,Industrials,Unknown,26446054943.657867,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+VACN.SW,VAT Group,CH,SIX,CHF,Industrials,Unknown,22675026099.060207,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+SGSN.SW,SGS,CH,SIX,CHF,Information Technology,Unknown,21385457235.7079,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+GEBN.SW,Geberit,CH,SIX,CHF,Industrials,Unknown,21194600164.054966,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+EMSN.SW,EMS-Chemie,CH,SIX,CHF,Materials,Unknown,19904730347.032833,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+BAER.SW,Julius Baer,CH,SIX,CHF,Financials,Unknown,17783384742.2425,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+STMN.SW,Straumann,CH,SIX,CHF,Health Care,Unknown,17008466649.959435,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+LOGN.SW,Logitech,CH,SIX,CHF,Information Technology,Unknown,14878458493.957792,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+UHR.SW,Swatch Group,CH,SIX,CHF,Consumer Discretionary,Unknown,13404493618.977358,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+SOON.SW,Sonova,CH,SIX,CHF,Health Care,Unknown,13281996952.426744,SMI_FB,yfinance,ciq_pit,override,universe,CH,2026-05-15,0.0
+BKW.SW,BKW,CH,SIX,CHF,Utilities,Unknown,10053183448.105022,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+PSPN.SW,PSP Swiss Property,CH,SIX,CHF,Real Estate,Unknown,8644484863.298412,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+BARN.SW,Barry Callebaut,CH,SIX,CHF,Consumer Discretionary,Unknown,8344778021.69004,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+TEMN.SW,Temenos,CH,SIX,CHF,Information Technology,Unknown,6148210345.856035,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+ADEN.SW,Adecco,CH,SIX,CHF,Information Technology,Unknown,3374950276.04024,SMI_FB,yfinance,ciq_pit,sector_hint,universe,CH,2026-05-15,0.0
+005930.KS,Samsung Electronics,KR,KRX,KRW,Information Technology,Consumer Electronics,1250036163658.2568,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+000660.KS,SK Hynix,KR,KRX,KRW,Information Technology,Semiconductors,940205168633.243,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+005935.KS,Samsung Electronics Pfd,KR,KRX,KRW,Information Technology,Unknown,836357532219.783,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+005380.KS,Hyundai Motor Company,KR,KRX,KRW,Consumer Discretionary,Auto Manufacturers,124609349896.82123,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+373220.KS,LG Energy Solution,KR,KRX,KRW,Industrials,Electrical Equipment & Parts,67445103898.64445,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+009150.KS,Samsung Electro-Mechanics,KR,KRX,KRW,Information Technology,Unknown,52107489536.34035,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+028260.KS,Samsung C&T,KR,KRX,KRW,Industrials,Unknown,46999538764.158745,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+000270.KS,Kia,KR,KRX,KRW,Consumer Discretionary,Auto Manufacturers,46762313879.68892,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+012450.KS,Hanwha Aerospace,KR,KRX,KRW,Industrials,Aerospace & Defense,44348836651.018295,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+207940.KS,Samsung Biologics,KR,KRX,KRW,Health Care,Biotechnology,43750329752.18151,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+012330.KS,Hyundai Mobis,KR,KRX,KRW,Consumer Discretionary,Unknown,38795479053.15711,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+032830.KS,Samsung Life Insurance,KR,KRX,KRW,Financials,Unknown,36832642873.511444,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+105560.KS,KB Financial Group,KR,KRX,KRW,Financials,Banks - Regional,36137314279.69712,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+006400.KS,Samsung SDI,KR,KRX,KRW,Information Technology,Unknown,33442210757.893658,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+055550.KS,Shinhan Financial,KR,KRX,KRW,Financials,Unknown,30046845511.650528,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+068270.KS,Celltrion,KR,KRX,KRW,Health Care,Biotechnology,27865140095.600983,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+042660.KS,Hanwha Ocean,KR,KRX,KRW,Industrials,Unknown,24929510659.567577,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+005490.KS,POSCO Holdings,KR,KRX,KRW,Materials,Unknown,23711976019.206844,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+066570.KS,LG Electronics,KR,KRX,KRW,Information Technology,Unknown,23041592145.807945,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+086790.KS,Hana Financial,KR,KRX,KRW,Financials,Unknown,21992592112.258026,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+009540.KS,HD Korea Shipbuilding,KR,KRX,KRW,Industrials,Unknown,21827551568.631325,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+051910.KS,LG Chem,KR,KRX,KRW,Materials,Unknown,20331126989.84798,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+035420.KS,Naver Corporation,KR,KRX,KRW,Communication Services,Internet Content & Information,20190090161.581078,KOSPI,yfinance,ciq_pit,yf_info_sector,universe,KR,2026-05-15,0.0
+034730.KS,SK Inc,KR,KRX,KRW,Financials,Unknown,20100912491.714024,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+000150.KS,Doosan,KR,KRX,KRW,Industrials,Unknown,19208284043.55944,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+010130.KS,Korea Zinc,KR,KRX,KRW,Materials,Unknown,18294673801.628487,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+015760.KS,KEPCO,KR,KRX,KRW,Utilities,Unknown,17534946882.357803,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+316140.KS,Woori Financial,KR,KRX,KRW,Financials,Unknown,15232125556.462307,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+017670.KS,SK Telecom,KR,KRX,KRW,Communication Services,Unknown,15105434187.810946,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+003670.KS,Posco Future M,KR,KRX,KRW,Materials,Unknown,14994480543.121532,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+096770.KS,SK Innovation,KR,KRX,KRW,Energy,Unknown,14528210352.897707,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+000810.KS,Samsung Fire & Marine,KR,KRX,KRW,Financials,Unknown,14189974599.522383,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+267250.KS,HD Hyundai,KR,KRX,KRW,Industrials,Unknown,14139559945.395235,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+035720.KS,Kakao,KR,KRX,KRW,Information Technology,Unknown,12686926996.227991,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+011200.KS,HMM,KR,KRX,KRW,Industrials,Unknown,12537475697.326616,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+000720.KS,Hyundai E&C,KR,KRX,KRW,Industrials,Unknown,12108454358.676666,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+003550.KS,LG Corp,KR,KRX,KRW,Financials,Unknown,11235413326.377195,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+030200.KS,KT,KR,KRX,KRW,Communication Services,Unknown,9530571119.059647,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+018260.KS,Samsung SDS,KR,KRX,KRW,Information Technology,Unknown,9296249410.762875,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+010950.KS,S-Oil,KR,KRX,KRW,Energy,Unknown,8997573458.136274,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+352820.KS,Hybe,KR,KRX,KRW,Information Technology,Unknown,6576253882.301973,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+003490.KS,Korean Air,KR,KRX,KRW,Industrials,Unknown,6374697565.912988,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+009830.KS,Hanwha Solutions,KR,KRX,KRW,Materials,Unknown,5234599215.496466,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+180640.KS,Hanjin KAL,KR,KRX,KRW,Industrials,Unknown,5060881000.87316,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+000990.KS,DB HiTek,KR,KRX,KRW,Information Technology,Unknown,5007074377.498698,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+034220.KS,LG Display,KR,KRX,KRW,Information Technology,Unknown,4749041553.586721,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+078930.KS,GS Holdings,KR,KRX,KRW,Financials,Unknown,4562796540.897905,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+001040.KS,CJ Corp,KR,KRX,KRW,Financials,Unknown,4551314348.849533,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+032640.KS,LG Uplus,KR,KRX,KRW,Communication Services,Unknown,4514546710.846083,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+000100.KS,Yuhan,KR,KRX,KRW,Health Care,Unknown,4244658517.888336,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+004020.KS,Hyundai Steel,KR,KRX,KRW,Materials,Unknown,3831181094.110724,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+128940.KS,Hanmi Pharm,KR,KRX,KRW,Health Care,Unknown,3782271576.78131,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+036570.KS,NCSoft,KR,KRX,KRW,Information Technology,Unknown,3432828762.1365933,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+011170.KS,Lotte Chemical,KR,KRX,KRW,Materials,Unknown,2439220878.436264,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+251270.KS,Netmarble,KR,KRX,KRW,Information Technology,Unknown,2306654715.4383435,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+097950.KS,CJ CheilJedang,KR,KRX,KRW,Consumer Discretionary,Unknown,2239344792.3204694,KOSPI_FB,yfinance,ciq_pit,sector_hint,universe,KR,2026-05-15,0.0
+RELIANCE.NS,Reliance Industries,IN,NSE,INR,Energy,Unknown,192458959407.9791,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+HDFCBANK.NS,HDFC Bank,IN,NSE,INR,Financials,Unknown,123730350322.3121,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+BHARTIARTL.NS,Bharti Airtel,IN,NSE,INR,Communication Services,Unknown,119821700839.88504,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+SBIN.NS,State Bank of India,IN,NSE,INR,Financials,Unknown,94462657176.9257,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ICICIBANK.NS,ICICI Bank,IN,NSE,INR,Financials,Unknown,93281251051.66791,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+TCS.NS,Tata Consultancy Services,IN,NSE,INR,Information Technology,Unknown,84866530950.2101,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+BAJFINANCE.NS,Bajaj Finance,IN,NSE,INR,Financials,Unknown,59231943769.620384,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+LT.NS,Larsen & Toubro,IN,NSE,INR,Industrials,Unknown,56611103310.018265,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+HINDUNILVR.NS,Hindustan Unilever,IN,NSE,INR,Consumer Discretionary,Unknown,55178699345.41975,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+SUNPHARMA.NS,Sun Pharma,IN,NSE,INR,Health Care,Unknown,46687216107.60738,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+INFY.NS,Infosys,IN,NSE,INR,Information Technology,Unknown,46280260682.75483,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+MARUTI.NS,Maruti Suzuki,IN,NSE,INR,Consumer Discretionary,Unknown,42931436545.70817,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ADANIPORTS.NS,Adani Ports & SEZ,IN,NSE,INR,Information Technology,Unknown,42670634946.24941,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+AXISBANK.NS,Axis Bank,IN,NSE,INR,Financials,Unknown,40740101610.86636,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ITC.NS,ITC,IN,NSE,INR,Consumer Discretionary,Unknown,40197727173.23044,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+NTPC.NS,NTPC,IN,NSE,INR,Utilities,Utilities - Regulated Electric,40132307570.0705,NIFTY50,yfinance,ciq_pit,yf_info_sector,universe,IN,2026-05-15,0.0
+KOTAKBANK.NS,Kotak Mahindra Bank,IN,NSE,INR,Financials,Unknown,39805391633.072525,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+M&M.NS,Mahindra & Mahindra,IN,NSE,INR,Consumer Discretionary,Unknown,39801357735.15955,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ONGC.NS,Oil and Natural Gas Corporation,IN,NSE,INR,Energy,Unknown,39533028833.4602,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+TITAN.NS,Titan Company,IN,NSE,INR,Consumer Discretionary,Unknown,38308041529.9048,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ADANIENT.NS,Adani Enterprises,IN,NSE,INR,Materials,Unknown,36879933091.45661,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ULTRACEMCO.NS,UltraTech Cement,IN,NSE,INR,Materials,Unknown,35919830502.89133,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+JSWSTEEL.NS,JSW Steel,IN,NSE,INR,Materials,Unknown,33056484984.558483,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+BEL.NS,Bharat Electronics,IN,NSE,INR,Industrials,Aerospace & Defense,32738387718.251053,NIFTY50,yfinance,ciq_pit,yf_info_sector,universe,IN,2026-05-15,0.0
+HCLTECH.NS,HCLTech,IN,NSE,INR,Information Technology,Unknown,31760399011.15748,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+BAJAJ-AUTO.NS,Bajaj Auto,IN,NSE,INR,Consumer Discretionary,Unknown,30481227903.308968,NIFTY50,yfinance,none,sector_hint,universe,IN,2026-05-15,0.0
+NESTLEIND.NS,Nestlé India,IN,NSE,INR,Consumer Discretionary,Unknown,29394041580.55352,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+POWERGRID.NS,Power Grid,IN,NSE,INR,Utilities,Utilities - Regulated Electric,29309341024.093853,NIFTY50,yfinance,ciq_pit,yf_info_sector,universe,IN,2026-05-15,0.0
+COALINDIA.NS,Coal India,IN,NSE,INR,Energy,Unknown,29222967948.401398,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+BAJAJFINSV.NS,Bajaj Finserv,IN,NSE,INR,Financials,Unknown,29032663191.859577,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+ASIANPAINT.NS,Asian Paints,IN,NSE,INR,Consumer Discretionary,Unknown,26252515731.25164,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+HINDALCO.NS,Hindalco Industries,IN,NSE,INR,Materials,Unknown,25765752056.964684,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+SHRIRAMFIN.NS,Shriram Finance,IN,NSE,INR,Financials,Unknown,22977159019.424507,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+GRASIM.NS,Grasim Industries,IN,NSE,INR,Materials,Unknown,20813410524.61143,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+EICHERMOT.NS,Eicher Motors,IN,NSE,INR,Consumer Discretionary,Unknown,20151078289.129696,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+SBILIFE.NS,SBI Life Insurance Company,IN,NSE,INR,Financials,Unknown,19555231681.07815,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+INDIGO.NS,IndiGo,IN,NSE,INR,Information Technology,Unknown,17284498144.548286,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+TRENT.NS,Trent,IN,NSE,INR,Consumer Discretionary,Unknown,15341727324.324945,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+HDFCLIFE.NS,HDFC Life,IN,NSE,INR,Financials,Unknown,13800525474.126005,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+TMPV.NS,Tata Motors Passenger Vehicles,IN,NSE,INR,Consumer Discretionary,Unknown,13027530523.88605,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+TATACONSUM.NS,Tata Consumer Products,IN,NSE,INR,Consumer Discretionary,Unknown,12695655432.87874,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+TECHM.NS,Tech Mahindra,IN,NSE,INR,Information Technology,Unknown,12426496813.57785,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+APOLLOHOSP.NS,Apollo Hospitals,IN,NSE,INR,Health Care,Unknown,12191656488.21815,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+CIPLA.NS,Cipla,IN,NSE,INR,Health Care,Unknown,12120156232.541903,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+DRREDDY.NS,Dr. Reddy's Laboratories,IN,NSE,INR,Health Care,Unknown,11335108218.47088,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+MAXHEALTH.NS,Max Healthcare,IN,NSE,INR,Health Care,Unknown,10667740051.053034,NIFTY50,yfinance,ciq_pit,sector_hint,universe,IN,2026-05-15,0.0
+0700.HK,Tencent,HK,HKEX,HKD,Information Technology,Unknown,531005386589.52045,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+9988.HK,Alibaba,HK,HKEX,HKD,Information Technology,Unknown,337929802292.2687,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0005.HK,HSBC Holdings,HK,HKEX,HKD,Financials,Unknown,307629438238.5841,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0941.HK,China Mobile,HK,HKEX,HKD,Communication Services,Unknown,239608185550.23636,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0883.HK,CNOOC,HK,HKEX,HKD,Energy,Unknown,159972628632.3001,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+3968.HK,China Merchants Bank,HK,HKEX,HKD,Financials,Unknown,152892436205.93536,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2318.HK,Ping An Insurance,HK,HKEX,HKD,Financials,Unknown,146814346413.40182,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2899.HK,Zijin Mining,HK,HKEX,HKD,Materials,Unknown,126368625987.74835,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1088.HK,China Shenhua,HK,HKEX,HKD,Energy,Unknown,122849286869.77708,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1299.HK,AIA Group,HK,HKEX,HKD,Financials,Unknown,116418437487.72566,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1211.HK,BYD,HK,HKEX,HKD,Consumer Discretionary,Unknown,114257455410.29964,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2628.HK,China Life Insurance,HK,HKEX,HKD,Financials,Unknown,107834544774.87503,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1810.HK,Xiaomi,HK,HKEX,HKD,Information Technology,Unknown,104580470820.20833,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+9999.HK,NetEase,HK,HKEX,HKD,Information Technology,Unknown,74837607925.54013,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0981.HK,SMIC,HK,HKEX,HKD,Information Technology,Unknown,73154460551.39194,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0388.HK,HKEX,HK,HKEX,HKD,Financials,Unknown,68367008754.51743,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+3690.HK,Meituan,HK,HKEX,HKD,Information Technology,Unknown,67562741820.040344,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2388.HK,BOC Hong Kong,HK,HKEX,HKD,Financials,Unknown,62368322102.5546,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0016.HK,Sun Hung Kai Properties,HK,HKEX,HKD,Real Estate,Unknown,53020585911.424255,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+9618.HK,JD.com,HK,HKEX,HKD,Information Technology,Unknown,45376801961.82597,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0019.HK,Swire Pacific A,HK,HKEX,HKD,Industrials,Unknown,40809994270.32938,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0001.HK,CK Hutchison,HK,HKEX,HKD,Industrials,Unknown,35821545575.79865,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1109.HK,China Resources Land,HK,HKEX,HKD,Real Estate,Unknown,34252983615.29122,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1024.HK,Kuaishou,HK,HKEX,HKD,Information Technology,Unknown,28165855818.445522,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2020.HK,ANTA Sports,HK,HKEX,HKD,Consumer Discretionary,Unknown,27362216224.476276,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0066.HK,MTR,HK,HKEX,HKD,Industrials,Unknown,26818433000.664757,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0002.HK,CLP Holdings,HK,HKEX,HKD,Utilities,Unknown,24871274823.85811,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0012.HK,Henderson Land,HK,HKEX,HKD,Real Estate,Unknown,21190610506.805264,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1801.HK,Innovent Biologics,HK,HKEX,HKD,Health Care,Unknown,19202473323.358265,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0027.HK,Galaxy Entertainment,HK,HKEX,HKD,Information Technology,Unknown,18910599116.042355,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0006.HK,Power Assets,HK,HKEX,HKD,Utilities,Unknown,17768507594.87168,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2269.HK,WuXi Biologics,HK,HKEX,HKD,Health Care,Unknown,17226984254.895893,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1209.HK,China Resources Mixc,HK,HKEX,HKD,Real Estate,Unknown,14461069324.402443,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0823.HK,Link REIT,HK,HKEX,HKD,Real Estate,Unknown,13924013363.029783,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0291.HK,China Resources Beer,HK,HKEX,HKD,Consumer Discretionary,Unknown,11241481507.023373,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2382.HK,Sunny Optical,HK,HKEX,HKD,Information Technology,Unknown,9107012240.325268,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+0285.HK,BYD Electronics,HK,HKEX,HKD,Information Technology,Unknown,8248072843.629607,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2018.HK,AAC Technologies,HK,HKEX,HKD,Information Technology,Unknown,6608837277.590614,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+1044.HK,Hengan Intl,HK,HKEX,HKD,Consumer Discretionary,Unknown,3893831593.002218,HSI_FB,yfinance,ciq_pit,sector_hint,universe,HK,2026-05-15,0.0
+2330.TW,TSMC,TW,TWSE,TWD,Information Technology,Unknown,1868216609055.698,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2308.TW,Delta Electronics,TW,TWSE,TWD,Information Technology,Unknown,177654181393.5277,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2454.TW,MediaTek,TW,TWSE,TWD,Information Technology,Unknown,172481663552.53104,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2317.TW,Hon Hai (Foxconn),TW,TWSE,TWD,Information Technology,Unknown,108346488313.15305,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3711.TW,ASE Technology,TW,TWSE,TWD,Information Technology,Unknown,76313576030.80635,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3037.TW,Unimicron,TW,TWSE,TWD,Information Technology,Unknown,44023974175.72431,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2303.TW,UMC,TW,TWSE,TWD,Information Technology,Unknown,43056634130.45468,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2881.TW,Fubon Financial,TW,TWSE,TWD,Financials,Unknown,41028823778.45349,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2382.TW,Quanta Computer,TW,TWSE,TWD,Information Technology,Unknown,40919621125.45656,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2412.TW,Chunghwa Telecom,TW,TWSE,TWD,Communication Services,Unknown,33852196135.032707,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2408.TW,Nanya Technology,TW,TWSE,TWD,Information Technology,Unknown,33534293772.217747,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3017.TW,Asia Vital Components,TW,TWSE,TWD,Information Technology,Unknown,31800971249.871067,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2357.TW,Asustek,TW,TWSE,TWD,Information Technology,Unknown,16006036547.389996,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2603.TW,Evergreen Marine,TW,TWSE,TWD,Industrials,Unknown,14532564416.882793,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3231.TW,Wistron,TW,TWSE,TWD,Information Technology,Unknown,13929253059.026062,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3008.TW,Largan Precision,TW,TWSE,TWD,Information Technology,Unknown,13013815977.525417,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3661.TW,WPG Holdings,TW,TWSE,TWD,Information Technology,Unknown,12583953145.454454,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+4904.TW,Far EasTone,TW,TWSE,TWD,Communication Services,Unknown,11232214217.155453,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3045.TW,Taiwan Mobile,TW,TWSE,TWD,Communication Services,Unknown,11061161483.563866,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+3034.TW,Novatek Microelectronics,TW,TWSE,TWD,Information Technology,Unknown,9520966695.69946,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2207.TW,Hotai Motor,TW,TWSE,TWD,Consumer Discretionary,Unknown,8283431213.424397,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2912.TW,President Chain Store,TW,TWSE,TWD,Consumer Discretionary,Unknown,7473243495.378008,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2376.TW,Gigabyte Technology,TW,TWSE,TWD,Information Technology,Unknown,6952097973.900823,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+5871.TW,Chailease Holding,TW,TWSE,TWD,Financials,Unknown,5866053397.419661,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+2474.TW,Catcher Technology,TW,TWSE,TWD,Information Technology,Unknown,3257653637.3027115,TW50_FB,yfinance,ciq_pit,sector_hint,universe,TW,2026-05-15,0.0
+O39.SI,OCBC Bank,SG,SGX,SGD,Financials,Banks - Regional,81023297000.91689,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+Z74.SI,Singtel,SG,SGX,SGD,Communication Services,Telecom Services,63119902655.90829,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+U11.SI,United Overseas Bank,SG,SGX,SGD,Financials,Banks - Regional,48181413534.2183,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+S68.SI,Singapore Exchange,SG,SGX,SGD,Financials,Financial Data & Stock Exchanges,17931815627.18824,STI,yfinance,none,yf_info_sector,universe,SG,2026-05-15,0.0
+J36.SI,Jardine Matheson Holdings Limited,SG,SGX,SGD,Industrials,Conglomerates,16616814108.205915,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+C6L.SI,Singapore Airlines,SG,SGX,SGD,Industrials,Airlines,15548836078.444603,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+BN4.SI,Keppel Corporation,SG,SGX,SGD,Industrials,Conglomerates,15261240353.584677,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+H78.SI,Hongkong Land Holdings,SG,SGX,SGD,Real Estate,Real Estate - Development,13916411063.102722,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+V03.SI,Venture Corporation,SG,SGX,SGD,Information Technology,Electronic Components,4115357264.6837316,STI,yfinance,ciq_pit,yf_info_sector,universe,SG,2026-05-15,0.0
+BHG.JO,BHP Group,ZA,JSE,ZAR,Materials,Unknown,225421532459.50818,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+BTI.JO,British American Tobacco,ZA,JSE,ZAR,Consumer Discretionary,Unknown,143381520005.0901,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+PETR3.SA,Petrobras,BR,B3,BRL,Energy,Unknown,127964613952.53174,IBOV_FB,yfinance,none,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+PETR4.SA,Petrobras PN,BR,B3,BRL,Energy,Unknown,123902148952.34776,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+CFR.JO,Compagnie Financiere Richemont,ZA,JSE,ZAR,Consumer Discretionary,Unknown,119649589272.74002,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+PRX.JO,Prosus,ZA,JSE,ZAR,Information Technology,Unknown,97511857753.15141,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+ITUB4.SA,Itau Unibanco,BR,B3,BRL,Financials,Unknown,89667735283.47844,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+VALE3.SA,Vale,BR,B3,BRL,Materials,Unknown,71196424258.28859,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+AGL.JO,Anglo American,ZA,JSE,ZAR,Materials,Unknown,58380554481.359,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+ANG.JO,AngloGold Ashanti,ZA,JSE,ZAR,Materials,Unknown,51275173550.84213,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+ABEV3.SA,Ambev,BR,B3,BRL,Consumer Discretionary,Unknown,50090446156.01053,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+GFI.JO,Gold Fields,ZA,JSE,ZAR,Materials,Unknown,39569771058.221466,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+NPN.JO,Naspers,ZA,JSE,ZAR,Information Technology,Unknown,39166650679.79157,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+BBDC4.SA,Bradesco,BR,B3,BRL,Financials,Unknown,38071265415.51534,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+WEGE3.SA,WEG,BR,B3,BRL,Industrials,Unknown,37021779389.48986,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+CPI.JO,Capitec Bank,ZA,JSE,ZAR,Financials,Unknown,30488553287.984024,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+FSR.JO,FirstRand,ZA,JSE,ZAR,Financials,Unknown,30388549119.97396,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SBK.JO,Standard Bank,ZA,JSE,ZAR,Financials,Unknown,30371668158.290695,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SANB11.SA,Santander Brasil,BR,B3,BRL,Financials,Unknown,25823310907.256382,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+KLBN11.SA,Klabin,BR,B3,BRL,Materials,Unknown,24153798166.560917,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+BBAS3.SA,Banco do Brasil,BR,B3,BRL,Financials,Unknown,23708456190.279514,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+MTN.JO,MTN Group,ZA,JSE,ZAR,Communication Services,Unknown,23410536523.360317,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+VIVT3.SA,Telefonica Brasil,BR,B3,BRL,Communication Services,Unknown,22871074429.28619,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SBSP3.SA,Sabesp,BR,B3,BRL,Utilities,Unknown,20723810787.807022,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+VOD.JO,Vodacom,ZA,JSE,ZAR,Communication Services,Unknown,18331947212.043804,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+B3SA3.SA,B3,BR,B3,BRL,Financials,Unknown,16881345602.900848,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+RDOR3.SA,Rede D'Or,BR,B3,BRL,Health Care,Unknown,15423395398.518343,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+IMP.JO,Impala Platinum,ZA,JSE,ZAR,Materials,Unknown,14244365232.151,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+BBSE3.SA,BB Seguridade,BR,B3,BRL,Financials,Unknown,13403089875.077835,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+ABG.JO,Absa Group,ZA,JSE,ZAR,Financials,Unknown,11764165716.794912,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SLM.JO,Sanlam,ZA,JSE,ZAR,Financials,Unknown,11026774893.487925,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+HAR.JO,Harmony Gold,ZA,JSE,ZAR,Materials,Unknown,10838739000.353317,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+TIMS3.SA,TIM,BR,B3,BRL,Communication Services,Unknown,10801626144.491117,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+DSY.JO,Discovery,ZA,JSE,ZAR,Financials,Unknown,10800402604.822464,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+PRIO3.SA,PetroRio,BR,B3,BRL,Energy,Unknown,10741628771.328081,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SUZB3.SA,Suzano,BR,B3,BRL,Materials,Unknown,10730224804.653202,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+CPFE3.SA,CPFL Energia,BR,B3,BRL,Utilities,Unknown,10555073178.863573,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+ENEV3.SA,Eneva,BR,B3,BRL,Utilities,Unknown,9950454903.28502,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+EQTL3.SA,Equatorial Energia,BR,B3,BRL,Utilities,Unknown,9894217429.061209,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+RENT3.SA,Localiza,BR,B3,BRL,Information Technology,Unknown,9756190419.845158,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SHP.JO,Shoprite,ZA,JSE,ZAR,Consumer Discretionary,Unknown,9594204054.450706,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SSW.JO,Sibanye Stillwater,ZA,JSE,ZAR,Materials,Unknown,9301753905.757181,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+GGBR4.SA,Gerdau,BR,B3,BRL,Materials,Unknown,9211947767.890408,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+BID.JO,Bid Corp,ZA,JSE,ZAR,Consumer Discretionary,Unknown,8474405428.3210535,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+SOL.JO,Sasol,ZA,JSE,ZAR,Energy,Unknown,8370576793.964827,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+VBBR3.SA,Vibra Energia,BR,B3,BRL,Energy,Unknown,8078872044.804223,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+NED.JO,Nedbank,ZA,JSE,ZAR,Financials,Unknown,7178322534.961339,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+INL.JO,Investec,ZA,JSE,ZAR,Financials,Unknown,7060112237.658794,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+RADL3.SA,RaiaDrogasil,BR,B3,BRL,Health Care,Unknown,6851504970.0647135,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+KIO.JO,Kumba Iron Ore,ZA,JSE,ZAR,Materials,Unknown,6359439090.28934,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+REM.JO,Remgro,ZA,JSE,ZAR,Financials,Unknown,6352113088.622917,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+UGPA3.SA,Ultrapar,BR,B3,BRL,Energy,Unknown,6313972043.4198,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+NRP.JO,NEPI Rockcastle,ZA,JSE,ZAR,Real Estate,Unknown,6090029560.740984,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+RAIL3.SA,Rumo,BR,B3,BRL,Industrials,Unknown,5731151956.026051,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+BVT.JO,Bidvest,ZA,JSE,ZAR,Industrials,Unknown,4805368203.879978,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+MNP.JO,Mondi,ZA,JSE,ZAR,Materials,Unknown,4561887446.157125,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+ENGI11.SA,Energisa,BR,B3,BRL,Utilities,Unknown,4530327963.4420805,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+APN.JO,Aspen Pharmacare,ZA,JSE,ZAR,Health Care,Unknown,3799366960.6756434,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+TOTS3.SA,Totvs,BR,B3,BRL,Information Technology,Unknown,3762423291.8024683,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+CLS.JO,Clicks,ZA,JSE,ZAR,Consumer Discretionary,Unknown,3504433500.5934877,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+HYPE3.SA,Hypera,BR,B3,BRL,Health Care,Unknown,3310529808.3555655,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+OMU.JO,Old Mutual,ZA,JSE,ZAR,Financials,Unknown,3131133683.8898687,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+EXX.JO,Exxaro,ZA,JSE,ZAR,Materials,Unknown,3014056677.795194,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+MULT3.SA,Multiplan,BR,B3,BRL,Real Estate,Unknown,2958076488.0993867,IBOV_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+WHL.JO,Woolworths,ZA,JSE,ZAR,Consumer Discretionary,Unknown,2688675092.492254,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+MRP.JO,Mr Price,ZA,JSE,ZAR,Consumer Discretionary,Unknown,2376635374.947077,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+TFG.JO,Foschini Group,ZA,JSE,ZAR,Consumer Discretionary,Unknown,1171521092.418643,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0
+PIK.JO,Pick n Pay,ZA,JSE,ZAR,Consumer Discretionary,Unknown,987246214.5656301,JSE40_FB,yfinance,ciq_pit,sector_hint,universe,EM_OTHER,2026-05-15,0.0

@@ -1,0 +1,91 @@
+# Execution config — Interactive Brokers Gateway
+# This is paper-only. Live trading requires explicit re-config + extra confirmation layer.
+
+ibkr:
+  host: "127.0.0.1"
+  paper_port: 4002              # IB Gateway paper
+  live_port: 4001               # NOT used by the bot; live trading forbidden by default
+  client_id: 42                  # 99 reserved for micro_futures_bot
+  paper_account_prefix: "DU"     # bot refuses to operate on non-DU accounts
+
+order:
+  type: "LMT"                    # limit only, no market orders
+  limit_buffer_pct: 0.005        # LMT = last_close × 1.005 (round to tick)
+  tif: "GTC"                     # good till cancelled (survives across sessions)
+  outside_rth: true              # accept orders outside regular trading hours
+  flip_cost_bps_target: 3.0
+
+pacing:
+  throttle_seconds: 1.0           # 1 order/sec to avoid IBKR pacing violations
+  max_in_flight: 10
+  min_position_usd: 100           # skip dust
+
+tick_rounding:
+  # IBKR's reported `minTick` is often too small (smallest across all price tiers).
+  # We override with currency- and price-level rules.
+  gbp:
+    # LSE/SETS tick rules for British pence (GBp). Liquid stocks use 0.05 below
+    # 100p, then 0.10 at 100-1000p, 0.50 at 1000-5000p, 1.00 above. SMART rejects
+    # finer-than-tier prices with Error 110.
+    tiers:
+      - price_min: 5000
+        tick: 1.0
+      - price_min: 1000
+        tick: 0.5
+      - price_min: 100
+        tick: 0.10
+      - price_min: 0
+        tick: 0.05
+  jpy:
+    tiers:
+      - price_min: 30000
+        tick: 50.0
+      - price_min: 5000
+        tick: 5.0
+      - price_min: 1000
+        tick: 1.0
+      - price_min: 0
+        tick: 0.1
+  krw:
+    tiers:
+      - price_min: 500000
+        tick: 1000.0
+      - price_min: 100000
+        tick: 500.0
+      - price_min: 50000
+        tick: 100.0
+      - price_min: 10000
+        tick: 50.0
+      - price_min: 5000
+        tick: 10.0
+      - price_min: 1000
+        tick: 5.0
+      - price_min: 0
+        tick: 1.0
+  default:                  # CHF/EUR/GBP/USD/CAD/AUD/SGD/BRL/etc.
+    tiers:
+      - price_min: 1000
+        tick: 1.0
+      - price_min: 500
+        tick: 0.5
+      - price_min: 100
+        tick: 0.05
+      - price_min: 10
+        tick: 0.01
+      - price_min: 0
+        tick: 0.001
+
+audit:
+  log_dir: "logs/"
+  log_format: "jsonl"
+  capture_ibkr_errors: true
+  capture_order_log_entries: true
+
+safety:
+  # All MUST be true. Bot refuses to submit otherwise.
+  paper_account_only: true
+  typed_confirmation_required: false  # already paper-restricted; set true for extra safety
+  dry_run_default: true
+  refuse_market_orders: true
+  refuse_live_port: true
+  min_account_nav_usd: 10000          # don't run on tiny accounts

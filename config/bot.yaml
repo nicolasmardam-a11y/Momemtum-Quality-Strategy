@@ -1,0 +1,82 @@
+# Global Equity Bot v2.5 — paper-trading execution bot control file.
+# ENGINEERING CONFIG ONLY. It does NOT change the strategy/model/parameters;
+# the frozen strategy spec lives in config/strategy.yaml and is consumed as-is.
+# Editing values here changes execution plumbing, not the investment model.
+
+investor_base_currency: EUR          # NAV is converted to EUR for the investor base
+signal_only_nav_eur: 1000000         # ASSUMED NAV used only in signal_only mode (no IBKR)
+
+ibkr:
+  host: "127.0.0.1"
+  paper_port: 4002                   # IB Gateway paper. HARD-checked.
+  live_port: 4001                    # MUST differ from paper_port. Never used by this bot.
+  client_id: 52                      # unique to the paper bot
+  paper_account_prefix: "DU"         # bot refuses any account not starting with this
+
+safety:
+  paper_only: true                   # HARD: must be true
+  live_trading_enabled: false        # HARD: must be false (no live code path)
+  require_manual_approval: true      # paper_trade needs explicit --approve + typed confirm
+  refuse_market_orders: true         # LMT only
+
+paths:
+  security_master:   "reports/production/security_master.csv"
+  current_portfolio: "reports/production/current_portfolio_clean.csv"
+  ibkr_contracts:    "config/ibkr_contracts.json"          # top-50 trade gate
+  ibkr_contracts_full: "config/ibkr_contracts_full.json"   # full validated registry (reconcile scope)
+  tradable_universe: "config/tradable_universe_clean.json"
+  clean_metrics:     "reports/production/clean_sector_pit_metrics.json"
+  clean_report:      "reports/production/clean_sector_pit_report.md"
+  naked_returns:     "equity/full_pit_naked_returns.csv"
+  benchmarks_wide:   "data/prices/benchmarks_wide.parquet"
+  eem:               "data/prices/EEM.parquet"
+  wide_local:        "data/prices/wide_close_local.parquet"
+  wide_usd:          "data/prices/wide_close_usd_em.parquet"
+  fx_history:        "data/fx/fx_history.parquet"
+  state_dir:         "data/bot_state"
+  reports_daily:     "reports/daily"
+  logs_execution:    "logs/execution"
+  logs_system:       "logs/system"
+
+order:
+  type: "LMT"                        # LMT only (market orders refused)
+  limit_buffer_pct: 0.005            # BUY = last*1.005, SELL = last*0.995, tick-rounded
+  tif: "GTC"
+  outside_rth: true
+  min_order_value_eur: 100           # skip trades below this notional
+  throttle_seconds: 1.0              # 1 order/sec
+  max_in_flight: 10
+
+# These mirror config/strategy.yaml (frozen). Duplicated here ONLY so the
+# execution layer is self-describing; values are identical to the strategy spec.
+overlay:
+  target_vol_annual: 0.10
+  vol_lookback_days: 60
+  trend_sma_days: 200
+  trend_assets: ["URTH", "EEM"]
+  trend_n_required_off: 2
+
+risk:
+  max_price_staleness_days: 5        # reject prices older than this many calendar days
+  exposure_min: 0.0                  # daily exposure scalar lower bound
+  exposure_max: 1.0                  # daily exposure scalar upper bound
+  exposure_change_threshold: 0.35    # |today - prior| exposure jump -> kill switch
+  reconcile_tol_qty: 0               # allowed share mismatch per name
+  reconcile_tol_value_eur: 50        # allowed per-name MV mismatch (EUR)
+  expected_n_constituents: 50        # production book size; deviation -> kill
+
+costs:
+  base_one_way_bps: 10.0             # commission + slippage estimate (one-way)
+  fx_conversion_bps: 20.0            # IBKR FX conversion cost
+  slippage_bps: 5.0                  # additional expected slippage estimate
+  country_buy_taxes_bps:             # paid on BUY notional (stamp/FTT), one-time
+    GB: 50
+    FR: 30
+    IT: 10
+    KR: 18
+    TW: 30
+    FI: 150
+    GR: 20
+    ZA: 25
+    IN: 25
+    BR: 30

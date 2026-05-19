@@ -1,0 +1,93 @@
+# Global Equity Bot v2.5 — frozen strategy specification
+# Backtest result (2015-2026 OOS): Sharpe 2.09, Calmar 2.05, MDD -9.6%, CAGR 19.7%
+# Adversarial validation: 7/7 tests passed, placebo 100th percentile
+# Version: v2.5_2026-05-15
+
+meta:
+  name: "Global Equity Bot v2.5"
+  version: "v2.5_2026-05-15"
+  description: "QM_only + country-cap top-50 + vol_target × multi-asset trend (URTH+EEM)"
+  base_currency: "USD"     # NAV reporting; portfolio still holds multi-currency
+  expected_sharpe: 2.09
+  expected_calmar: 2.05
+  expected_mdd: -0.096
+  expected_cagr: 0.197
+
+universe:
+  # Path to the parquet file with the eligible universe
+  file: "data/universe/backtest_universe_em.parquet"
+  # Total: 1,225 stocks across 14 regions and 25 countries
+  region_caps:
+    US: 300
+    UK: 200
+    EZ: 150
+    JP: 100
+    CA: 50
+    AU: 100
+    NORDIC: 50
+    CH: 32
+    KR: 56
+    IN: 46
+    HK: 39
+    TW: 25
+    SG: 9
+    EM_OTHER: 68
+  min_market_cap_usd: 1_000_000_000   # $1B floor
+
+scoring:
+  weights:
+    Q: 0.50   # Quality (ROIC, ROE, ROA, margins, FCF margin, –accruals)
+    M: 0.50   # Momentum (12-1, 6m, risk-adj, dist-52w-high, SMA200 trend)
+  neutrality: "sector_neutral"          # alternatives: raw, country_neutral, region_neutral
+  quality_floor:
+    min_roic: 0.04
+    require_positive_fcf_ttm: true
+    max_net_debt_ebitda: 6.0
+    min_mkt_cap_usd: 1_000_000_000
+
+portfolio:
+  top_n: 50
+  per_country_cap: 10
+  weighting: "equal"             # 2% per position before overlay
+  rebalance_months: 3            # quarterly: Mar/Jun/Sep/Dec first business day
+  drift_rebalance_threshold: 0.05 # if any holding drifts > 5pp from target, rebalance
+
+overlay:
+  type: "vol_target_x_multi_asset_trend"
+  target_vol_annual: 0.10
+  vol_lookback_days: 60
+  trend_sma_days: 200
+  trend_assets: ["URTH", "EEM"]    # MSCI World + MSCI Emerging Markets
+  trend_n_required_off: 2          # OFF only when BOTH below SMA
+  flip_cost_bps: 3.0               # cost per 100% exposure change
+
+costs:
+  base_one_way_bps: 10.0           # commission + slippage estimate
+  country_buy_taxes_bps:           # paid on BUY side, one-time
+    GB: 50    # UK stamp duty 0.5%
+    FR: 30    # French FTT
+    IT: 10    # Italian FTT
+    KR: 18    # Korea transaction tax
+    TW: 30
+    FI: 150   # Finland transfer tax — structural, very heavy
+    GR: 20
+    ZA: 25
+    IN: 25
+    BR: 30
+  fx_conversion_bps: 20            # IBKR FX conversion cost
+  dividend_withholding_pct: 0.15   # effective WHT for non-treaty cases
+
+acceptance_gates:
+  oos_sharpe_min: 0.80              # clean-PIT
+  oos_sharpe_biased_min: 1.10       # biased (yfinance current-snapshot) haircut
+  oos_calmar_min: 0.60
+  max_dd_max: 0.25
+  top10_stock_share_max: 0.35
+  top_country_share_max: 0.40
+  top_sector_share_max: 0.40
+
+halting_rules:
+  rolling_18m_sharpe_min: 0.50      # hard kill
+  rolling_12m_mdd_max: 0.20         # hard kill
+  single_day_loss_max: 0.05         # hard kill — sanity check
+  forward_drift_2sigma_consec_months: 2  # soft pause / investigate

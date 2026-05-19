@@ -1,0 +1,48 @@
+# yfinance ticker suffix → IBKR exchange + currency
+#
+# UPDATED 2026-05-15: switched to SMART as primary for all non-US exchanges to
+# avoid IBKR Error 10311 ("This order will be directly routed to X. Direct routed
+# orders may result in higher trade fees. Restriction is specified in Precautionary
+# Settings of Global Configuration/API"). SMART lets IBKR's smart router pick the
+# venue and does not trigger the precaution.
+#
+# The previous direct-exchange routes (LSE, EBS, B3, KRX, etc.) are retained as
+# fallbacks for tickers SMART can't resolve. The currency is unchanged.
+
+primary_map:
+  ".KS":  {exchange: "SMART", currency: "KRW", fallbacks: ["KRX", "KSE"]}
+  ".T":   {exchange: "SMART", currency: "JPY", fallbacks: ["TSEJ"]}
+  ".L":   {exchange: "SMART", currency: "GBP", fallbacks: ["LSE", "LSEIOB"]}
+  ".SA":  {exchange: "SMART", currency: "BRL", fallbacks: ["B3", "BVMF", "BOVESPA", "BMF"]}
+  ".AX":  {exchange: "SMART", currency: "AUD", fallbacks: ["ASX"]}
+  ".NS":  {exchange: "SMART", currency: "INR", fallbacks: ["NSE"]}
+  ".SW":  {exchange: "SMART", currency: "CHF", fallbacks: ["EBS"]}
+  ".SI":  {exchange: "SMART", currency: "SGD", fallbacks: ["SGX"]}
+  ".HE":  {exchange: "SMART", currency: "EUR", fallbacks: ["HEX", "HEX_OMX", "OMX"]}
+  ".PA":  {exchange: "SMART", currency: "EUR", fallbacks: ["SBF"]}
+  ".DE":  {exchange: "SMART", currency: "EUR", fallbacks: ["IBIS"]}
+  ".MI":  {exchange: "SMART", currency: "EUR", fallbacks: ["BVME"]}
+  ".MC":  {exchange: "SMART", currency: "EUR", fallbacks: ["BM"]}
+  ".AS":  {exchange: "SMART", currency: "EUR", fallbacks: ["AEB"]}
+  ".TO":  {exchange: "SMART", currency: "CAD", fallbacks: ["TSE", "VENTURE"]}
+  ".CO":  {exchange: "SMART", currency: "DKK", fallbacks: ["CPH"]}
+  ".ST":  {exchange: "SMART", currency: "SEK", fallbacks: ["SFB"]}
+  ".BR":  {exchange: "SMART", currency: "EUR", fallbacks: ["ENEXT.BE"]}
+  ".HK":  {exchange: "SMART", currency: "HKD", fallbacks: ["SEHK"]}
+  ".JO":  {exchange: "SMART", currency: "ZAR", fallbacks: ["JSE"]}
+  # Added 2026-05-15 (full-universe IBKR validation): suffixes that were absent
+  # from the original top-50 map and were falsely blocked. Currency + venue
+  # confirmed via read-only reqContractDetails.
+  ".TW":  {exchange: "SMART", currency: "TWD", fallbacks: ["TWSE"]}          # Taiwan — TWSE
+  ".IR":  {exchange: "SMART", currency: "EUR", fallbacks: ["ISED", "ISE"]}   # Ireland — Euronext Dublin
+  ".VI":  {exchange: "SMART", currency: "EUR", fallbacks: ["VSE"]}           # Austria — Wiener Boerse
+  ".LS":  {exchange: "SMART", currency: "EUR", fallbacks: ["BVL"]}           # Portugal — Euronext Lisbon
+
+default:
+  exchange: "SMART"
+  currency: "USD"
+
+# UK and JSE quotes are in MINOR units (pence, cents). Auto-divide by 100 when USD-implied price > $500.
+minor_unit_currencies: ["GBp", "ZAc"]
+minor_unit_suffixes: [".L", ".JO"]
+minor_unit_usd_threshold: 500.0
