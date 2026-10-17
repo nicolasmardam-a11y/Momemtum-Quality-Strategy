@@ -1,5 +1,7 @@
 # GRIMDRIP and endlessFate: wallet reconstruction (as of 2026-10-17)
 
+> Reviewed adversarially on 2026-10-17 (`analyses/wallets/review_0[1-5]_*.py`). Fills, fees, redemptions, realised P&L, screens, event grouping and null probabilities were re-derived independently from raw /v2 data and match to the cent. Corrections are marked [corrected by reviewer]. Consolidated view: `WALLETS.md`.
+
 Wallets: **GRIMDRIP** `0x3f87d51f27ba6e19ec52aaeebb68559a839c742c`, **endlessFate** `0x5e4c3b5b81171e2ca4ab776ac0d6bba787f9dba2`.
 Comparison wallet: **mintblade** `0x96cfcb0c30942cfcd1cdf76c7d408794d66b1acb`. Co-trader found in the tapes: **LEEEROYJENKINS**
 `0x99aea8f9a64d0142b6b66a4b9d02a2211d45386f`.
@@ -17,7 +19,7 @@ Labels: **VERIFIED** = I inspected the primary data myself; **PLAUSIBLE** = cons
    - endlessFate won 4 of 7 matches; the null expectation is 3.84. (VERIFIED computation; the null model is stated below.)
 4. **No leading-information signature in the price data.**
    - All entries but one were pre-match, in the last ~70 minutes before kick-off. The exception is endlessFate's Canada–Bosnia entry at half-time, after a public goal.
-   - Prices barely moved after the entries. Closing-line value is about 0 to +5c, and every large later move coincides with a publicly reported goal.
+   - Prices barely moved after the entries. Closing-line value is about 0 to +5c [corrected by reviewer: the §5 table gives **−1 to +2.5c** (last trade by others before KO); with the `/prices-history` close (copyability.md) the range is −0.5 to +4.5c], and every large later move coincides with a publicly reported goal.
    - The wallets **were** most of the taker flow in their own windows (70-100%), so they set the price rather than front-ran it. (VERIFIED for the price/tape facts; "no leading information" is PLAUSIBLE, since absence of a signature is not proof.)
 5. **Copying is not demonstrably profitable ex ante.**
    - Ex post, a follower lagging by 1-15 minutes would have matched the wallets' returns on these specific matches, because prices did not move pre-match.
@@ -168,6 +170,8 @@ Economically overlapping legs:
 
 No episode is post-outcome-known; every fill precedes the first goal of its match except CAN-BIH (see section 5). (VERIFIED against the tape and public reports)
 
+[corrected by reviewer] Order creation times from the signed V2 Order structs (`review_03_order_times.py`; VERIFIED) refine the GRIMDRIP kick-off fills. Its single resting bid (2,000,000 Czechia-No shares at 0.50, signed 15:55:47) filled 14% between 15:55:53 and **16:00:01** and then stopped. Its final taker order was **signed at 16:00:12.5**, after the scheduled kick-off, and filled at 16:00:16. So the last ~$10k was a new in-play order in the first seconds of the match, still before Czechia's 6' goal. endlessFate's Colombia maker fills came from one resting 3.2M-share bid at 0.74 signed 01:38:43 (21% filled by 01:52:55, KO 02:00).
+
 Max capital (`ge_capital.parquet`):
 
 | wallet | peak cost of unresolved positions | peak cumulative net cash outlay | realised P&L / peak open cost |
@@ -246,6 +250,7 @@ Match timelines (public reports; minute-to-UTC mapping approximate, about +/-3 m
   - GRIMDRIP deposited $7.22M from 14:48 to 15:28, began trading at 15:23, then deposited $2.30M from 15:54 to 16:00.
 - **Assessment.**
   - Coordinated or related activity among these four accounts is **PLAUSIBLE**. Evidence: sequential hand-offs within 22-176 s on identical legs, paired account creations, a matching deposit day and amount, and adjacent withdraw/deposit windows.
+  - [corrected by reviewer] **Mirrored orders, VERIFIED (`review_05_mirrored_orders.py`).** On Belgium-win Yes, endlessFate, LEEEROYJENKINS and FlickRaw each signed an order for exactly **6,313 shares at 0.66 ($4,166.58)** at 18:50:06.183, 18:50:06.577 and 18:50:07.738 UTC. Each then signed an order for exactly **12,626 shares at 0.66 ($8,333.16)** at 18:50:39.695, 18:50:40.502 and 18:50:41.742. These are not round-dollar sizes; they are 1/3 and 2/3 of $12,500. Every one of these orders was signed before the first fill of its batch was mined (blocks 88,562,949/950 and 88,562,971/972), so no follower using public data could have copied it. For endlessFate and LEEEROYJENKINS the coordination is therefore **VERIFIED** rather than PLAUSIBLE: one controller, or one automated instruction, drove three separately keyed accounts. It is still not proof of common beneficial ownership. A systematic search over all fills of the 5 accounts (same token, size and price within 5 s) finds no other mirrors, and none that involve mintblade or GRIMDRIP.
   - **Common ownership is UNSUPPORTED.** Each wallet uses its own deposit address (GRIMDRIP `0x6e39…d17d`, endlessFate `0x8599…8945`, mintblade `0xb4c3…3a41`, LEEEROY `0xb227…f69a`). All of them are funded through the same high-volume hot wallet `0xf70d…dbef` (nonce 3.26M), which is bridge/relayer infrastructure.
   - **Update 2026-10-17 (see `linkage.md`):** this verdict was reached before the Relay withdrawals were followed off Polygon. All three wallets' withdrawals end, directly or through one single-purpose hop, in two Etherscan-tagged *Binance Deposit* addresses: `0xb08b…317d` received from all three and `0x3319…b072` from mintblade and endlessFate. The link is now classed **STRONG PROBABILISTIC** (common destination account, not a shared key).
   - All withdrawals go to the same depository contract `0x4cd0…bc31`, which emits only an opaque bridge ID.
@@ -325,6 +330,9 @@ Receipts for all 198 deposit/withdrawal transactions of the three wallets were d
 
 ## 10. Is following profitable?
 
+> Pointer (2026-10-17): a print-based follower reconstruction with delays of 5 s to hourly, $500–$10k sizes, fees and a zero-edge null is in `copyability.md`. It supersedes the ex-post copy test here.
+
+- [corrected by reviewer] **Point-in-time selection (VERIFIED, `review_04_pit_screen.py`):** at the time of every one of its entries, none of the three wallets passed either screen under any counting rule. GRIMDRIP had no resolved history at all. endlessFate had 0–8 resolved markets including losses, and was −$1.57M realised before its KSA-URY entries. mintblade had only the $4.81 Mets ticket. mintblade passes (per market) only after its final market resolved (06-16 03:22 UTC), and it never traded again. A follower using the user's screens would have copied **zero** of these trades. The ex-post copy results below assume the wallets were known in advance.
 - **Ex post:** an equal-weight follower entering 1, 5 or 15 minutes after each wallet's first or last fill would have earned about the wallets' own returns on these matches (`ge_copy_lag.parquet`):
   - GRIMDRIP: about +170-180% per $ on 2 legs
   - endlessFate: about +64-70% mean per $ over 14 market-episodes

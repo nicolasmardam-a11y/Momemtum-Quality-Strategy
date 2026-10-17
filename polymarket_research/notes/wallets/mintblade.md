@@ -1,5 +1,7 @@
 # mintblade (0x96cfcb0c30942cfcd1cdf76c7d408794d66b1acb): full reconstruction
 
+> Reviewed adversarially on 2026-10-17 (`analyses/wallets/review_0[1-5]_*.py`). Fills, fees ($127,397.56), redemptions, realised P&L ($9,109,604.79), screens, event grouping, null probabilities and peak capital ($7,982,923) were re-derived independently from raw /v2 data and confirmed. Corrections are marked [corrected by reviewer]. Consolidated view: `WALLETS.md`.
+
 As of 2026-10-17. All data are read-only public pulls; raw payloads are under `data/raw/` (provenance by `pmr.http`).
 Labels: **VERIFIED** = checked in primary data, **PLAUSIBLE** = consistent with the evidence but not proven, **UNSUPPORTED** = no support.
 
@@ -123,6 +125,7 @@ They were bought within one 5-minute window (21:54:45–22:00:01). P&L by state,
   - The wallet bought from 00:17:22 to 01:04:03.
   - From 00:17 to 00:58 it placed taker fills of round dollar amounts (Iran: $10k ×64, $50k ×24, $100k ×8, $200k ×5, $500k ×2, plus a few odd sizes up to $851k; Saudi–Uruguay showed the same pattern). They stepped the price from 0.47 to 0.48, 0.49 and 0.50. This is consistent with "buy $X" market orders (PLAUSIBLE).
   - From 00:59:24 to 01:03:48 it rested a **No bid at 0.50**, filled 561 times (486,732 shares) by 213 takers.
+    - [corrected by reviewer] Order-level decode of the signed V2 Order structs (`review_03_order_times.py`, `review_order_times.parquet`; VERIFIED): this was **five successive 500,000-share No bids at 0.50**, not one bid. They were signed at 00:59:09.7, 00:59:27.5, 00:59:41.7, **01:01:13.2 and 01:01:52.1** UTC and filled 36%, 7%, 1%, 53% and 0.2%; each stopped filling while partly unfilled (cancel-and-replace). Two of them were therefore signed *after* the scheduled 01:00 kick-off. The final 200k-share taker order was signed at **01:04:00.2** (filled 01:04:03). So the wallet was still making new decisions after the scheduled kick-off; whether these were before the actual kick-off depends on the inferred ~01:04 start (PLAUSIBLE). Taker orders across all three wallets were signed a median 2.5 s (IQR 2.1–2.9 s) before their fill block.
   - One last 200k-share taker fill came at 01:04:03.
   - No goal, card or other match event preceded any fill. The first goal (NZ, 01:10:33) came 6.5 minutes after the last fill and moved Iran-No from about 0.48 to 0.70.
   - Public pre-match news (Al Jazeera, 2026-06-15): injury doubts for Eckert, Jahanbakhsh and Torabi; 11 Iranian federation members denied visas; the squad arriving on match day. All of this was public before the entries. Line-ups are typically published about 1 h before KO; I did not verify the exact release time. Nothing in the public timeline I found is specific to 00:17–01:04.
@@ -175,6 +178,7 @@ Price impact per leg (others' taker VWAP, `mintblade_impact.parquet`):
   - All three withdraw through the same platform path: pUSD burned, USDC.e from 0xc417…9db1, then out to contract 0x4cd00e38…bc31. That is shared infrastructure.
   - First-hop deposit sources differ: mintblade 0xb4c3…3a41, GRIMDRIP 0x6e39…d17d. Both are EIP-7702-delegated EOAs pointing to the same delegate implementation, which is common tooling.
   - Amounts do not match one-to-one. A shared bridge, relayer or style is **not** proof of common ownership. **UNSUPPORTED** as an ownership claim.
+  - [corrected by reviewer] See `WALLETS.md` §4: the reviewer found synchronized identical Belgium orders in endlessFate, LEEEROYJENKINS and FlickRaw (signed 0.4–2.1 s apart, before any of them was mined). mintblade and GRIMDRIP have no such mirrored orders with any of these accounts (`review_05_mirrored_orders.py`).
   - **Update 2026-10-17 (see `linkage.md`):** this verdict was reached before the Relay withdrawals were followed off Polygon. All three wallets' withdrawals end, directly or through one single-purpose hop, in two Etherscan-tagged *Binance Deposit* addresses: `0xb08b…317d` received from all three and `0x3319…b072` from mintblade and endlessFate. The link is now classed **STRONG PROBABILISTIC** (common destination account, not a shared key).
 - **Funding (VERIFIED).**
   - 55 pUSD mints to the wallet total $9,352,937, of which $9,352,922 came via 0xb4c3…3a41.
@@ -207,7 +211,7 @@ Price impact per leg (others' taker VWAP, `mintblade_impact.parquet`):
 
    The naive product overstates the significance by about 4× because the three Saudi–Uruguay legs are one bet.
 
-2. **Size ≠ skill.** The $9.1M depends almost entirely on Iran. P(P&L > 0) = 0.489 and P(P&L ≥ $9.11M) = 0.116 under the null, with an expected P&L of −$155k.
+2. **Size ≠ skill.** The $9.1M depends almost entirely on Iran. P(P&L > 0) = 0.489 and P(P&L ≥ $9.11M) = 0.116 under the null, with an expected P&L of −$155k. [corrected by reviewer] Strictly, P&L ≥ the realised $9,109,605 also needs the $4.81 Mets leg (without it the total is $9,109,600), so P = 0.96 × 0.236 × 0.489 = **0.111** with these CLOB probabilities, or **0.113** with entry VWAPs as probabilities (`review_02_screens_null_capital.py`). The −$155k expected P&L uses CLOB mids; with entry VWAPs as probabilities the null mean is −$127,398, i.e. minus the fees.
 
 3. **Selection.** A wallet is surfaced *because* it won big (leaderboard or biggest-winner lists), so the posterior has to account for the many similar wallets that lost and are not shown. In these two matches alone, 490 distinct wallets took Iran-No and 542 took Uruguay-No as takers before kick-off in the pulled tape windows. Every one of them "won".
 
@@ -225,6 +229,8 @@ Price impact per leg (others' taker VWAP, `mintblade_impact.parquet`):
 5. **Two real decisions** cannot support an estimate of edge. A binomial 2/2 is consistent with any win rate from about 0.16 to 1 (95% Clopper–Pearson lower bound ≈ 0.16).
 
 ## 11. Copy-trading implications (PLAUSIBLE; no backtest run here)
+
+> Pointer (2026-10-17): a print-based follower reconstruction with delays of 5 s to hourly, $500–$10k sizes, fees and a zero-edge null is in `copyability.md`. It supersedes the ex-post copy test here.
 
 - The edge, if any, sits in a few minutes before kick-off, and the wallet itself moves the price by 1–3c.
 - A follower polling `/v2/activity` would see the first fill only after it printed. They would pay at least the post-impact price (Iran 0.48–0.50, Uruguay-No 0.36–0.37) plus a 0.03·p(1−p) taker fee, and would carry the same coin-flip variance.

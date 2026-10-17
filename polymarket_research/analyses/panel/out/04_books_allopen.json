@@ -1,0 +1,11 @@
+{
+ "mirror": {
+  "n": 150,
+  "bid0_eq_1_minus_ask1": 1.0,
+  "ask0_eq_1_minus_bid1": 0.9733333333333334
+ },
+ "n_candidates": 283806,
+ "n_selected": 2384,
+ "snapshot_utc": "2026-10-17T22:51:03.593262+00:00",
+ "fresh_markets": 25000
+}

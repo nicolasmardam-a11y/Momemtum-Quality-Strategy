@@ -34,9 +34,13 @@ SCENARIOS = {"latency_0.25s_no_delay": (0.25, False), "latency_0.25s_plus_delay"
              "latency_1s_plus_delay": (1.0, True)}
 
 
-def load_universe():
-    uv = max(D.glob("universe_v*.parquet"), key=lambda p: int(re.search(r"universe_v(\d+)", p.name).group(1)))
-    u = pd.read_parquet(uv)
+def load_universe(window: str | None = None):
+    """Union of the universe snapshots of one collection window (w1: v1-v99, w2: v100+), latest row per market,
+    so markets that closed later in the window (e.g. finished matches) are still known to the replay."""
+    fs = sorted(D.glob("universe_v*.parquet"), key=lambda p: int(re.search(r"universe_v(\d+)", p.name).group(1)))
+    if window is not None:
+        fs = [f for f in fs if (int(re.search(r"universe_v(\d+)", f.name).group(1)) >= 100) == (window == "w2")]
+    u = pd.concat([x[x.negRisk & x.nr_id.notna()] for x in (pd.read_parquet(f) for f in fs)]).drop_duplicates("market_id", keep="last")
     u["tokens"] = u["tokens"].map(json.loads)
     return u[u.negRisk & u.nr_id.notna()]
 
@@ -201,10 +205,13 @@ def replay(files, u):
 
 
 def main():
-    u = load_universe()
+    us = {}
     allr = []
     for run, files in sorted(run_files().items()):
-        r = replay(files, u)
+        w = "w1" if int(run.split("_")[1][:2]) < 20 else "w2"  # window 1 ran 15:17-16:21 UTC, window 2 from 21:28 UTC
+        if w not in us:
+            us[w] = load_universe(w)
+        r = replay(files, us[w])
         for x in r:
             x["run"] = run
         allr += r

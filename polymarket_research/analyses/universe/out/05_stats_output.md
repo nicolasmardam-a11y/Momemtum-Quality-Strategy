@@ -250,7 +250,7 @@ umaResolutionStatus counts:
 | None | 50 |
 | disputed | 2 |
 
-## Dispute incidence by quarter (has_disputed = 'disputed' in umaResolutionStatuses; multi_proposal = >1 'proposed')
+## Dispute incidence by quarter (has_disputed = 'disputed' in umaResolutionStatuses; multi_proposal = >1 proposal round, i.e. runs of consecutive 'proposed')
 
 | end_quarter | markets | has_disputed | multi_proposal | dispute_flag_broad |
 |---|---|---|---|---|

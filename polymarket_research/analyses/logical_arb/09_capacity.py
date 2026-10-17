@@ -18,7 +18,8 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 TAG, BOOKS, EIDS = sys.argv[1], sys.argv[2], sys.argv[3:]
-K = {"531533": 5, "801515": 2, "904908": 3, "1188161": 5, "956300": 2, "904911": 3, "1188310": 5, "1188311": 5}
+K = {"531533": 5, "801515": 2, "904908": 3, "1188161": 5, "956300": 2, "904911": 3, "1188310": 5, "1188311": 5,
+     "811116": 5, "811117": 3, "1189431": 2}
 CAPS = [5_000, 25_000, 100_000]
 M = pd.read_parquet(ROOT / "data" / "derived" / f"la_markets_{TAG}.parquet",
                     columns=["id", "event_id", "fee_rate", "fee_exponent", "feesEnabled", "acceptingOrders", "outcomes"])

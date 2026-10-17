@@ -1,5 +1,7 @@
 # Linkage: mintblade, GRIMDRIP and endlessFate (as of 2026-10-17)
 
+> Reviewed adversarially on 2026-10-17 (`analyses/wallets/review_0[1-5]_*.py`). Four changes, marked [corrected by reviewer]. (1) Peak capital in §0 and §8 was overstated: each market's *final* cost was counted from its first fill. (2) Scenario (b) is not an evidence-consistent grouping. (3) New VERIFIED evidence: identical Belgium orders signed within 0.4–2.1 s by endlessFate, LEEEROYJENKINS and FlickRaw. (4) The A/B Etherscan tags were re-fetched and confirmed. No key-level link exists. Consolidated view: `WALLETS.md`.
+
 Wallets (Polymarket proxy = V2 Deposit Wallet addresses): mintblade `0x96cf…1acb`, GRIMDRIP `0x3f87…742c`, endlessFate `0x5e4c…dba2`.
 Scripts: `analyses/wallets/linkage_01…11*.py` (plus `linkage_04b`). Data: `data/derived/linkage_*.parquet`. All raw RPC / API
 responses are stored with provenance under `data/raw/` (sources `polygon*`, `ethereum-tenderly`, `bsc*`, `relay`, `gamma`,
@@ -24,8 +26,9 @@ inferred from behaviour alone unless marked PLAUSIBLE. Nothing here identifies, 
 - **Screens by scenario (Section 8):**
   - (a) Independent wallets: only mintblade passes, and only when counting per market (5/5). It fails per event (3 events).
   - (b) mintblade + GRIMDRIP as one entity: 7 market decisions, all won, over 4 events. It passes "≥5, no losses" per market, fails "exactly 5", and fails both rules per event.
+    - [corrected by reviewer] (b) is not a credible grouping on this evidence. endlessFate is tied to mintblade at least as strongly as GRIMDRIP is: both A and B, plus the shared match. Any grouping supported by the funds evidence that contains mintblade and GRIMDRIP also contains endlessFate, which brings in its 3 losses, and that grouping fails every screen.
   - (c) All three as one entity: 13 market decisions (10 won) over 10 events (7 made money). It fails every screen.
-  - Under (c), the realised P&L is $23.87M on a cluster peak capital of $12.07M.
+  - Under (c), the realised P&L is $23.87M on a cluster peak capital of $12.07M [corrected by reviewer: **$10.53M**, reached at 06-16 01:04:03, the time of mintblade's last Iran fill. See §8].
   - (d) The extended book (11 accounts) nets **+$14.9M**, because four of its accounts lost $15.0M.
 
 ## 1. Wallet type and controller (VERIFIED; `linkage_01_wallet_type.py`, `linkage_wallet_controllers.parquet`, `linkage_batch_signers.parquet`)
@@ -193,6 +196,7 @@ Sources: `/v2/user-stats` and `/v2/trades` (VERIFIED, pulled 2026-10-17) and Gam
   - mintblade–endlessFate is one of the 16 (35 min). Unusual, but not extreme.
 - **Round-number taker orders (B3).** 95% (mintblade), 95% (GRIMDRIP) and 87% (endlessFate) of taker orders of $1k or more are within $1 of a $1,000 multiple. That is true of only 8 of 69 large takers (11.6%). This is consistent with amount-based market orders, which many UI and API users place, so it is weak to moderate.
 - **Test tickets.** mintblade and FlickRaw each bought exactly 5 Mets shares at 0.96 ($4.80) on 2026-06-03, 73 s apart. Within ±2 min only 3 wallets placed any 5-share buy in that market (±10 min: 5 wallets bought Mets 5@0.96). Moderately suggestive.
+- [corrected by reviewer] **Mirrored orders (VERIFIED, `review_05_mirrored_orders.py`, `review_mirrored_orders.parquet`).** endlessFate, LEEEROYJENKINS and FlickRaw each signed an order for 6,313 Belgium-Yes shares at 0.66 ($4,166.58) within 1.56 s (18:50:06.183 / 06.577 / 07.738 UTC). They then each signed an order for 12,626 shares at 0.66 ($8,333.16) within 2.05 s (18:50:39.695 / 40.502 / 41.742). All of these orders were signed before the first fill of each batch was mined, so this cannot be public-data copy trading. The sizes are not round dollars. A systematic search of all fills of the 5 accounts finds no other mirrors, and none involving mintblade or GRIMDRIP. This is the only trading-level evidence of common control in the cluster. It links endlessFate–LEEEROYJENKINS–FlickRaw directly. It does not link mintblade or GRIMDRIP at the trading level.
 - **Complementary hedges across wallets:** none within the 13 markets. Every cluster member present (incl. FlickRaw and LEEEROYJENKINS) is on the **same** side, e.g. Belgium Yes for endlessFate, FlickRaw and LEEEROY. Hedges in other markets were not tested.
 
 ## 7. Link classification and remaining alternatives
@@ -206,6 +210,7 @@ Sources: `/v2/user-stats` and `/v2/trades` (VERIFIED, pulled 2026-10-17) and Gam
 | profile creation 14 min apart; FlickRaw 8.6 min later | WEAK alone; supportive in context | 0.05% of large-trader pairs | ~160 accounts created per 14 min platform-wide |
 | KSA-URY same 3 legs (mintblade, endlessFate) | WEAK–MODERATE | 25% of 3-leg large traders share it | public information / copy trading (mintblade later and at worse prices) |
 | identical $4.80 Mets ticket (mintblade, FlickRaw) | MODERATE | 2 of 3 five-share buyers within ±2 min | minimum-size test trades are common |
+| [reviewer] identical orders signed within 0.4–2.1 s (endlessFate, LEEEROYJENKINS, FlickRaw; Belgium, 2 tickets) | **STRONG** for common control or one instruction source (VERIFIED) | sizes not round, signed before any copy was possible | one automated tool or signal group operating several independent owners' accounts (still a common controller of the orders) |
 | withdrawal chunking ($100 test, $X99,999) | WEAK–MODERATE | same in all 3 and in the extended accounts | a habit that is easy to copy; base rate not measured |
 | same tx / trading against each other / hedges | NONE | 0 shared txs; no opposite sides | n/a |
 
@@ -219,11 +224,13 @@ Counting rules at cluster level:
 
 | scenario | market decisions (won) | events (made money) | "exactly 5, all won" market / event | "≥5, no losses" market / event | realised P&L | cluster peak capital | P&L / peak | null P(P&L ≥ obs) | null P(all events made money) |
 |---|---|---|---|---|---|---|---|---|---|
-| (a) mintblade | 5 (5) | 3 (3) | **pass** / fail | **pass** / fail | $9.11M | $8.65M | 1.05 | 0.113 | 0.172 |
+| (a) mintblade | 5 (5) | 3 (3) | **pass** / fail | **pass** / fail | $9.11M | $8.65M [corrected by reviewer: **$7.98M**] | 1.05 [**1.14**] | 0.113 | 0.172 |
 | (a) GRIMDRIP | 2 (2) | 1 (1) | fail / fail | fail / fail | $7.51M | $6.10M | 1.23 | 0.288 | 0.498 |
 | (a) endlessFate | 9 (6) | 7 (4) | fail / fail | fail / fail | $7.25M | $7.52M | 0.96 | 0.168 | 0.013 |
-| (b) mintblade + GRIMDRIP | 7 (7) | 4 (4) | fail / fail | **pass** / fail | $16.62M | $8.65M | 1.92 | 0.032 | 0.085 |
-| (c) all three | 13 (10), 3 shared | 10 (7) | fail / fail | fail / fail | $23.87M | $12.07M | 1.98 | 0.028 | 0.003 |
+| (b) mintblade + GRIMDRIP | 7 (7) | 4 (4) | fail / fail | **pass** / fail | $16.62M | $8.65M [**$7.98M**] | 1.92 [**2.08**] | 0.032 | 0.085 |
+| (c) all three | 13 (10), 3 shared | 10 (7) | fail / fail | fail / fail | $23.87M | $12.07M [**$10.53M**] | 1.98 [**2.27**] | 0.028 | 0.003 |
+
+[corrected by reviewer] `linkage_09_scenarios.py` evaluated, at each first-fill time, the *full final cost* of every market started but not yet resolved. At 00:17:22 on 06-16 it therefore counted all $7.14M of Iran plus the still-open KSA-URY spread legs (closed 00:35:48). Only a fraction of the Iran position existed at that moment. A fill-by-fill re-computation (`review_02_screens_null_capital.py`, `review_capital.parquet`) gives these peaks: mintblade $7,982,923 (as in mintblade.md), GRIMDRIP $6,096,723, endlessFate $7,516,421, and all three $10,526,430. The sum of the individual peaks is $21.60M (not $22.3M). The P&L, decision counts, screen results and null probabilities in this table were re-derived and confirmed.
 
 - **Sensitivity (drop stakes < $100, i.e. the $4.80 Mets ticket):**
   - (a) mintblade: 4 markets / 2 events, which fails both screens.
@@ -232,7 +239,7 @@ Counting rules at cluster level:
 - **What changes across scenarios:**
   - **Counting distinct decisions shrinks the evidence.** Under (c), mintblade's and endlessFate's Saudi Arabia–Uruguay positions are one decision. The cluster's real decisions are about 9 football events plus a test ticket, not 16 "markets".
   - **Under (b) the screen passes for the wrong reason.** Merging two wallets adds markets, but the four real events are 3 coin-flip-sized bets plus a test ticket.
-  - **P&L does not double count, but capital does.** The cluster's peak capital ($12.07M under (c)) is far below the sum of the wallets' peaks ($22.3M), because money was recycled through Binance between accounts (06-18). So per-wallet "ROI" understates the cluster's leverage of capital. Raw P&L is unchanged.
+  - **P&L does not double count, but capital does.** The cluster's peak capital ($12.07M under (c) [corrected by reviewer: $10.53M]) is far below the sum of the wallets' peaks ($22.3M [corrected by reviewer: $21.60M]), because money was recycled through Binance between accounts (06-18). So per-wallet "ROI" understates the cluster's leverage of capital. Raw P&L is unchanged.
   - **The null probabilities look smaller for the cluster, but selection worsens.** These three accounts were picked because they won, and the same funds evidence ties them to accounts that lost (Section 4).
   - Even taken at face value, P(P&L ≥ observed) of about 0.03 for a selected cluster is not evidence of edge. The three accounts are survivors chosen from a book that also contains FlickRaw, downtownfee, LEEEROYJENKINS and others.
 - **Scenario (d), extended cluster (membership PLAUSIBLE, not proven).** These are the 10 profiled accounts paying A, plus LEEEROYJENKINS via `0xbbfa`.
@@ -255,6 +262,7 @@ Counting rules at cluster level:
 
 ## 10. Uncertainties, data gaps, contradictions
 
+- [reviewer] Etherscan tags for A and B were re-fetched on 2026-10-17 and confirmed. Both pages show the name tag "Binance Deposit: 0x…", are funded by "Binance: Deposit Funder 1", and have 70 and 3 transactions. These are per-account deposit addresses, not shared hot wallets or bridge contracts. The Relay solver `0xf70d…` and depository `0x4cd0…` are shared bridge infrastructure, and no link above rests on them. The GRIMDRIP hop's token-transfer page also shows a later **$150 to a different Binance deposit address `0x9Dea58…2f5E74`** (2026-07-02), so "≈100% to A" stands. The `*:depsrc` rows of `linkage_relay_requests.parquet` contain unrelated requests (other recipients, dates before the accounts existed); no claim uses them.
 - **Labels.** "Binance Deposit", "Binance: Hot Wallet 34", "Binance 14", "Binance 51", "Binance: Withdrawals 7", "Kraken: Hot Wallet 4" and "Binance: Deposit Funder 1" are Etherscan public tags (BscScan returned 403). That one Binance deposit address equals one account is standard exchange practice but cannot be checked on-chain: PLAUSIBLE.
 - **BNB Chain coverage is partial** (narrow windows before each origin tx). B's sweep on BNB Chain was not found within 600 blocks.
 - **Ethereum window.** Blocks 25.13M–25.99M (2026-05-19 15:00Z to about 09-14). A was also checked back to block 25.03M: there is nothing before its $100 test on 05-19. The hops' and B's later history is covered to 09-14.

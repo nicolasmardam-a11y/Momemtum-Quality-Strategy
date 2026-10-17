@@ -1,0 +1,27 @@
+{
+ "n_side_rows": 6776,
+ "by_universe_round": {
+  "allopen_r2": 2126,
+  "vol10k_r2": 1262
+ },
+ "two_sided_share": {
+  "allopen": 0.796,
+  "vol10k": 0.836
+ },
+ "stability_r1_r2": {
+  "vol10k": {
+   "n": 1055,
+   "spearman_half_spread": 0.9830193868996486,
+   "median_abs_change_half_spread": 0.0,
+   "share_half_spread_unchanged": 0.8388625592417062,
+   "median_abs_change_mid": 0.0
+  },
+  "allopen": {
+   "n": 1688,
+   "spearman_half_spread": 0.974781209097704,
+   "median_abs_change_half_spread": 0.0,
+   "share_half_spread_unchanged": 0.7802132701421801,
+   "median_abs_change_mid": 0.0
+  }
+ }
+}

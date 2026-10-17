@@ -1,0 +1,24 @@
+{
+ "n_trades": 2316839,
+ "n_markets": 1484,
+ "by_split": {
+  "test": {
+   "n_trades": 1828523.0,
+   "eff_half_med": 0.005,
+   "eff_half_mean": 0.0175,
+   "eff_half_wmean": 0.0142
+  },
+  "train": {
+   "n_trades": 227573.0,
+   "eff_half_med": 0.005,
+   "eff_half_mean": 0.0066,
+   "eff_half_wmean": 0.0115
+  },
+  "validation": {
+   "n_trades": 260743.0,
+   "eff_half_med": 0.005,
+   "eff_half_mean": 0.0097,
+   "eff_half_wmean": 0.0081
+  }
+ }
+}

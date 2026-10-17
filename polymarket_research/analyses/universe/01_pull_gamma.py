@@ -4,6 +4,8 @@ Run from polymarket_research/ (resumable; finished windows are skipped, pages ar
     PMR_RATE_SCALE=2 python -m analyses.universe.01_pull_gamma markets
     PMR_RATE_SCALE=2 python -m analyses.universe.01_pull_gamma events
     PMR_RATE_SCALE=2 python -m analyses.universe.01_pull_gamma events_missing
+    PMR_RATE_SCALE=2 python analyses/universe/01_pull_gamma.py month_split markets 2026-08   (weekly windows; used for
+        2026-08 after a deterministic Cloudflare 403 on one monthly keyset cursor)
 
 Source: GET https://gamma-api.polymarket.com/markets/keyset?closed=true&include_tag=true
         &end_date_min=<window start>&end_date_max=<window end>&limit=100 (cursor: after_cursor)

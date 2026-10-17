@@ -133,7 +133,7 @@ def main() -> None:
     p(md(pd.crosstab(m["category"], m["resolution"], normalize="index").reindex(CATS), "{:.4f}"))
     p("\numaResolutionStatus counts:\n")
     p(md(m["umaResolutionStatus"].astype("string").fillna("None").value_counts().to_frame("markets")))
-    p("\n## Dispute incidence by quarter (has_disputed = 'disputed' in umaResolutionStatuses; multi_proposal = >1 'proposed')\n")
+    p("\n## Dispute incidence by quarter (has_disputed = 'disputed' in umaResolutionStatuses; multi_proposal = >1 proposal round, i.e. runs of consecutive 'proposed')\n")
     dq = m.groupby("end_quarter").agg(markets=("id", "size"), has_disputed=("has_disputed", "mean"),
                                       multi_proposal=("multi_proposal", "mean"), dispute_flag_broad=("dispute_flag", "mean"))
     p(md(dq, "{:.4f}"))

@@ -1,0 +1,99 @@
+{
+ "fetch": {
+  "requests": 22476,
+  "errors": 0,
+  "h60_points": 2918801,
+  "m1_points": 25664433
+ },
+ "coverage": {
+  "n_sample": 8000,
+  "h60_nonempty": 0.986625,
+  "m1_nonempty": 0.988375,
+  "res_T-1d_and_T-1h_priced": 0.811,
+  "by_split_both": {
+   "test": 0.7648,
+   "train": 0.8841,
+   "validation": 0.892
+  },
+  "res_priced_share_by_horizon": {
+   "T-12h": 0.9608,
+   "T-15m": 0.9882,
+   "T-1d": 0.811,
+   "T-1h": 0.9872,
+   "T-30d": 0.1514,
+   "T-3d": 0.5341,
+   "T-6h": 0.971,
+   "T-7d": 0.3621
+  }
+ },
+ "lookahead": {
+  "rows_obs_after_horizon": 0,
+  "rows_priced_after_close": 0
+ },
+ "fidelity": {
+  "n": 409692,
+  "same_minute_within_0.5c": 1.0,
+  "end_of_hour_within_0.5c": 0.7417254913447175,
+  "same_minute_exact": 1.0
+ },
+ "alignment": {
+  "n_markets": 1499,
+  "median_abs_gap_by_lag_s": {
+   "-600": 0.0050000000000000044,
+   "-300": 0.0050000000000000044,
+   "-120": 0.0050000000000000044,
+   "-60": 0.0050000000000000044,
+   "0": 0.0050000000000000044,
+   "60": 0.0050000000000000044,
+   "120": 0.0050000000000000044,
+   "300": 0.0050000000000000044,
+   "600": 0.0050000000000000044
+  },
+  "mean_abs_gap_by_lag_s (post hoc)": {
+   "-600": 0.015110647176904746,
+   "-300": 0.013648279188501894,
+   "-120": 0.012112985508703482,
+   "-60": 0.010909662802368702,
+   "0": 0.00998303521887103,
+   "60": 0.01177604066356976,
+   "120": 0.012982435578279843,
+   "300": 0.015901482921235346,
+   "600": 0.020231364576136925
+  },
+  "change_events (post hoc)": {
+   "n_markets": 1437,
+   "n_events": 520225,
+   "share_with_trade_in_prior_60s": 0.3557422269210438,
+   "share_with_trade_in_next_60s": 0.27157287712047673
+  }
+ },
+ "tapes": {
+  "markets": 1503,
+  "rows": 5663872,
+  "pages": 6435,
+  "errors": 0,
+  "truncated": 1,
+  "complete_share": 0.9993346640053227,
+  "empty_pages_with_more": 0,
+  "nonmonotone_steps": 0,
+  "dup_rows": 0,
+  "ratio_tape_notional_to_volumeNum_q": {
+   "0.1": 0.26,
+   "0.25": 0.408,
+   "0.5": 0.501,
+   "0.75": 0.555,
+   "0.9": 0.623
+  },
+  "nullvol_audit": {
+   "n": 100,
+   "with_trades": 5,
+   "tape_notional_ge_10k": 0,
+   "tape_notional_ge_10k_x_median_ratio": 0,
+   "notional_q": {
+    "0.5": 0.0,
+    "0.9": 0.0,
+    "0.99": 820.0
+   }
+  }
+ }
+}
