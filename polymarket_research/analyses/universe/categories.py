@@ -9,7 +9,8 @@ Two labels are produced:
 
 ``category`` = ``category_fee`` when feeType maps to a category, else ``category_rule``.
 
-Rule (first match wins, evaluated on the union of market tags and parent-event tags, all lower-cased):
+Rule (first match wins, evaluated on the market's own tag slugs as returned by Gamma /markets/keyset with
+include_tag=true, lower-cased; parent-event tags are not used; 454 of 4.15M markets have no tag):
   1. mentions    tag in MENTIONS_TAGS, or slug/question matches MENTIONS_RE
   2. sports      sportsMarketType present, or tag in SPORTS_TAGS, or slug starts with a league prefix
   3. crypto      tag in CRYPTO_TAGS, or slug matches CRYPTO_SLUG_RE

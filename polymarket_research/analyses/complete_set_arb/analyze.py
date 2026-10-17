@@ -30,12 +30,23 @@ PRE_FLAGS = {"not_tradable", "crossed_book", "seconds_delay", "game_started", "r
 RELAXED_FLAGS = PRE_FLAGS - {"stale_gt5min"}
 
 
+# Collection windows: w1 = scan ids 0-99 (2026-10-17 15:18-16:21 UTC), w2 = scan ids >= 100 (from 21:28 UTC).
+WINDOW = sys.argv[1] if len(sys.argv) > 1 else "all"
+SUFFIX = "" if WINDOW == "all" else f"_{WINDOW}"
+
+
+def in_window(scan_id: int) -> bool:
+    return WINDOW == "all" or (WINDOW == "w1" and scan_id < 100) or (WINDOW == "w2" and scan_id >= 100)
+
+
 def load(pattern):
     fs = sorted(glob.glob(str(D / pattern)))
     out = []
     for f in fs:
-        x = pd.read_parquet(f)
         m = re.search(r"(?:scan|cand)_(\d+)", Path(f).name)
+        if m and not in_window(int(m.group(1))):
+            continue
+        x = pd.read_parquet(f)
         if m and "scan_id" not in x:
             x["scan_id"] = int(m.group(1))
         out.append(x)
@@ -80,7 +91,7 @@ def main():
         summ = summ.join(bs)
     print("\nPer-scan summary (edge0 = top-of-book net edge per set after taker fees):")
     print(summ.round(4).to_string())
-    summ.reset_index().to_parquet(ROOT / "data" / "derived" / "complete_set_arb_scan_summary.parquet", index=False)
+    summ.reset_index().to_parquet(ROOT / "data" / "derived" / f"complete_set_arb_scan_summary{SUFFIX}.parquet", index=False)
 
     # mirror check (members)
     if len(members):
@@ -105,7 +116,7 @@ def main():
         print(f"distinct groups ever gross sum(bidYES) > 1: {gx.nr_id.nunique()}; of which ever net (d) > 0: "
               f"{gx[gx.d_edge0 > 0].nr_id.nunique()}; median gross excess {np.median(gx.sbid - 1) if len(gx) else float('nan'):.4f}, "
               f"median net edge {gx.d_edge0.median() if len(gx) else float('nan'):.4f}")
-        fb.reset_index().to_parquet(ROOT / "data" / "derived" / "complete_set_arb_feeband.parquet", index=False)
+        fb.reset_index().to_parquet(ROOT / "data" / "derived" / f"complete_set_arb_feeband{SUFFIX}.parquet", index=False)
 
     # ---------------------------------------------------------------- near-miss distribution of (d)
     print("\n(d)/(e) top-of-book edge distribution over all group-scans (n_trad>=2):")
@@ -153,7 +164,7 @@ def main():
             "exhaustive": bool(x.exhaustive.iloc[0]),
         })
     ev = pd.DataFrame(rows)
-    ev.to_parquet(ROOT / "data" / "derived" / "complete_set_arb_events.parquet", index=False)
+    ev.to_parquet(ROOT / "data" / "derived" / f"complete_set_arb_events{SUFFIX}.parquet", index=False)
     print(f"\nraw candidate observations: {len(cands)} (valid-type {len(v)}); distinct valid candidates: {len(ev)}")
     print("non-exhaustive (c) observations with positive edge (excluded):", int((~cands.valid_type & cands.pos).sum()),
           "distinct:", cands[~cands.valid_type & cands.pos].id.nunique())
@@ -182,6 +193,9 @@ def main():
 def ws_summary():
     """Websocket episodes: merge flickers of the same (group, type) separated by < 2 s into bursts."""
     eps = load("ws_episodes_*.parquet")
+    if len(eps) and WINDOW != "all":  # websocket runs 1-3 belong to window 1, runs 4-6 to window 2
+        rn = eps.run.str.extract(r"(\d+)")[0].astype(int)
+        eps = eps[(rn <= 3) if WINDOW == "w1" else (rn >= 4)]
     if not len(eps):
         print("no websocket episodes")
         return
@@ -215,7 +229,7 @@ def ws_summary():
             bursts.append(cur)
     b = pd.DataFrame(bursts)
     b["dur_s"] = (b.end_ms - b.start_ms) / 1000
-    b.to_parquet(ROOT / "data" / "derived" / "complete_set_arb_ws_bursts.parquet", index=False)
+    b.to_parquet(ROOT / "data" / "derived" / f"complete_set_arb_ws_bursts{SUFFIX}.parquet", index=False)
     print(f"\nWebsocket: {len(eps)} raw episodes -> {len(b)} bursts (flickers < 2 s apart merged); runs {sorted(eps.run.unique())}")
     print(b.groupby(["type", "inplay"]).agg(n=("gid", "size"), groups=("gid", "nunique"), med_dur=("dur_s", "median"),
                                             p90_dur=("dur_s", lambda s: s.quantile(.9)), max_dur=("dur_s", "max"),

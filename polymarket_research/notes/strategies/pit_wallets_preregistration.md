@@ -219,3 +219,24 @@ return or evaluation-window statistic existed.
   session was interrupted. No screen membership had been merged and no evaluation-window statistic existed.
   The rule was left as implemented, so all 256 buckets use one rule. The audit (`10_audit_sample.py`) uses the
   first-second rule, so any disagreement it finds includes this effect.
+- **A9 (2026-10-17T22:00Z, resumed session) cap on the every-BUY-fill export (secondary signal) because of a
+  CryptoHouse query quota.**
+  - Partway through the evaluation export, CryptoHouse rejected queries with `QUOTA_EXCEEDED`: "queries =
+    145/120 per 3600 s for user crypto". This is a quota of 120 queries per hour, shared by every agent on this
+    IP. It is not in CONTEXT.md.
+  - The every-fill export is very concentrated. In 2025-06, 10 of the 539 fill-export wallets with any buy hold
+    64% of the window's BUY fills; in 2024-07, 10 of 221 hold 91%. These are bot-like wallets with thousands of
+    buys a month, and their fills alone would need several hundred more queries.
+  - The secondary (every-fill) export is therefore capped. Per (selection date, wallet), it keeps the wallet's
+    first 1,000 BUY fills in the window by timestamp, plus every fill in the same second as the 1,000th. Those
+    wallets are flagged, and their total number of window buys is recorded.
+  - The same rule is applied locally to the months already exported without the cap, so every month uses one
+    rule.
+  - The primary signal (new decisions) is not capped.
+  - The decision export also drops fields that can be re-joined locally from `token_meta_pit` (condition,
+    event, payout, `t_res`, category). The first fill's order hash is dropped and its transaction hash is kept.
+    The per-day activity array is replaced by the server-side gap to the previous active day, which is the
+    F2 input.
+  - Months exported only in part (2024-10 and 2025-07) are re-exported whole in the new format.
+  - Decided only from export volume and the quota. No evaluation-window price, outcome or follower return had
+    been looked at.

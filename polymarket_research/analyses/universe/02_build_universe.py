@@ -60,7 +60,12 @@ SCHEMA_A = [
     ("settle_lag_h", F), ("settle_lag_game_h", F), ("duration_h", F), ("end_quarter", S), ("split", S),
     ("src_window", S),
 ]
-SCHEMA_B_EXTRA = [("event_n_markets_universe", I), ("structure", S)]
+SCHEMA_B_EXTRA = [("event_n_markets_universe", I), ("structure", S), ("cluster_id", S), ("cluster_source", S),
+                  ("cluster_week", S), ("n_proposal_rounds", I), ("dup_proposal_record", B), ("traded", B)]
+# Sports games are split over several Gamma events that share the slug stem up to the ISO date
+# (e.g. bra-cor1-cre-2026-07-23, ...-halftime-result, ...-more-markets, ...-player-props), so for sports
+# the leakage cluster is that stem; otherwise the parent event, then negRiskMarketID, then the market.
+GAME_STEM = r"^(.+?-\d{4}-\d{2}-\d{2})(?:-[a-z0-9-]+)?$"
 
 RENAME = {"conditionId": "condition_id", "questionID": "question_id"}
 EV_FIELDS = ["id", "slug", "title", "ticker", "negRisk", "negRiskMarketID", "enableNegRisk", "negRiskAugmented",
@@ -104,6 +109,24 @@ def parse_resolution(prices) -> tuple[str, int | None]:
     if all(x == 0.0 for x in p):
         return "all_zero", None
     return "unresolved_nonterminal", None
+
+
+def uma_flags(sts) -> tuple[int, bool]:
+    """(proposal rounds, consecutive duplicate 'proposed' records) from umaResolutionStatuses.
+
+    From 2026-08 the status history of most markets reads ['proposed', 'proposed'] (0.3% of markets ending
+    2026-07, 87% of those ending 2026-09) with no dispute and automatic resolution: a recording change,
+    not a re-proposal. A proposal round is therefore a run of consecutive 'proposed' entries; a real
+    second round needs an intervening status (in practice 'disputed')."""
+    rounds, dup, prev = 0, False, None
+    for x in sts if sts is not None else []:
+        if x == "proposed":
+            if prev == "proposed":
+                dup = True
+            else:
+                rounds += 1
+        prev = x
+    return rounds, dup
 
 
 def build_part(rows: list[dict], label: str) -> pa.Table:
@@ -152,7 +175,7 @@ def build_part(rows: list[dict], label: str) -> pa.Table:
     d["n_proposed"] = [s.count("proposed") for s in sts]
     d["n_disputed"] = [s.count("disputed") for s in sts]
     d["has_disputed"] = [nd > 0 or u == "disputed" for nd, u in zip(d["n_disputed"], d["umaResolutionStatus"])]
-    d["multi_proposal"] = [n > 1 for n in d["n_proposed"]]
+    d["multi_proposal"] = [uma_flags(x)[0] > 1 for x in sts]
     d["dispute_flag"] = [a or b for a, b in zip(d["has_disputed"], d["multi_proposal"])]
     # fees
     fsl = []
@@ -260,6 +283,26 @@ def stage_b() -> dict:
         df["event_n_markets_universe"] = en.astype("Int64")
         df["structure"] = np.select([df["negRisk"].astype(bool), en.fillna(1).gt(1)],
                                     ["neg_risk", "binary_grouped"], "binary_standalone")
+        uf = [uma_flags(x) for x in df["umaResolutionStatuses"]]
+        df["n_proposal_rounds"] = [a for a, _ in uf]
+        df["dup_proposal_record"] = [b for _, b in uf]
+        df["multi_proposal"] = df["n_proposal_rounds"] > 1   # overrides stage-A raw count (> 1 'proposed')
+        df["dispute_flag"] = df["has_disputed"].astype(bool) | df["multi_proposal"]
+        # Trading proxy. Gamma volumeNum is NULL for 43% of markets, and NULL does not mean untraded: /v2/trades
+        # samples (2026-10-17) found trades in 20/25 null-volume crypto and 22/25 null-volume non-sports
+        # non-crypto markets, and in 25/25 null-volume markets that carry a lastTradePrice. Among markets with
+        # both fields null, trades were found in 9/30 crypto, 1/30 sports, 0/30 other; volumeNum == 0: 0/30.
+        df["traded"] = df["volumeNum"].fillna(0).gt(0) | df["lastTradePrice"].notna()
+        stem = df["event_slug"].str.extract(GAME_STEM, expand=False)
+        is_game = df["category"].eq("sports") & stem.notna()
+        has_ev, has_nr = df["event_id"].notna(), df["negRiskMarketID"].notna()
+        df["cluster_source"] = np.select([is_game, has_ev, has_nr], ["sports_game_stem", "event_id", "negRiskMarketID"],
+                                         "condition_id")
+        df["cluster_id"] = np.select([is_game, has_ev, has_nr],
+                                     ["g:" + stem.fillna(""), "e:" + df["event_id"].fillna(""),
+                                      "n:" + df["negRiskMarketID"].fillna("")], "c:" + df["condition_id"].fillna(""))
+        iso = df["endDate"].dt.isocalendar()
+        df["cluster_week"] = iso["year"].astype(str) + "-W" + iso["week"].astype(str).str.zfill(2)
         writer.write_table(pa.Table.from_pandas(df, schema=schema, preserve_index=False))
     writer.close()
     print("markets_resolved rows", stats["final_rows"], flush=True)

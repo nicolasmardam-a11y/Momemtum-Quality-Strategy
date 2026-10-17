@@ -247,6 +247,7 @@ Match timelines (public reports; minute-to-UTC mapping approximate, about +/-3 m
 - **Assessment.**
   - Coordinated or related activity among these four accounts is **PLAUSIBLE**. Evidence: sequential hand-offs within 22-176 s on identical legs, paired account creations, a matching deposit day and amount, and adjacent withdraw/deposit windows.
   - **Common ownership is UNSUPPORTED.** Each wallet uses its own deposit address (GRIMDRIP `0x6e39…d17d`, endlessFate `0x8599…8945`, mintblade `0xb4c3…3a41`, LEEEROY `0xb227…f69a`). All of them are funded through the same high-volume hot wallet `0xf70d…dbef` (nonce 3.26M), which is bridge/relayer infrastructure.
+  - **Update 2026-10-17 (see `linkage.md`):** this verdict was reached before the Relay withdrawals were followed off Polygon. All three wallets' withdrawals end, directly or through one single-purpose hop, in two Etherscan-tagged *Binance Deposit* addresses: `0xb08b…317d` received from all three and `0x3319…b072` from mintblade and endlessFate. The link is now classed **STRONG PROBABILISTIC** (common destination account, not a shared key).
   - All withdrawals go to the same depository contract `0x4cd0…bc31`, which emits only an opaque bridge ID.
   - No withdrawal amount matches a GRIMDRIP deposit amount (round $499,999 / $999,999 out versus ~$250,066 chunks in).
   - Shared bridge infrastructure is not proof. Alternative explanations: copy-trading chains, a shared signal or tipster, or a group of independent accounts.

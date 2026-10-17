@@ -223,3 +223,44 @@ if __name__ == "__main__":
         run("events", "2023-07-01", "2026-10-18T00:00:00Z")
     elif what == "events_missing":
         events_missing()
+
+
+def pull_week_or_days(kind: str, sub: str, a, b) -> None:
+    from datetime import timedelta
+    try:
+        r = pull_window_retry(kind, sub, a.strftime("%Y-%m-%dT%H:%M:%SZ"), b.strftime("%Y-%m-%dT%H:%M:%SZ"), attempts=2)
+        print(f"{kind} {sub}: pages={r[1]} rows={r[2]}", flush=True)
+    except RuntimeError as e:
+        print(f"FAILED {kind} {sub}: {str(e)[:150]} -> daily", flush=True)
+        (OUT / kind / f"{sub}.ndjson.tmp").unlink(missing_ok=True)
+        d, j = a, 0
+        while d < b:
+            e2 = min(d + timedelta(days=1), b)
+            r = pull_window_retry(kind, f"{sub}d{j}", d.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                  e2.strftime("%Y-%m-%dT%H:%M:%SZ"), attempts=2)
+            print(f"{kind} {sub}d{j}: pages={r[1]} rows={r[2]}", flush=True)
+            d, j = e2, j + 1
+
+
+def pull_month_split(kind: str, label: str, workers: int = 4) -> None:
+    """Pull one month as weekly sub-windows (in parallel), falling back to daily sub-windows for a failing week.
+
+    Used for markets 2026-08: the monthly keyset chain reached a cursor that Cloudflare answers with HTTP 403
+    every time (reproduced 2026-10-17 ~21:30 UTC with and without include_tag), i.e. a deterministic block on
+    that cursor string, not rate limiting. Sub-windows produce different cursor chains. Weekly windows are
+    [d, d+7d) from the 1st; the last one is clipped at the month end."""
+    from datetime import timedelta
+    lo = datetime.fromisoformat(f"{label}-01T00:00:00+00:00")
+    hi = (lo + timedelta(days=32)).replace(day=1)
+    wins, a, k = [], lo, 0
+    while a < hi:
+        b = min(a + timedelta(days=7), hi)
+        wins.append((f"{label}w{k}", a, b))
+        a, k = b, k + 1
+    with ThreadPoolExecutor(workers) as ex:
+        for f in [ex.submit(pull_week_or_days, kind, *w) for w in wins]:
+            f.result()
+
+
+if __name__ == "__main__" and sys.argv[1] == "month_split":
+    pull_month_split(sys.argv[2], sys.argv[3])

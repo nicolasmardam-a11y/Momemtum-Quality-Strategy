@@ -21,13 +21,17 @@ Every Gamma, Data API and RPC response is stored by `pmr.http` under `data/raw/`
 | Gamma metadata of traded tokens | `03_gamma_meta.py` | `gamma_markets_traded.parquet`, `token_meta.parquet`, `gamma_failed_tokens.parquet` |
 | CryptoHouse `assets` snapshot (cross-check) | `03a_assets_crosscheck_pull.py` | `ch_assets.parquet` |
 | per-token PIT metadata + external table | `03b_build_meta.py` | `token_meta_pit.parquet`, `market_meta.parquet`, `meta_ext.tsv`, `meta_checks.json` |
-| decisions + screens (server side, 256 wallet buckets) | `04_screens.py` | `screen_buckets/*` (raw) |
+| decisions + screens (server side, 256 wallet buckets) | `04_screens.py` | `screen_buckets/*` (raw; `screen_buckets_s5shallow/` = 3 superseded buckets, section 6) |
 | merge screens, S5 global cut | `05_merge_screens.py` | `screen_base_rates.parquet`, `screen_members.parquet`, `fresh_first_decisions.parquet` |
-| evaluation-window export | `06_eval_export.py`, `06b_eval_merge.py` | `eval_chunks/*` (raw), `eval_decisions.parquet`, `eval_buys.parquet`, `eval_coverage.parquet`, `eval_sample_members.parquet`, `eval_wallet_index.parquet` |
+| evaluation-window export | `06_eval_export.py`, `06b_eval_merge.py` | `eval_chunks/*` (raw; `eval_chunks_superseded/` = partial months redone in format v2), `eval_decisions.parquet`, `eval_buys.parquet`, `eval_fill_wallets.parquet`, `eval_coverage.parquet`, `eval_sample_members.parquet`, `eval_wallet_index.parquet` |
 | wallet births (cluster base rate) | `07_wallet_births.py` | `wallet_births.parquet` |
 | cluster signal | `08_cluster_signals.py` | `cluster_signals.parquet`, `cluster_signal_members.parquet` |
 | resolution-time check | `09_resolution_check.py` | `resolution_check.parquet` |
 | fee field usage | ad hoc query (section 2) | `fee_field_by_quarter.parquet` |
+| independent audit of screens (Data API) | `10_audit_sample.py` | `audit_sample.parquet` |
+| counts quoted in this note | `11_build_summary.py` | (stdout only) |
+
+Run logs of the resumed session are in `data/derived/pit_wallets/logs/`.
 
 ## 2. Data facts (VERIFIED unless marked)
 
@@ -36,6 +40,15 @@ Every Gamma, Data API and RPC response is stored by `pmr.http` under `data/raw/`
   readonly=1 (no SET, no materialised CTEs), 20 GB memory. A `WITH x AS (subquery)` referenced twice is
   evaluated twice, including the full table scan. Every query here therefore uses one linear pipeline and
   packs its output into arrays to stay under the byte cap.
+- **Hourly query quota (new on 2026-10-17, not in CONTEXT.md).** CryptoHouse returned `QUOTA_EXCEEDED`:
+  "Quota for user `crypto` for 3600s has been exceeded: queries = 145/120", with intervals ending on the full
+  hour.
+  - That means at most **120 queries per hour**. It is probably counted per IP, so all agents on this sandbox
+    share it (PLAUSIBLE: the quota key was not shown).
+  - Failed queries appear to count too.
+  - `ch.py` now sleeps until the interval ends instead of retrying.
+  - Any stage-2 pull of follower prices from CryptoHouse must fit this budget: at most about 120 tokens or
+    time windows per hour unless they are batched into one query.
 - **`polymarket.orders_filled`.**
   - 257,649,337 rows from 2022-11-21 19:50 to 2026-01-05 22:05 UTC. Sorted by `id`
     (`<tx hash>_<order hash>`), so time filters do not prune reads; a full scan of the needed columns takes
@@ -178,11 +191,180 @@ payout(YES) + payout(NO) = 1 per set at resolution, so the split terms cancel. I
 conversions or transfers between wallets. The pre-registered "net-negative shares = unreliable = not made
 money" rule is therefore conservative. It was kept as pre-registered.
 
-__SCREENS__
+## 6. Screens: base rates and members (step 5) — counts only, no performance
+
+**Run.**
+- All 256 wallet buckets were computed with the same SQL. Buckets 0-142 and 178-218 ran before the
+  interruption and 143-177 and 219-255 after it; the queries are cached under `data/raw/cryptohouse/cache/`.
+- Each bucket read 258,035,873 rows. That count is the same for every bucket, so the table did not change
+  between the runs.
+- No bucket had to be split for the 1 MB cap.
+
+**The S5 candidate depth was too shallow in three buckets.**
+- The merge found that buckets 29, 62 and 92 did not reach the global S5 cut at 2024-12, 2025-01 and
+  2025-02. Their top 2% + 3 candidate lists ended above the cut.
+- Those three buckets were re-run with a list of the top 8% + 12 (`PMR_S5_DEPTH=0.08,12`). The earlier files
+  are kept in `screen_buckets_s5shallow/`.
+- Every other output of those buckets was identical: the counts, and the S1-S4 and B1 members.
+- After the re-run, the global cut lies inside every bucket's list at all 24 dates. The re-run changed the
+  2024-12 S5 cut from $11,511 to $11,568.
+
+**Consistency checks (VERIFIED).**
+- `screen_members` row counts equal the server-side screen counts at every date for S1, S1m, S2, S3 and S4.
+- Independent audit (`10_audit_sample.py`, `audit_sample.parquet`): I took 40 random (date, wallet) members,
+  10 each of S1, S1m, S2 and S3, and pulled each wallet's full history from Data API
+  `/v2/trades?user=…&taker_only=false`, a source independent of CryptoHouse. I re-implemented the rules in
+  pandas with the same token metadata.
+  - One wallet was skipped because it had more than 20,000 Data API rows.
+  - All 39 audited memberships were reproduced.
+  - n_res matched in 39 of 39. n_won and the edge sum matched in 38 of 39; the exception is one S3 wallet with
+    218 decisions, 154 wins against 155, and the screen flag is unchanged. n_mm matched in 39 of 39.
+  - The one difference is consistent with the A8 tie-break or a single fill that is missing in one of the
+    two sources (PLAUSIBLE).
+
+**Base rates** (`screen_base_rates.parquet`, every date).
+- n_w_counted = wallets with >= 1 counted decision whose entry episode ended before D. n_res5 / n_res10 =
+  wallets with >= 5 / >= 10 counted resolved decisions (the S5 and B1 eligibility base).
+- s5_n_top = ceil(1% of n_res5). s5_pnl_cut = the trailing decision-market P&L of the last S5 member, in $.
+
+| D | wallets counted | n_res>=5 | n_res>=10 | S1 | S1m | S2 | S3 | S4 sports | S4 politics | S4 crypto | S4 other | S5 n | S5 cut $ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2024-01 | 7464 | 1335 | 639 | 16 | 10 | 43 | 13 | 0 | 0 | 0 | 8 | 14 | 17165 |
+| 2024-02 | 9999 | 1762 | 851 | 21 | 19 | 59 | 11 | 0 | 0 | 0 | 8 | 18 | 20541 |
+| 2024-03 | 11435 | 2026 | 997 | 22 | 12 | 68 | 13 | 0 | 0 | 0 | 7 | 21 | 22897 |
+| 2024-04 | 11281 | 2196 | 1135 | 26 | 23 | 67 | 15 | 0 | 1 | 5 | 5 | 22 | 22443 |
+| 2024-05 | 11900 | 2359 | 1238 | 32 | 27 | 82 | 19 | 0 | 5 | 4 | 2 | 24 | 18913 |
+| 2024-06 | 19330 | 2736 | 1384 | 52 | 49 | 113 | 22 | 0 | 6 | 5 | 1 | 28 | 18491 |
+| 2024-07 | 34389 | 4157 | 1780 | 146 | 131 | 367 | 16 | 2 | 5 | 5 | 6 | 42 | 18385 |
+| 2024-08 | 56147 | 7423 | 2874 | 277 | 237 | 814 | 32 | 2 | 11 | 6 | 5 | 75 | 16447 |
+| 2024-09 | 82397 | 13207 | 5393 | 377 | 350 | 1372 | 58 | 7 | 34 | 7 | 4 | 133 | 18276 |
+| 2024-10 | 115176 | 18680 | 8008 | 567 | 505 | 1838 | 72 | 13 | 45 | 11 | 5 | 187 | 16388 |
+| 2024-11 | 187154 | 29600 | 12404 | 933 | 789 | 3317 | 97 | 26 | 61 | 13 | 6 | 296 | 10747 |
+| 2024-12 | 297367 | 61103 | 25544 | 2295 | 1516 | 7066 | 239 | 41 | 178 | 25 | 4 | 612 | 11568 |
+| 2025-01 | 405415 | 88179 | 36138 | 3081 | 2172 | 10077 | 313 | 90 | 206 | 35 | 11 | 882 | 8725 |
+| 2025-02 | 545391 | 151846 | 65808 | 6666 | 5022 | 26886 | 387 | 119 | 212 | 47 | 16 | 1519 | 5592 |
+| 2025-03 | 631439 | 198229 | 91978 | 7144 | 5130 | 36424 | 462 | 178 | 226 | 52 | 24 | 1983 | 4317 |
+| 2025-04 | 693776 | 243049 | 121266 | 9309 | 6088 | 43564 | 514 | 209 | 258 | 52 | 21 | 2431 | 3707 |
+| 2025-05 | 723385 | 294026 | 154593 | 10381 | 5490 | 54457 | 554 | 232 | 238 | 60 | 27 | 2941 | 3379 |
+| 2025-06 | 757314 | 335018 | 188296 | 11595 | 6099 | 61017 | 634 | 261 | 256 | 61 | 38 | 3351 | 3300 |
+| 2025-07 | 786104 | 355143 | 210183 | 10627 | 5908 | 63189 | 697 | 293 | 278 | 97 | 47 | 3552 | 3593 |
+| 2025-08 | 822213 | 371735 | 227808 | 11723 | 6794 | 67556 | 768 | 325 | 253 | 132 | 52 | 3718 | 3559 |
+| 2025-09 | 849435 | 379524 | 237658 | 10671 | 6106 | 68424 | 842 | 369 | 227 | 165 | 53 | 3796 | 3559 |
+| 2025-10 | 882313 | 390575 | 247717 | 9971 | 5409 | 71407 | 850 | 404 | 209 | 182 | 57 | 3906 | 3804 |
+| 2025-11 | 1015499 | 434070 | 274372 | 11359 | 6867 | 82910 | 987 | 430 | 180 | 297 | 68 | 4341 | 5035 |
+| 2025-12 | 1044579 | 482212 | 310280 | 11758 | 7097 | 86995 | 1154 | 493 | 159 | 438 | 86 | 4823 | 5268 |
+
+**What the members look like (VERIFIED; trailing in-sample statistics, not evaluation results).**
+- **"5 bets, 5 wins" is common, not rare.** S1 holds 1.1-4.4% of the eligible wallets (>= 5 resolved
+  decisions) at each date: 16 wallets at 2024-01, and 9,971-11,758 a month during 2025-H2. S2 (>= 5 and no
+  losses) holds 3-19%.
+- **Most of those records come from buying near-certain outcomes.** The members' average entry price
+  (1 - mean edge) is >= 0.90 for 82% of S1, 79% of S1m and 90% of S2 member rows, and >= 0.95 for 70% / 68% / 79%.
+  The median trailing mean edge is 0.02 for S1 and 0.015 for S2, against 0.003 for the random eligible
+  wallets (B1).
+- **They make very little money.** S1's median trailing decision-market P&L is $0.56 (S1m $1.31, S2 $0.78).
+  Only 4.4% of S1 member rows made more than $100. The median resolved notional over the five bets is
+  $83, and the median decision notional is $12.
+- **Membership does not persist.** A median of 49% of a date's S1 members are S1 again a month later.
+- **S3 and S4 are rare and look different.**
+  - S3 has 13-1,154 wallets per date. Its median member has 55 resolved decisions, mean edge 0.15 and
+    trailing P&L about $1,150.
+  - S4 has 0-493 wallets per date per category. Sports and politics specialists appear from mid-2024, crypto
+    from 2025.
+  - The S3 and S4 z rule penalises entries near certainty through its variance term, so those wallets are not
+    favourite buyers.
+- **S5 (top 1% by trailing P&L) is set by size.** Its median decision notional is $297, against $8.5 for B1.
+  Its median mean edge is 0.04.
+- **About 8% of S3 and S5 member rows have an "unreliable" market P&L** (a token with net-negative fill shares,
+  from a split, conversion or transfer). That flag affects S1m only. In S3 and S5 those wallets stay, using the
+  fill-based P&L.
+
+**Member rows by split** (rows = (date, wallet) pairs; wallets = distinct).
+
+| screen | train rows | validation rows | test rows | train wallets | validation wallets | test wallets |
+|---|---|---|---|---|---|---|
+| S1 | 4,764 | 48,176 | 66,109 | 3,810 | 32,466 | 32,331 |
+| S1m | 3,668 | 30,001 | 38,181 | 2,835 | 20,360 | 20,345 |
+| S2 | 15,206 | 232,425 | 440,481 | 8,801 | 81,617 | 112,016 |
+| S3 | 607 | 2,864 | 5,298 | 331 | 936 | 1,828 |
+| S4 sports | 91 | 1,089 | 2,314 | 61 | 389 | 708 |
+| S4 politics | 346 | 1,396 | 1,306 | 217 | 349 | 456 |
+| S4 crypto | 81 | 307 | 1,311 | 34 | 103 | 573 |
+| S4 other | 61 | 137 | 363 | 17 | 55 | 122 |
+| S5 | 1,472 | 13,107 | 24,136 | 697 | 3,909 | 7,300 |
+| B1 (1% random eligible) | 1,338 | 12,987 | 24,329 | 568 | 3,398 | 5,306 |
+
+**The train period is thin.** The 2024 dates have few wallets: S3 has 11-239 members per date, and S4 has 0-178
+per category. The test-period numbers per date are large enough. Stage 2 should therefore read the train
+period as a rough check only. Validation and test carry the evidence.
+
+**Per-wallet signal features (exported in `screen_members`).**
+- `med_usd`: median decision notional over the window decisions whose episode ended before D. It feeds F1,
+  "bet >= 5x the wallet's own median".
+- `first_fill`: the wallet's first-ever fill.
+- `n_win`: counted decisions in the window. `n_res`, `n_won`, `n_cmp`, `n_mm`: resolved, won, event-complete
+  and made-money counts. `n_nc`: decisions not counted (scalp or dust). `n_unrel`: decisions whose market P&L is
+  unreliable.
+- `se`, `se2`, `sv`: sums of the edge, the squared edge and p(1-p). `pnl`, `usd_res`: trailing P&L and resolved
+  notional.
+- Per-category counts, wins, edge sums and z. `mean_edge`, `shrunk_edge`, `z_shrunk` and `t_plain` (the plain
+  t-stat, stored but not used).
+- "Last activity before D" for F2 is in the evaluation export (`w_last_before`, `prev_active_day_gap`), not
+  here.
 
 __EVAL__
 
-__CLUSTER__
+## 8. Cluster signal candidate (pre-registration section 12, A4) — signals exported, no performance
+
+**Input** (`fresh_first_decisions.parquet`, built by the D = 0 group of the bucket queries):
+- One row for each wallet whose first-ever exchange fill is the BUY that starts its first decision, with a
+  6 h episode of >= $100: 448,680 wallets, of which 123,585 have an episode >= $1k.
+- The row holds the decision token, the underlying event, the payout and `t_res`, and the episode's BUY fills
+  (ts, shares, $).
+- Wallets are identified only by `cityHash64(address)`. The addresses were not exported; they are not needed
+  for following.
+- Context from `wallet_births.parquet` (first-ever fill per month): 600-2,700 new wallets a month in 2023 to
+  early 2024, rising to 112k-215k a month in 2024-10 to 2025-02, and 34k-187k a month in 2025. 1.73M wallets in total, 99.3% of which start with a BUY (91.6% in 2025-12).
+
+**Rule and output** (`08_cluster_signals.py` -> `cluster_signals.parquet`, `cluster_signal_members.parquet`):
+- The signal fires at the first minute m at which, in (m-60 min, m]:
+  - >= 3 fresh wallets with cumulative episode buys >= $100 (counted from past fills only) bought the same
+    outcome token; and
+  - the fresh-wallet buys of that token sum to >= $20,000.
+- Signal time = the end of minute m. One signal per token.
+- Each row carries the token, condition, underlying event, question, outcome, category, negRisk, payout,
+  `t_res`, the fresh-wallet VWAP and the split label.
+
+| split (by signal time) | signals | distinct underlying events |
+|---|---|---|
+| before 2024 (unused) | 3 | 2 |
+| train 2024 | 233 | 116 |
+| validation 2025-H1 | 164 | 73 |
+| test 2025-H2 | 373 | 218 |
+
+**Descriptives (VERIFIED, no outcomes used).**
+- 773 signals on 773 tokens in 389 underlying events.
+- By category: sports 287, politics 233, crypto 208, other 45.
+- 96.6% of the signals are on markets with a clean resolution.
+- Median 4 counting wallets (maximum 131). Median window notional $22.6k.
+- The fresh wallets' VWAP in the window has median 0.98 (10th / 90th percentiles 0.39 / 0.998). So, as with
+  S1, most clusters are fresh wallets buying near-certain outcomes.
+- Hours from signal to `t_res`: 10th percentile 5.2, median 264, 90th percentile 2,392. No signal fires at or
+  after `t_res`.
+- Several signals often fall in one event (several NO tokens of one negRisk event). Stage 2 must cluster
+  inference by underlying event (only 116 train events).
+
+**Point-in-time caveats.**
+- Freshness (first-ever fill), the $100 threshold and the window sums use only past fills.
+- **One deviation is conservative.** Fresh wallets whose whole 6 h episode stayed under $100 are not in the
+  input at all. A real-time detector would add their buys to the window sum, so it would fire at the same time
+  or earlier, never later. Our signal times are therefore never earlier than an achievable detector's
+  (PLAUSIBLE small effect).
+- **What C1 cannot see.**
+  - "Newly funded" (collateral deposits) is not in `orders_filled`.
+  - C2 (young wallets) was not built.
+  - Wallets whose first fill was on one of the 937 tokens without metadata are never fresh in this data.
+- 3 signals before 2024 are outside every split.
 
 ## 9. Limitations (read before using the data)
 
@@ -204,4 +386,16 @@ __CLUSTER__
   about 0.02% of volume. Fills on them are excluded from decisions. Unclean markets (1.4% of volume) count
   as neither wins nor losses.
 - **Bucket outputs.** Each wallet-bucket query had to fit under 1 MB. Buckets were sized (256) so that no
-  split was needed; the log records any split.
+  split was needed, and none was. Three buckets were re-run with a deeper S5 candidate list (section 6).
+- **The every-fill export is capped (A9).** It keeps the first 1,000 BUY fills per (date, wallet), plus ties.
+  This truncates the heaviest bot-like wallets, so secondary-signal results describe the first 1,000 fills of
+  those wallets. `eval_fill_wallets.parquet` says which (date, wallet) pairs were capped and their full counts.
+- **F1 is not knowable at the first fill.** F1 ("large bet") uses the wallet's buys in the first 10 minutes,
+  which a follower knows only at t0 + 10 min. Stage 2 must either enter F1 signals no earlier than t0 + 10 min
+  or use `usd_first` (first-second notional, known at t0) as the F1 test.
+- **The decision tie-break is a logged deviation (A8).** It matters only for same-second buys of two tokens in
+  one event.
+- **The train period is thin.** The 2024 dates have far fewer wallets than 2025 (section 6), so most of the
+  evidence will sit in validation and test.
+- **The CryptoHouse quota (120 queries/hour) limits stage 2.** Follower prices for tens of thousands of
+  signals must be pulled in batches: many tokens per query through an external table.

@@ -54,7 +54,10 @@ def q(sql: str, ext: dict | None = None, *, cache: bool = True, retries: int = 4
             params[f"{name}_format"] = "TabSeparated"
             files[name] = (f"{name}.tsv", text.encode())
     err = None
-    for attempt in range(retries):
+    quota_waits = 0
+    attempt = -1
+    while attempt < retries - 1:
+        attempt += 1
         _throttle(HOST)
         t0 = time.monotonic()
         try:
@@ -67,6 +70,19 @@ def q(sql: str, ext: dict | None = None, *, cache: bool = True, retries: int = 4
             time.sleep(min(30, 3 * 2 ** attempt))
             continue
         el = time.monotonic() - t0
+        if r.status_code != 200 and "QUOTA_EXCEEDED" in r.text:
+            # hourly query quota (120 queries / 3600 s for user crypto, seen 2026-10-17): wait for the interval end
+            import re as _re
+            m_ = _re.search(r"Interval will end at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", r.text)
+            end = datetime.strptime(m_.group(1), "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc) if m_ else None
+            wait = (end - datetime.now(timezone.utc)).total_seconds() + 20 if end else 600
+            print(f"  [ch] quota exceeded; sleeping {int(max(wait, 30))} s until {m_.group(1) if m_ else '?'}", flush=True)
+            time.sleep(max(wait, 30))
+            quota_waits += 1
+            if quota_waits > 12:
+                raise CHError("quota: giving up after 12 waits")
+            attempt -= 1
+            continue
         if r.status_code != 200:
             full = r.text
             txt = full[:300] + (" ... " + full[-700:] if len(full) > 1000 else full[300:1000])

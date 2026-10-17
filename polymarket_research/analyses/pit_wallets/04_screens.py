@@ -21,6 +21,7 @@ at or after D enters any feature; resolved decisions (r < D) are complete before
 """
 from __future__ import annotations
 
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -141,7 +142,7 @@ WITH
   sc2 AS (
     SELECT sc.*,
       toUInt16(s1) + 2 * toUInt16(s1m) + 4 * toUInt16(s2) + 8 * toUInt16(s3) + 16 * toUInt16(s4[1]) + 32 * toUInt16(s4[2])
-        + 64 * toUInt16(s4[3]) + 128 * toUInt16(s4[4]) + 256 * toUInt16(e5 AND rk <= ceil(0.02 * ne5) + 3)
+        + 64 * toUInt16(s4[3]) + 128 * toUInt16(s4[4]) + 256 * toUInt16(e5 AND rk <= ceil({s5f} * ne5) + {s5a})
         + 512 * toUInt16(e5 AND sipHash64(w) % 100 = 0) AS flags
     FROM sc
   )
@@ -165,7 +166,10 @@ QCOLS = ["wallet", "flags", "n_win", "n_res", "n_won", "n_cmp", "n_mm", "n_nc", 
 
 def build_sql(K: int, b: int) -> str:
     dates = "[" + ",".join(f"({d},{d12})" for d, d12 in DATES) + "]"
-    return SQL.format(dates=dates, K=K, b=b, cutoff=CUTOFF)
+    # S5 candidate depth: default top 2% + 3 per bucket (identical SQL text to the original run, so cached);
+    # env PMR_S5_DEPTH="0.08,12" re-runs a bucket whose list did not reach the global cut (05_merge_screens check)
+    f, a = os.environ.get("PMR_S5_DEPTH", "0.02,3").split(",")
+    return SQL.format(dates=dates, K=K, b=b, cutoff=CUTOFF, s5f=f, s5a=a)
 
 
 def run_one(K: int, b: int, ext: dict, cdir: Path) -> None:

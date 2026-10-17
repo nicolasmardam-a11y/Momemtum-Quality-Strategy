@@ -175,6 +175,7 @@ Price impact per leg (others' taker VWAP, `mintblade_impact.parquet`):
   - All three withdraw through the same platform path: pUSD burned, USDC.e from 0xc417…9db1, then out to contract 0x4cd00e38…bc31. That is shared infrastructure.
   - First-hop deposit sources differ: mintblade 0xb4c3…3a41, GRIMDRIP 0x6e39…d17d. Both are EIP-7702-delegated EOAs pointing to the same delegate implementation, which is common tooling.
   - Amounts do not match one-to-one. A shared bridge, relayer or style is **not** proof of common ownership. **UNSUPPORTED** as an ownership claim.
+  - **Update 2026-10-17 (see `linkage.md`):** this verdict was reached before the Relay withdrawals were followed off Polygon. All three wallets' withdrawals end, directly or through one single-purpose hop, in two Etherscan-tagged *Binance Deposit* addresses: `0xb08b…317d` received from all three and `0x3319…b072` from mintblade and endlessFate. The link is now classed **STRONG PROBABILISTIC** (common destination account, not a shared key).
 - **Funding (VERIFIED).**
   - 55 pUSD mints to the wallet total $9,352,937, of which $9,352,922 came via 0xb4c3…3a41.
   - Three USDC.e inflows of $1,663,369 from EOA 0xf70d…dbef each match an amount the wallet had just withdrawn. They look like refunded or bounced withdrawals (PLAUSIBLE).

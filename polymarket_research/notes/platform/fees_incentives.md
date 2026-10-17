@@ -36,10 +36,13 @@ lp_rewards_snapshot.py, cost_table.py, keccak.py). Derived data: `data/derived/o
 5. **The regime changed often in 2026.** The changes were: fee-free → crypto-only (Jan–Mar) → all categories
    (2026-03-30) → formula change (~03-31/04-01) → V2/pUSD (04-28) → crypto 0.072→0.070 (between 05-04 and
    05-07, on-chain) → taker rebates (05-28) → sports 0.03→0.05 for **all** sports markets (between 07-10 02:00
-   and 07-11 02:00 UTC, on-chain) → legacy `sports_fees_v2` markets back at 0.03 by 09-03 → NFL/CFB 0.03 (09-04).
+   and 07-11 02:00 UTC, on-chain) → legacy `sports_fees_v2` markets back at 0.03 between 08-15 20:00 and 08-25 20:00
+   UTC **[corrected by verifier 2026-10-17: was "by 09-03"; on-chain 0.05 on 08-05 and 08-15, 0.03 on 08-25]** →
+   NFL/CFB 0.03 (09-04).
    **Gamma's feeSchedule on a closed market is what Gamma shows today, not necessarily what was charged.**
    - Crypto markets traded on 2026-04-29 at 0.072 now show 0.07.
-   - `sports_fees_v2` markets were charged 0.05 from 07-11 to at least 07-28 but show 0.03.
+   - `sports_fees_v2` markets were charged 0.05 from 07-11 to at least 08-15 but show 0.03 **[corrected by verifier
+     2026-10-17: was "at least 07-28"; 690/690 fills at 0.05 on 07-15 20:00, 243/243 on 08-15 20:00]**.
    - Backtests must use on-chain `OrderFilled.fee`, or the regime table in section 2, not today's Gamma field.
 6. **The taker rebate is a share of fees paid (VERIFIED).** One wallet's 2026-07-08 TAKER_REBATE of $18,721.49
    equals 18% (Gold) × its 2026-06-16 taker fees of $104,008.29, to the cent. Tier thresholds use weighted
@@ -187,7 +190,14 @@ Sports detail around the July change (modal implied rate, fill count):
 | sports_fees_v2 | 0.03 (147) | 0.03 (48) | **0.05 (69)** | 0.05 (65) | 0.05 (17) | 0.05 (1) | – | – | 0.03 (5) | 0.03 (1) | 0.03 (1) | 0.03 (3) |
 | sports_fees_v3 | – | – | 0.05 (11) | 0.05 (79) | 0.05 (105) | 0.05 (117) | 0.05 (82) | 0.05 (116) | 0.05 (63) | 0.05 (74) | 0.05 (149) | 0.05 (99) |
 
-Fee-free markets showed `fee = 0` on all but a few multi-level fills. Poly-v2 ExchangeV3 tokens did not resolve
+Fee-free markets showed `fee = 0` on all but a few fills. **[corrected by verifier 2026-10-17]** Those few are
+**builder fees**, not multi-level fills. On a fee-free market (US x Iran ceasefire, Oct 31), every non-zero taker
+`fee` came on a fill whose `OrderFilled.builder` was non-zero, at exactly 25, 50 or 100 bps of notional (3 of 25
+taker fills). The docs say a fee-free market with a builder code charges "Builder fee only"
+([builders/fees](https://docs.polymarket.com/programs/builders/fees.md)). So the on-chain `fee` = platform fee +
+builder fee. Above-schedule outliers in this section (e.g. the 0.045 politics fill) are most likely builder fills too.
+In the verifier's re-sample (`analyses/verification/v10_historical_fee_dates.py`) builder≠0 fills were excluded. In
+that sample, 100% of the ≈50k taker fills in every (date, feeType) cell sat at the modal rate. Poly-v2 ExchangeV3 tokens did not resolve
 through `/v2/tokens` (33 fills, median 0.03). Readings:
 
 - The current formula with these rates was in force **from the first day after the V2 cutover**.
@@ -204,6 +214,17 @@ through `/v2/tokens` (33 fills, median 0.03). Readings:
 - From 2026-09-03 onwards, the `sports_fees_v2` markets that still traded (Ballon d'Or, UFC futures; 10 fills)
   were charged 0.03. Either the v2 schedule reverted between 07-28 and 09-03, or only some v2 markets had been
   switched. The sample cannot distinguish these (no v2 fills on 08-08 or 08-20).
+  **[corrected by verifier 2026-10-17]** A 300-block re-sample at extra dates (builder≠0 fills excluded;
+  `data/derived/verification_historical_fee_dates_{A,B}.json`) dates the reversion more tightly:
+
+  | Date (20:00 UTC) | `sports_fees_v2` fills at 0.05 | fills at 0.03 |
+  |---|---|---|
+  | 07-15 | 690/690 | 0 |
+  | 08-05 | 12/12 | 0 |
+  | 08-15 | 243/243 | 0 |
+  | 08-25 | 0 | 27/27 |
+
+  The reversion happened between 2026-08-15 20:00 and 2026-08-25 20:00 UTC.
 
 ---
 
@@ -229,7 +250,7 @@ through `/v2/tokens` (33 fills, median 0.03). Readings:
 | 2026-05-28 | **Taker Rebate Program** live; new **Referral** terms (10% / 5% of net fees) | VERIFIED | [taker-rebates](https://docs.polymarket.com/programs/taker-rebates.md), [referral](https://docs.polymarket.com/programs/referral-program.md) |
 | 2026-07-02 | World Cup markets decimalized to a 0.0025 tick | VERIFIED | changelog |
 | 2026-07-10/11 | **Sports 0.03 → 0.05; sports maker rebate 25% → 15%** (`sports_fees_v3` for new markets). On-chain the 0.05 applied to all sports markets between 07-10 02:00 and 07-11 02:00 UTC | VERIFIED | changelog; on-chain §1.4 |
-| 07-28..09-03 | Legacy `sports_fees_v2` markets charged 0.03 again (Gamma shows 0.03 for all of them) | VERIFIED (sparse) | on-chain §1.4 |
+| 08-15..08-25 | Legacy `sports_fees_v2` markets charged 0.03 again (Gamma shows 0.03 for all of them). **[corrected by verifier 2026-10-17: window narrowed from 07-28..09-03; 0.05 still charged on 08-15 20:00 UTC, 0.03 on 08-25 20:00 UTC]** | VERIFIED (sparse) | on-chain §1.4 |
 | 2026-08 | Crypto TWAP liquidity rewards $1M for 5m/15m/4h markets "through the month of August"; **ended** | VERIFIED | [liquidity-rewards](https://docs.polymarket.com/programs/liquidity-rewards.md) |
 | 2026-08-17 / 09-04 | Crypto taker delay 250 → 50 ms (08-17), then 150 ms (09-04 14:00) | VERIFIED | changelog |
 | 2026-09-04 | First `sports_fees_nfl_cfb_oct26` markets (0.03 / 15%); not in the docs | VERIFIED (data) | Gamma census; on-chain 10-16 |
@@ -261,7 +282,9 @@ week, 16,000 markets; indicative, not random):
   created ≥ 03-06, or NCAAB/Serie A ≥ 02-18. Use the v1 formula for those.
 - From **2026-03-30 onward** use per-fill on-chain fees where possible. Otherwise use the regime table:
   crypto 0.072 to ~05-05 then 0.07; sports 0.03 to 07-10 then 0.05 for all sports (legacy v2 markets back to 0.03
-  by 09-03; 0.03 for NFL/CFB from 09-04).
+  between 08-15 and 08-25 **[corrected by verifier 2026-10-17: was "by 09-03"]**; 0.03 for NFL/CFB from 09-04).
+  On-chain `fee` includes any builder fee, so exclude fills with `builder ≠ 0` when inferring the platform rate
+  **[added by verifier 2026-10-17]**.
 - The fortnight from **03-30 to 04-28** is the least certain. It had the V1 exchange and a formula flip.
 
 ---
@@ -304,7 +327,11 @@ week, 16,000 markets; indicative, not random):
 | Diamond | $4M | 44% | $7,500 | $8M | $3.5M | $40M |
 | Obsidian | $10M | 50% | $25,000 | $20M | $8.7M | $100M |
 
-- **Basis = share of fees paid** (VERIFIED, one exact reconciliation). The docs never state the base explicitly.
+- **Basis = share of fees paid** (VERIFIED, one exact reconciliation). **[corrected by verifier 2026-10-17]** The
+  docs do state the base, though only on the fees page: "Takers can also earn a portion of fees back through the
+  tiered Taker Rebate Program" ([trading/fees](https://docs.polymarket.com/trading/fees.md)). The taker-rebates page
+  itself does not repeat it. The verifier re-ran the reconciliation live (`analyses/verification/v01_taker_rebate.py`):
+  0.18 × 104,008.29 = 18,721.49, exact.
   Wallet `0x96cf…1acb` paid $104,008.29 of taker fees on 2026-06-16 (computed from `/v2/activity`) and received a
   `TAKER_REBATE` of $18,721.49 on 2026-07-08. 0.18 × 104,008.29 = 18,721.49, so the payout is Gold × fees.
   - Lifetime ratios are 27,877.90 / 127,397.56 = 21.9% for that wallet and 64,534.48 / 160,131.17 = 40.3% for
@@ -338,6 +365,10 @@ week, 16,000 markets; indicative, not random):
   - 14,608 markets with standard rewards.
   - **$289,412/day** in total `total_daily_rate`, of which $289,281 native and $131 sponsored. A separate
     sponsored query returned $3,994/day.
+  - **[corrected by verifier 2026-10-17]** The total is a point-in-time snapshot. The same endpoint re-summed at
+    22:05 UTC the same day gave **$191,809/day across 14,421 markets**, with median $3, p90 $25 and max $2,000
+    (`data/derived/verification_lp_rewards_sum.json`). Game-day props drop out when they close. Quote a range or a
+    time-stamped value, not "$289k/day".
   - Per market: median $3/day, p90 $25, p99 $104, max **$8,850/day** (EPL spread/total props on 2026-10-17 game
     day, max spread 2.5¢, min size 1,000 shares).
   - All configurations pay in pUSD and run to 2500-12-31.
@@ -417,7 +448,7 @@ week, 16,000 markets; indicative, not random):
 | Card / exchange on-ramps | Intermediary fees (Coinbase, MoonPay; "2–3%" for cards, SECONDARY) | VERIFIED (exists) | [fees](https://docs.polymarket.com/trading/fees.md) |
 | Min order size | **5 shares** on 287,974 / 288,003 open markets (`orderMinSize`, CLOB `min_order_size`) | VERIFIED | Gamma census; [place-orders](https://docs.polymarket.com/trading/place-orders.md) |
 | Tick size | 0.01 on 239,209 markets, 0.001 on 48,793, 0.0025 on 1 (World Cup). Possible values: 0.1 / 0.01 / 0.005 / 0.0025 / 0.001 / 0.0001; changes are announced by a `tick_size_change` event | VERIFIED | census; [market-details](https://docs.polymarket.com/market-data/market-details.md) |
-| Matching delays | `secondsDelay` 1 s on 237,644 (sports) and 3 s on 544 markets; crypto taker delay 150 ms | VERIFIED | census; changelog |
+| Matching delays | `secondsDelay` 1 s on 237,644 (sports) and 3 s on 544 markets; crypto taker delay 150 ms. **[corrected by verifier 2026-10-17]** The 150 ms taker delay (`itode`) applies to 5-min, 15-min and hourly crypto up/down markets and to some single-stock/ETF up/down markets. It does not apply to 4-hour or daily crypto up/down markets or to price-level crypto markets | VERIFIED | census; changelog; live `/clob-markets` |
 
 ---
 
@@ -511,7 +542,8 @@ table is in the CSV.
 4. CONTEXT says Gamma `feeSchedule` is "authoritative for a market". That holds for **current** trades. For past
    trades it is wrong at least for:
    - crypto from 2026-04-28 to ~05-05, charged 0.072 while Gamma shows 0.07;
-   - sports v2 markets from 2026-07-11 to at least 07-28, charged 0.05 while Gamma shows 0.03.
+   - sports v2 markets from 2026-07-11 to at least 08-15, charged 0.05 while Gamma shows 0.03 **[corrected by
+     verifier 2026-10-17: was "at least 07-28"]**.
 5. CONTEXT describes the taker rebate as "3% … to 50%" without saying what it is a share of. It is a **share of
    taker fees paid** (verified by reconciliation), not of volume.
 6. `pmr/fees.py` has three problems:
@@ -572,7 +604,8 @@ table is in the CSV.
 
 1. When exactly did `sports_fees_v2` markets go back from 0.05 to 0.03, between 2026-07-28 and 2026-09-03? Did it
    apply to all of them? v2 fills are sparse after July. A targeted sample of known v2 futures (Ballon d'Or, UFC,
-   F1) in August would settle it.
+   F1) in August would settle it. **[corrected by verifier 2026-10-17]** It is now narrowed to between 08-15 20:00 and
+   08-25 20:00 UTC (§1.4). Whether every v2 market switched is still open.
 2. What was the pre-V2 charged fee (2026-01-05 to 04-27) on the V1 exchange, including `fees_refunded`? I did not
    decode it on-chain.
 3. What is the holding-reward rate actually paid (observed ≈1.75% vs 3.25% / 4.00% stated), and what is the full

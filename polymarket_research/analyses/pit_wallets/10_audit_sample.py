@@ -89,7 +89,9 @@ def main(n_per: int):
             out.append({"D": m.D, "wallet": m.wallet, "screen": m.screen, "skipped": "no data api rows"}); continue
         tr = tr.rename(columns={"timestamp": "ts", "size": "shares"})
         tr["token_id"] = tr.token_id.astype(str); tr["shares"] = tr.shares.astype(float)
-        tr["usd"] = tr.shares * tr.price.astype(float)
+        tr["ts"] = tr.ts.astype("int64"); tr["price"] = tr.price.astype(float)  # v2 returns strings
+        tr = tr.drop_duplicates(["transaction_hash", "token_id", "side", "shares", "price", "ts"])
+        tr["usd"] = tr.shares * tr.price
         tr = tr[tr.ts < CUTOFF]
         dec = decisions(tr, tm)
         a = record(dec, int(m.D))

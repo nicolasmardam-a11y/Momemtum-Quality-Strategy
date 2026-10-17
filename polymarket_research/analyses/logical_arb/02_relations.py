@@ -424,13 +424,20 @@ NUM_RE = re.compile(r"^(?:above|over|>|≥|at least|more than)?\s*[↑↓]?\s*\$
 MULT = {"": 1, "k": 1e3, "m": 1e6, "b": 1e9, "t": 1e12, "%": 1}
 
 
-def parse_date(s, start):
-    """Parse 'October 31' / 'June 30, 2027'. Without a year, take the first such date on or after the
-    market's startDate (Gamma endDate is unreliable for this: e.g. a 'December 31' market with endDate Nov 1)."""
+def parse_date(s, start, desc=None):
+    """Parse 'October 31' / 'June 30, 2027'. Without a year, first look for the same month/day with a year
+    in the market's own rules text ('by September 30, 2026, 11:59 PM ET'; fix 2026-10-17 21:40 UTC: the
+    roll-forward heuristic below turned an expired-but-unresolved 'by September 30' into 2027 and reversed
+    the bundle). Only if the rules give no year, take the first such date on or after the market's startDate
+    (Gamma endDate is unreliable for this: e.g. a 'December 31' market with endDate Nov 1)."""
     mm = DATE_RE.match((s or "").strip())
     if not mm:
         return None
     mo, d, y = MONTHS[mm.group(1).lower()], int(mm.group(2)), mm.group(3)
+    if y is None and desc:
+        yy = re.search(rf"{mm.group(1)}\s+0?{d}(?:st|nd|rd|th)?,?\s+(\d{{4}})", desc, re.I)
+        if yy:
+            y = yy.group(1)
     if y is None:
         y = start.year if pd.notna(start) else 2026
         try:
@@ -472,19 +479,19 @@ for eid, g in ns[(ns.negRisk == False) & (ns.outs.map(lambda o: o == ["Yes", "No
     tl = title.lower()
     gi = g.groupItemTitle.fillna("")
     # --- date ladders: cumulative "by/before" wording only
-    def qdate(q, gtitle, st):
+    def qdate(q, gtitle, st, dsc=None):
         ql = (q or "").lower()
         mm = re.search(r"before (\d{4})\b", ql)
         if mm:
             return pd.Timestamp(year=int(mm.group(1)) - 1, month=12, day=31, tz="UTC")
         mm = re.search(MD_Q, ql)
         if mm and re.search(r"\d{4}", mm.group(0)):
-            return parse_date(mm.group(0), st)
+            return parse_date(mm.group(0), st, dsc)
         mm = re.search(r"\bin (\d{4})\??$", ql)
         if mm and not DATE_RE.match((gtitle or "").strip()):
             return pd.Timestamp(year=int(mm.group(1)), month=12, day=31, tz="UTC")
-        return parse_date(gtitle, st)
-    dates = [qdate(q, x, e) for q, x, e in zip(g.question, gi, g.start)]
+        return parse_date(gtitle, st, dsc)
+    dates = [qdate(q, x, e, dsc) for q, x, e, dsc in zip(g.question, gi, g.start, g.description)]
     if sum(d is not None for d in dates) >= 2:
         if re.search(r"\bby\b|before|\bby\.\.\.|by…|by ___|by __", tl) and not re.search(r"\bon\b|\bin\b (?:january|february|march|april|may|june|july|august|september|october|november|december)", tl):
             rows = [(d, r) for d, r in zip(dates, g.itertuples()) if d is not None]
@@ -580,7 +587,8 @@ for tmpl, g in yn[yn.is_by & yn.tmpl.str.contains("<d>")].groupby("tmpl"):
     pass  # same template, same date = duplicate (handled above)
 yn["tmpl_nodate"] = yn.tmpl.str.replace("<d>", "<D>")
 by_t = yn[yn.is_by].copy()
-by_t["d"] = [parse_date(re.search(MD, q.lower()).group(0) if re.search(MD, q.lower()) else "", e) for q, e in zip(by_t.question, by_t.start)]
+by_t["d"] = [parse_date(re.search(MD, q.lower()).group(0) if re.search(MD, q.lower()) else "", e, dsc)
+             for q, e, dsc in zip(by_t.question, by_t.start, by_t.description)]
 by_t = by_t[by_t.d.notna()]
 for tmpl, g in by_t.groupby("tmpl"):
     if g.event_id.nunique() < 2 or len(g) > 30:

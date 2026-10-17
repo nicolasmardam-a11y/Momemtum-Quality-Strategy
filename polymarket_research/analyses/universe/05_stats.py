@@ -22,7 +22,8 @@ COLS = ["endDate", "closedTime", "gameStartTime", "startDate", "category", "cate
         "umaResolutionStatus", "settle_lag_h", "settle_lag_game_h", "volumeNum", "liquidityNum", "end_quarter", "split",
         "parse_ok", "event_id", "n_events", "version", "event_version", "restricted", "automaticallyResolved",
         "sportsMarketType", "n_outcomes", "enableOrderBook", "secondsDelay", "orderPriceMinTickSize", "duration_h",
-        "rewardsMinSize", "rewardsMaxSpread", "closed", "archived"]
+        "rewardsMinSize", "rewardsMaxSpread", "closed", "archived", "cluster_id", "cluster_source", "cluster_week",
+        "n_proposal_rounds", "dup_proposal_record", "traded"]
 
 
 def md(df: pd.DataFrame, floatfmt: str = "{:,.0f}") -> str:
@@ -49,8 +50,9 @@ def main() -> None:
     import pyarrow.compute as pc
     m = pq.read_table(DER / "markets_resolved.parquet", columns=COLS).to_pandas(strings_to_categorical=True)
     for c in m.columns:  # low-cardinality strings back to plain (arrow-backed) str for comparisons
-        if isinstance(m[c].dtype, pd.CategoricalDtype) and c != "event_id":
+        if isinstance(m[c].dtype, pd.CategoricalDtype) and c not in ("event_id", "cluster_id"):
             m[c] = m[c].astype("str").where(m[c].notna(), None)
+    n_no_tags = int(pc.sum(pc.equal(pc.list_value_length(pq.read_table(DER / "markets_resolved.parquet", columns=["tags"])["tags"]), 0)).as_py() or 0)
     m["id"] = np.arange(len(m))  # row counter for size aggregations (Gamma ids are not needed here)
     cid = pq.read_table(DER / "markets_resolved.parquet", columns=["condition_id"])["condition_id"]
     n_cid_null = int(cid.null_count)
@@ -65,6 +67,12 @@ def main() -> None:
     p(md(m.groupby("split").agg(markets=("id", "size"), events=("event_id", "nunique"),
                                 volume_usd=("volumeNum", "sum")).reindex(["train", "validation", "test"])))
 
+    p("\n## Leakage clusters by split (cluster_id: sports game stem > event_id > negRiskMarketID > condition_id)\n")
+    p(md(m.groupby("split").agg(markets=("id", "size"), clusters=("cluster_id", "nunique"), events=("event_id", "nunique"),
+                                weeks=("cluster_week", "nunique")).reindex(["train", "validation", "test"])))
+    p("\ncluster_source shares:\n")
+    p(md(m["cluster_source"].value_counts(normalize=True).to_frame("share"), "{:.4f}"))
+
     # ---- category x quarter
     ct = pd.crosstab(m["end_quarter"], m["category"]).reindex(columns=CATS, fill_value=0)
     ct["total"] = ct.sum(axis=1)
@@ -72,7 +80,7 @@ def main() -> None:
     ct.index.name = "quarter"
     p("\n## Markets by category x endDate quarter (all markets)\n")
     p(md(ct))
-    mv = m[m["volumeNum"].fillna(0) >= 10_000]
+    mv = m.loc[m["volumeNum"].fillna(0) >= 10_000, ["end_quarter", "category"]]
     ct2 = pd.crosstab(mv["end_quarter"], mv["category"]).reindex(columns=CATS, fill_value=0)
     ct2["total"] = ct2.sum(axis=1)
     ct2.loc["total"] = ct2.sum()
@@ -92,13 +100,13 @@ def main() -> None:
 
     # ---- fees
     p("\n## Fee-enabled share by quarter (all markets; and volume-weighted)\n")
-    fe = m.assign(fe=m["feesEnabled"].fillna(False).astype(bool), v=m["volumeNum"].fillna(0))
+    fe = m[["end_quarter", "feesEnabled", "volumeNum", "fee_rate"]].assign(fe=m["feesEnabled"].fillna(False).astype(bool), v=m["volumeNum"].fillna(0))
     g = fe.groupby("end_quarter").apply(lambda d: pd.Series({
         "markets": len(d), "share_fee_enabled": d["fe"].mean(),
         "vol_share_fee_enabled": (d["v"] * d["fe"]).sum() / max(d["v"].sum(), 1e-9),
         "share_feeSchedule_present": d["fee_rate"].notna().mean()}), include_groups=False)
     p(md(g, "{:.3f}"))
-    t = m[m["split"] == "test"]
+    t = m.loc[m["split"] == "test", ["id", "category", "feesEnabled", "fee_rate", "feeType", "fee_exponent", "fee_rebate_rate"]]
     p("\n### TEST period (2026-01-01..2026-10-15) fee schedule by category: share fee-enabled, (rate, exponent, rebate) combos\n")
     tt = t.assign(fe=t["feesEnabled"].fillna(False).astype(bool))
     p(md(tt.groupby("category").agg(markets=("id", "size"), share_fee_enabled=("fe", "mean"),
@@ -133,15 +141,39 @@ def main() -> None:
     dc = m.groupby("category").agg(markets=("id", "size"), has_disputed=("has_disputed", "mean"),
                                    multi_proposal=("multi_proposal", "mean"), split_50_50=("resolution", lambda s: (s == "split_50_50").mean())).reindex(CATS)
     p(md(dc, "{:.4f}"))
-    mv2 = m[m["volumeNum"].fillna(0) >= 10_000]
+    mv2 = m.loc[m["volumeNum"].fillna(0) >= 10_000, ["id", "category", "has_disputed", "multi_proposal", "resolution"]]
     dcv = mv2.groupby("category").agg(markets=("id", "size"), has_disputed=("has_disputed", "mean"),
                                       multi_proposal=("multi_proposal", "mean"), split_50_50=("resolution", lambda s: (s == "split_50_50").mean())).reindex(CATS)
     p("\nDispute / 50-50 incidence by category, markets with volume >= $10k:\n")
     p(md(dcv, "{:.4f}"))
     p("\nmulti_proposal x has_disputed (counts):\n")
     p(md(pd.crosstab(m["multi_proposal"], m["has_disputed"])))
-    p("\nn_proposed distribution:\n")
+    p("\nn_proposed (raw 'proposed' records) distribution:\n")
     p(md(m["n_proposed"].value_counts().sort_index().to_frame("markets")))
+    p("\nn_proposal_rounds (runs of consecutive 'proposed') distribution:\n")
+    p(md(m["n_proposal_rounds"].value_counts().sort_index().to_frame("markets")))
+    p("\nshare with duplicate consecutive 'proposed' records (recording artefact) by quarter:\n")
+    p(md(m.groupby("end_quarter").agg(dup_proposal_record=("dup_proposal_record", "mean")), "{:.4f}"))
+    p("\n## Traded proxy (volumeNum > 0 or lastTradePrice present) share, volumeNum null share, enableOrderBook by quarter / category\n")
+    p(md(m.groupby("end_quarter").agg(markets=("id", "size"), traded=("traded", "mean"),
+                                      volume_null=("volumeNum", lambda s: s.isna().mean()),
+                                      orderbook_false=("enableOrderBook", lambda s: (s == False).mean())), "{:.4f}"))  # noqa: E712
+    p(md(m.groupby("category").agg(markets=("id", "size"), traded=("traded", "mean")).reindex(CATS), "{:.4f}"))
+    p("\nTraded-proxy markets only, by category x quarter:\n")
+    mt = m.loc[m["traded"], ["id", "end_quarter", "category", "split", "structure", "has_disputed", "multi_proposal", "resolution", "feesEnabled"]]
+    ct3 = pd.crosstab(mt["end_quarter"], mt["category"]).reindex(columns=CATS, fill_value=0)
+    ct3["total"] = ct3.sum(axis=1)
+    ct3.loc["total"] = ct3.sum()
+    ct3.index.name = "quarter"
+    p(md(ct3))
+    p("\nTraded markets: structure share by split, dispute and 50-50 incidence by split:\n")
+    p(md(pd.crosstab(mt["split"], mt["structure"], normalize="index").reindex(["train", "validation", "test"]), "{:.4f}"))
+    p(md(mt.groupby("split").agg(markets=("id", "size"), has_disputed=("has_disputed", "mean"),
+                                 multi_proposal=("multi_proposal", "mean"),
+                                 split_50_50=("resolution", lambda s: (s == "split_50_50").mean()),
+                                 fee_enabled=("feesEnabled", lambda s: s.fillna(False).astype(bool).mean())
+                                 ).reindex(["train", "validation", "test"]), "{:.4f}"))
+    del mt
 
     # ---- settlement lag
     p("\n## Settlement lag: closedTime - endDate (hours)\n")
@@ -155,11 +187,11 @@ def main() -> None:
     p("\nby quarter:\n")
     p(md(m.groupby("end_quarter")["settle_lag_h"].apply(lagstats).unstack(), "{:,.2f}"))
     p("\nsports: closedTime - gameStartTime (hours), markets with gameStartTime:\n")
-    sp = m[m["category"] == "sports"]
+    sp = m.loc[m["category"] == "sports", ["settle_lag_game_h", "gameStartTime", "has_disputed", "multi_proposal"]]
     p(md(pd.concat({"sports_vs_gameStart": lagstats(sp["settle_lag_game_h"])}, axis=1).T, "{:,.2f}"))
     p(f"\nnull closedTime: {m['closedTime'].isna().sum():,}; null gameStartTime among sports: {sp['gameStartTime'].isna().mean():.3f}")
     p("\nsettlement lag (closedTime - endDate, h) by dispute group, non-sports only (sports endDate is often a deadline):\n")
-    nsp = m[m["category"] != "sports"].assign(grp=lambda d: np.select(
+    nsp = m.loc[m["category"] != "sports", ["settle_lag_h", "has_disputed", "multi_proposal"]].assign(grp=lambda d: np.select(
         [d["has_disputed"], d["multi_proposal"]], ["disputed", "multi_proposal_no_dispute"], "single_proposal"))
     p(md(nsp.groupby("grp")["settle_lag_h"].apply(lagstats).unstack(), "{:,.2f}"))
     p("\nsports: closedTime - gameStartTime (h) by dispute group:\n")
@@ -185,10 +217,11 @@ def main() -> None:
 
     # ---- category mapping holdout
     p("\n## Category rule vs feeType (rule never sees feeType)\n")
-    lab = m[m["category_fee"].notna()].copy()
-    lab["period"] = np.select([lab["endDate"] < pd.Timestamp("2026-05-01", tz="UTC"),
+    lab = m.loc[m["category_fee"].notna(), ["id", "endDate", "category_fee", "category_rule"]].copy()
+    # categories.py: tag sets / precedence were designed on endDate 2026-01-01..2026-06-30 (feeType as reference)
+    lab["period"] = np.select([lab["endDate"] < pd.Timestamp("2026-01-01", tz="UTC"),
                                lab["endDate"] < pd.Timestamp("2026-07-01", tz="UTC")],
-                              ["pre-2026-05 (not used in design)", "2026-05..06 (design)"], "2026-07..10 (holdout)")
+                              ["pre-2026 (feeType rare)", "2026-01..06 (design)"], "2026-07..10 (holdout)")
     lab["agree"] = lab["category_fee"] == lab["category_rule"]
     p(md(lab.groupby("period").agg(n=("id", "size"), agree=("agree", "mean")), "{:.4f}"))
     ho = lab[lab["period"].str.startswith("2026-07")]
@@ -230,11 +263,12 @@ def main() -> None:
         "feeSchedule_rate_vs_pmr_table_mismatch_TEST": None,
         "secondsDelay_gt0": int((m["secondsDelay"].fillna(0) > 0).sum()),
         "tick_size_counts": m["orderPriceMinTickSize"].value_counts(dropna=False).head(6).to_dict(),
+        "markets_with_no_tags": n_no_tags,
         "sportsMarketType_present_share_in_sports": m.loc[m["category"] == "sports", "sportsMarketType"].notna().mean(),
     }
     sys.path.insert(0, str(ROOT))
     from pmr import fees
-    tt = m[(m["split"] == "test") & m["fee_rate"].notna() & (m["feesEnabled"] == True)]  # noqa: E712
+    tt = m.loc[(m["split"] == "test") & m["fee_rate"].notna() & (m["feesEnabled"] == True), ["fee_rate", "category", "feeType"]]  # noqa: E712
     mm = tt["fee_rate"] != tt["category"].map(fees.TAKER_RATE)
     dq["feeSchedule_rate_vs_pmr_table_mismatch_TEST"] = {"n_fee_markets": len(tt), "n_mismatch": int(mm.sum()),
                                                          "by_feeType": tt[mm].groupby(["feeType", "fee_rate"]).size().sort_values(ascending=False).head(10).to_dict()}

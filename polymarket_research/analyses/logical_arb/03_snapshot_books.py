@@ -33,13 +33,17 @@ OUTDIR = ROOT / "data" / "derived" / "la_books"
 OUTDIR.mkdir(parents=True, exist_ok=True)
 LEVELS = 30
 
-RCOLS = ["ma", "mb", "clobTokenIds_a", "clobTokenIds_b", "event_slug_a", "event_slug_b"]
-R = pd.concat([pd.read_parquet(f, columns=RCOLS) for f in
+# relation files may be slim (family,key,ma,oa,mb,ob,note); token ids come from the market pull of the same tag.
+# la_extra_markets_<tag>.parquet (column 'id') adds markets used by multi-leg checks (06_count_sets).
+R = pd.concat([pd.read_parquet(f, columns=["ma", "mb"]) for f in
                sorted((ROOT / "data" / "derived").glob(f"la_relations*_{DATE}.parquet"))])
-legs = pd.concat([
-    R[["ma", "clobTokenIds_a", "event_slug_a"]].set_axis(["mid", "tok", "slug"], axis=1),
-    R[["mb", "clobTokenIds_b", "event_slug_b"]].set_axis(["mid", "tok", "slug"], axis=1),
-]).drop_duplicates("mid")
+ids = pd.unique(pd.concat([R.ma.astype(str), R.mb.astype(str)]))
+xf = ROOT / "data" / "derived" / f"la_extra_markets_{DATE}.parquet"
+if xf.exists():
+    ids = pd.unique(pd.concat([pd.Series(ids), pd.read_parquet(xf).id.astype(str)]))
+MK = pd.read_parquet(ROOT / "data" / "derived" / f"la_markets_{DATE}.parquet", columns=["id", "clobTokenIds", "event_slug"])
+MK["id"] = MK["id"].astype(str)
+legs = MK[MK.id.isin(set(ids))].drop_duplicates("id").set_axis(["mid", "tok", "slug"], axis=1)
 legs["tok0"] = legs.tok.map(lambda s: json.loads(s)[0])
 legs = legs.sort_values(["slug", "mid"])
 TOKS = legs.tok0.tolist()

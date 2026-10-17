@@ -40,6 +40,15 @@ def addr_set(which: str) -> dict[str, str]:
         d = pd.read_parquet(DERIVED / "linkage_deposit_sources.parquet").dropna(subset=["source"])
         keep = d[d.source_code.str.startswith("EIP-7702 EOA -> 0xe6cae83b") | (d.source_code == "contract(45B)")]
         return {a: "hop2:" + "|".join(sorted(set(g.label))) for a, g in keep.groupby("source")}
+    if which == "wdr":
+        # Relay withdrawal recipients of the three wallets (linkage_03), plus the two Ethereum sinks found in
+        # linkage_06/07 (same EOA addresses exist on Polygon); added in the resumed run
+        r = pd.read_parquet(DERIVED / "linkage_relay_requests.parquet")
+        w = r[r.queried_label.str.endswith(":wallet") & r.recipient.str.match(r"^0x[0-9a-f]{40}$")]
+        s = {a: "wdr:" + "|".join(sorted({x.split(":")[0] for x in g.queried_label})) for a, g in w.groupby("recipient")}
+        s.setdefault("0xb08b85827f803c37b5a3163ec1f03ce6b21e317d", "sinkA")
+        s.setdefault("0x33193e1592ff490f21f15bd877736aacf3cbb072", "sinkB")
+        return s
     raise SystemExit(which)
 
 

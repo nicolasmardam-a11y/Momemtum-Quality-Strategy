@@ -14,6 +14,12 @@ thousands of members per date, so the export uses a fixed, deterministic random 
 One query per (D, wallet chunk); a chunk whose packed result overflows the 1 MB cap is halved (wallets), and a single
 heavy wallet is split into time slices for its fills (decision rows only in the slice that starts at D).
 Raw chunks: data/derived/pit_wallets/eval_chunks/; merged by 06b_eval_merge.py.
+Format v2 (addendum A9, 2026-10-17T22:00Z; CryptoHouse quota of 120 queries/hour): fill export capped at the first
+1,000 BUY fills per (D, wallet) by timestamp (plus ties in the 1,000th fill's second); decision rows no longer carry
+fields re-joinable from token_meta_pit (c, e, p, r, cat), the first fill is identified by its tx hash (UInt256), and
+the F2 input is the server-side previous active day index (prev_day, -1 if none in [D-61d, t0 day)).
+Per-month wallet buy counts and caps are saved as eval_chunks/counts_D<D0>.parquet. Chunks written in format v1
+(months completed before A9) are normalised and capped locally by 06b_eval_merge.py with the same rule.
 """
 from __future__ import annotations
 
@@ -32,15 +38,18 @@ import ch  # noqa: E402
 OUT = ROOT / "data" / "derived" / "pit_wallets"
 EXCH = "('0x4bfb41d5b3570defd03c39a9a4d8de6bd8b8982e', '0xc5d563a36ae78145c45a50134d48a1215220f80a')"
 META_STRUCT = "k UInt64, c UInt32, e UInt32, p Int8, r UInt32, cat UInt8"
-Q_STRUCT = "w String, wi UInt32, e2 UInt8"
+Q_STRUCT = "w String, wi UInt32, e2 UInt8, cut UInt32"
+FILL_CAP = 1000     # per (D, wallet) BUY fills in the fill export (A9)
 CAP_DEC = 1000      # wallets per (D, screen) in the decision export
 CAP_FILL = 150      # wallets per (D, screen) in the fill export
-TARGET_BYTES = 650_000
+TARGET_BYTES = 900_000
 
 COUNT_SQL = """
-SELECT groupArray((wi, n)) FROM (
-  SELECT q.wi AS wi, n FROM (
-    SELECT maker AS w, toUInt32(count()) AS n, toUInt32(uniqExact(taker_asset_id)) AS nt FROM polymarket.orders_filled
+SELECT groupArray((wi, n, nt, cut)) FROM (
+  SELECT q.wi AS wi, n, nt, cut FROM (
+    SELECT maker AS w, toUInt32(count()) AS n, toUInt32(uniqExact(taker_asset_id)) AS nt,
+           toUInt32(if(count() > {cap}, arrayElement(arraySort(groupArray(toUInt32(timestamp))), {cap}), 0)) AS cut
+    FROM polymarket.orders_filled
     WHERE is_deleted = 0 AND maker_asset_id = '0' AND timestamp >= {D0} AND timestamp < {D1} AND maker IN (SELECT w FROM q)
     GROUP BY maker) AS c INNER JOIN q ON c.w = q.w)
 """
@@ -73,7 +82,7 @@ WITH
     FROM f GROUP BY w, k
   ),
   wt2 AS (
-    SELECT wt0.*, m.k != 0 AS has_meta, m.c AS c, m.e AS e, m.p AS p, m.r AS r, m.cat AS cat
+    SELECT wt0.*, m.k != 0 AS has_meta, m.e AS e
     FROM wt0 LEFT JOIN m ON wt0.k = m.k
   ),
   wt3 AS (
@@ -84,18 +93,25 @@ WITH
       groupUniqArrayArray(days) OVER (PARTITION BY w) AS w_days
     FROM wt2
   )
-SELECT groupArray((q.wi, k, toUInt8(has_meta), c, e, p, r, cat,
-                   {first} AND k = kdec AND t0e >= {D0} AND t0e < {D1} AS is_new,
+SELECT groupArray((wi, k, toUInt8(has_meta), is_new,
                    if(is_new, t0e, 0), if(is_new, toFloat32(ep_sh), 0), if(is_new, toFloat32(ep_usd), 0),
                    if(is_new, toFloat32(ep_ssh), 0), if(is_new, toFloat32(usd10m), 0), if(is_new, toFloat32(sh_first), 0),
-                   if(is_new, toFloat32(usd_first), 0), if(is_new, toFloat32(usd_first_taker), 0), if(is_new, ep_n, 0),
-                   if(is_new, fid, ''), w_last_before, if(is_new, w_days, CAST([], 'Array(UInt8)')), wb)) AS a
-FROM wt3 INNER JOIN q ON wt3.w = q.w
-WHERE length(wb) > 0 OR ({first} AND k = kdec AND t0e >= {D0} AND t0e < {D1})
+                   if(is_new, toFloat32(usd_first), 0), if(is_new, toFloat32(usd_first_taker), 0), toUInt32(if(is_new, ep_n, 0)),
+                   if(is_new, reinterpretAsUInt256(reverse(unhex(substring(fid, 3, 64)))), toUInt256(0)), w_last_before,
+                   if(is_new, prev_day, toInt16(-1)), wbc)) AS a
+FROM (
+  SELECT wt3.k AS k, has_meta, t0e, ep_sh, ep_usd, ep_ssh, usd10m, sh_first, usd_first, usd_first_taker, ep_n, fid,
+         w_last_before, q.wi AS wi, q.cut AS cut,
+         {first} AND wt3.k = kdec AND t0e >= {D0} AND t0e < {D1} AS is_new,
+         arrayFilter(x -> cut = 0 OR x.1 <= cut, wb) AS wbc,
+         intDiv(t0e, 86400) - {day0} AS dd,
+         if(arrayExists(x -> x < dd, w_days), toInt16(arrayMax(arrayFilter(x -> x < dd, w_days))), toInt16(-1)) AS prev_day
+  FROM wt3 INNER JOIN q ON wt3.w = q.w)
+WHERE length(wbc) > 0 OR is_new
 """
 
-COLS = ["wi", "k", "has_meta", "c_idx", "e_idx", "p", "r", "cat", "is_new", "t0", "ep_sh", "ep_usd", "ep_ssh", "usd10m",
-        "sh_first", "usd_first", "usd_first_taker", "ep_n", "first_fill_id", "w_last_before", "w_days", "wb"]
+COLS = ["wi", "k", "has_meta", "is_new", "t0", "ep_sh", "ep_usd", "ep_ssh", "usd10m",
+        "sh_first", "usd_first", "usd_first_taker", "ep_n", "first_tx_u256", "w_last_before", "prev_day", "wb"]
 
 
 def months():
@@ -129,18 +145,23 @@ def run(i0: int, i1: int):
     for i, (D0, D1) in enumerate(months()):
         if i < i0 or i > i1:
             continue
+        if (cdir / f"D{D0}_v1done").exists():   # month completed in format v1 before A9; kept as is
+            continue
         m = mem[(mem.D == D0) & mem.in_dec]
         if m.empty:
             continue
         g = m.groupby("wallet").agg(e2=("in_fill", "max"), n_win=("n_win", "max"))
-        qtxt = "".join(f"{w}\t{widx[w]}\t{int(r.e2)}\n" for w, r in g.iterrows())
-        b = ch.q(COUNT_SQL.format(D0=D0, D1=D1), {"q": (Q_STRUCT, qtxt)})
-        cnt = {int(a): (int(n), int(nt)) for a, n, nt in b["data"][0][0]}
-        # estimated bytes per wallet: decision rows (<= tokens touched in window, ~200 B each) + fills (45 B, e2 only)
+        qtxt = "".join(f"{w}\t{widx[w]}\t{int(r.e2)}\t0\n" for w, r in g.iterrows())
+        b = ch.q(COUNT_SQL.format(D0=D0, D1=D1, cap=FILL_CAP), {"q": (Q_STRUCT, qtxt)})
+        cnt = {int(a): (int(n), int(nt), int(cut)) for a, n, nt, cut in b["data"][0][0]}
+        pd.DataFrame([{"D": D0, "wi": a, "n_buys_window": v[0], "n_tokens_bought_window": v[1], "fill_cap_ts": v[2]}
+                      for a, v in cnt.items()]).to_parquet(cdir / f"counts_D{D0}.parquet", index=False)
+        cut = {w: cnt.get(widx[w], (0, 0, 0))[2] for w in g.index}
+        # estimated bytes per wallet: decision rows (<= tokens bought in window, ~100 B each) + capped fills (45 B, e2 only)
         est = {}
         for w, r in g.iterrows():
-            n, nt = cnt.get(widx[w], (0, 0))
-            est[w] = 200 * nt + (45 * n if r.e2 else 0) + 60
+            n, nt, _ = cnt.get(widx[w], (0, 0, 0))
+            est[w] = 85 * nt + (45 * min(n, int(FILL_CAP * 1.05)) if r.e2 else 0) + 60
         order = sorted(g.index, key=lambda w: est[w])
         chunks, cur, tot = [], [], 0
         for w in order:
@@ -152,7 +173,7 @@ def run(i0: int, i1: int):
         print(f"D={datetime.fromtimestamp(D0, timezone.utc):%Y-%m} wallets={len(g)} (fill-export {int(g.e2.sum())}) "
               f"buys_all={sum(v[0] for v in cnt.values())} chunks={len(chunks)}", flush=True)
         for j, ws in enumerate(chunks):
-            qq = "".join(f"{w}\t{widx[w]}\t{int(g.at[w, 'e2'])}\n" for w in ws)
+            qq = "".join(f"{w}\t{widx[w]}\t{int(g.at[w, 'e2'])}\t{cut[w]}\n" for w in ws)
             export(cdir, D0, D1, f"c{j:04d}", ws, qq, meta, D0, D1)
 
 
@@ -182,10 +203,20 @@ def export(cdir, D0, D1, tag, ws, qq, meta, S0, S1, depth=0):
         print(f"  {tag} FAILED ({len(ws)} wallets): {str(e)[-200:]}", flush=True)
         return
     df = pd.DataFrame(body["data"][0][0], columns=COLS)
+    df["fmt"] = 2
+    df["first_tx"] = ["0x" + format(int(x), "064x") if int(x) else "" for x in df.first_tx_u256]
+    df = df.drop(columns=["first_tx_u256"])
+    # wb = [(ts, shares, usd, is_taker, tx as UInt256 decimal string)] -> typed list columns (parquet needs one type)
+    df["wb_ts"] = df.wb.map(lambda a: [int(x[0]) for x in a])
+    df["wb_sh"] = df.wb.map(lambda a: [float(x[1]) for x in a])
+    df["wb_usd"] = df.wb.map(lambda a: [float(x[2]) for x in a])
+    df["wb_taker"] = df.wb.map(lambda a: [bool(x[3]) for x in a])
+    df["wb_tx"] = df.wb.map(lambda a: ["0x" + format(int(x[4]), "064x") for x in a])
+    df = df.drop(columns=["wb"])
     df["D"] = D0; df["slice_start"] = S0; df["slice_end"] = S1
     df.to_parquet(p, index=False)
     print(f"  {tag}: {len(ws)} wallets, {len(df)} rows, {int(df.is_new.astype(bool).sum())} new decisions, "
-          f"{sum(len(x) for x in df.wb)} buys, {round(time.time() - t, 1)}s", flush=True)
+          f"{sum(len(x) for x in df.wb_ts)} buys, {round(time.time() - t, 1)}s", flush=True)
 
 
 if __name__ == "__main__":

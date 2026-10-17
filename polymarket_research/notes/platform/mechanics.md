@@ -51,15 +51,21 @@ Scripts (all read-only), in `analyses/mechanics/`:
 3. **"Buy all YES" in a v1 neg-risk event locks capital until resolution.** The legacy adapter has no horizontal merge.
    In augmented events (placeholders + "Other"), the tradable YES legs are **not** a complete set over time. **VERIFIED** (ABI/source + live event).
 4. **No multi-leg order exists on the CLOB.** Every leg is a separate order with its own leg risk: partial fills, the 1–3 s sports
-   delay during which an order cannot be cancelled, and the 150 ms crypto taker delay. Each leg also pays its own taker fee
+   delay during which an order cannot be cancelled, and the 150 ms crypto taker delay (5m/15m/1h up/down markets only **[corrected by verifier 2026-10-17]**). Each leg also pays its own taker fee
    (`rate·p·(1−p)` per share), and the minimum size is 5 shares per leg.
 5. **Capital recycles fast once you hold the tokens.** A matched trade lands on-chain about 2.3 s after the match (median, n=397). A
    merge or convert is one more transaction (Polygon blocks ≈1.5 s; gasless through the relayer for smart wallets). Redemption by
    the AutoRedeemer lands about 12 s after resolution (median, n=150 conditions). **The slow part is resolution itself:**
    the median from `endDate` to on-chain resolution is about 2–3 h for UMA markets and about 1 min for Chainlink crypto up/down markets. A dispute adds days.
+   **[corrected by verifier 2026-10-17]** For sports, Gamma `endDate` is the scheduled **start**, not the end. It equals
+   `gameStartTime` on 97.8% of 1,434 sports markets closed 2026-10-17 21:42–21:57 UTC. So the sports "3 h after
+   `endDate`" is about 3 h after kick-off, which is roughly 1 h after a 2-hour game ends. In that fresh sample,
+   start-to-close was p10 2.4 h, median 4.3 h and p90 8.9 h (`data/derived/verification_recent_closed_markets.parquet`).
+   On-chain, the UMA challenge window on these markets is 900 s (see §4.2).
 6. **Resolution tail risks are real but rare.** "disputed" appears in the Gamma status history of 13 of 37,236 sampled closed
    markets (0.035%). Excluding sports and crypto, the rate is 6 of 960 (0.6%). **50-50 payouts hit 1.7% of sampled sports markets**, mostly
-   unplayed sub-markets. Admins can flag and manually resolve at several layers.
+   unplayed sub-markets. **[corrected by verifier 2026-10-17]** The rate depends on market-type mix: 0.9–3.2% across the
+   six windows, but 0.29% in a fresh soccer-heavy sample of 3,807. See §4.4. Admins can flag and manually resolve at several layers.
 
 ---
 
@@ -303,8 +309,8 @@ VERIFIED ([/trading/matching-engine](https://docs.polymarket.com/trading/matchin
 
 | Delay | Where | Size | Evidence |
 |---|---|---|---|
-| Sports/game delay (`secondsDelay`, CLOB `sd`) | **sports only**: 1 s on 237,349 open markets (92% of open sports markets); **3 s on 533** (CS2 odd/even kills/rounds, cricket props, a few soccer); none outside sports | 1–3 s | census; CLOB `/clob-markets` `sd` matched Gamma in 40 of 40 sampled markets. VERIFIED |
-| Crypto taker delay (`itode`) | crypto **up/down** markets (12 of 12 sampled `itode:true`; 0 of 48 in other categories) | **150 ms** since 2026-09-04 (was 250 → 50 → 150) | [changelog](https://docs.polymarket.com/changelog/predictions.md). The order-lifecycle doc and OpenAPI still say 250 ms |
+| Sports/game delay (`secondsDelay`, CLOB `sd`) | **sports only**: 1 s on 237,349 open markets (92% of open sports markets); **3 s on 533** (CS2 odd/even kills/rounds, cricket props, a few soccer); none outside sports. **[corrected by verifier 2026-10-17]** One exception: a stale weather market ("highest temperature in Atlanta … May 15", still flagged open) has `sd`=3 live. Legacy `sports_fees_v2` futures (e.g. UCL/EPL winner) have no delay | 1–3 s | census; CLOB `/clob-markets` `sd` matched Gamma in 40 of 40 sampled markets. VERIFIED |
+| Crypto taker delay (`itode`) | crypto **up/down** markets (12 of 12 sampled `itode:true`; 0 of 48 in other categories). **[corrected by verifier 2026-10-17]** Not all of them. Live `/clob-markets` shows `itode:true` on **5-min, 15-min and hourly** crypto up/down markets (every one of ~200 hourly markets checked). It is absent on **4-hour** (`*-updown-4h`) and **daily** (`*-up-or-down-on-<date>`) up/down markets and on price-level crypto markets (`*-above-*`, "will the price"). It is also `true` on some **finance** up/down markets: AAPL, SPY, SPCX and MU, but not SPX, DAX, NIK and other indices. This matches the docs' "selected crypto and finance up/down markets" ([order-lifecycle](https://docs.polymarket.com/concepts/order-lifecycle.md)) | **150 ms** since 2026-09-04 (was 250 → 50 → 150) | [changelog](https://docs.polymarket.com/changelog/predictions.md). The order-lifecycle doc and OpenAPI still say 250 ms |
 
 Semantics (VERIFIED, [order lifecycle](https://docs.polymarket.com/concepts/order-lifecycle.md)): a marketable order is held (status
 `delayed`). **It cannot be cancelled during the delay.** Balance, market and risk checks rerun when the delay ends, and the order is then
@@ -369,6 +375,12 @@ The docs say the bond is "typically $750" and the challenge period is "2 hours".
 | `umaReward` | 0.8: 233,512; 5: 35,688; 0.6/3.5/1.5/2/20/10: the rest |
 | `customLiveness` (s) | **900**: 88,960 (sports 84,741; weather 3,102; finance 1,109); 0 = default 7200: 39,028; 600: 1,362 (crypto); 1,800: 3,120; 7,200: 830; 3,600: 215; null: 154,203 |
 
+**On-chain confirmation (verifier, 2026-10-17).** Over the last 3,000 blocks (~75 min), `QuestionInitialized` events from
+adapters `0x6507…` and `0x69c4…` showed `proposalBond` = 250 pUSD on 2,571 questions and 500 on 187, with none at 750.
+The first 150 `ProposePrice` events on MOOV2 `0x2c0367a9db231ddebd88a94b4f6461a6e47c58b1` from those adapters all had
+`expirationTimestamp − block time` = 900 s (`analyses/verification/v06_uma_onchain_params.py`). So the Gamma fields
+match what the contracts enforce.
+
 So a typical sports market's challenge window is **15 minutes, not 2 hours**, with a $250 bond. Low bonds and short liveness make faster but cheaper-to-attack
 resolutions. A low bond also caps a disputer's reward.
 
@@ -406,6 +418,13 @@ Request types are BINARY, INCREMENTAL_NEGRISK and ATOMIC_NEGRISK. Gamma shows `r
 - **50-50 resolutions (measured):** 493 of 37,236 (1.32%). **Sports 492/28,921 (1.70%)**: tennis totals and set props, LoL/CS game-3+ props, child moneylines
   (sub-markets that were not played). Crypto 1. No other categories. A position bought at 0.99 pays 0.50 in these cases, a material tail for
   "buy near-certain outcome" sports strategies. VERIFIED (Gamma `outcomePrices` on closed markets).
+  **[corrected by verifier 2026-10-17]** The 1.70% depends on the sample and should not be used as a general rate.
+  - By window, this sample ranges from 0.93% (09-17) to 3.17% (08-20).
+  - A fresh sample of 3,807 sports markets closed 2026-10-17 21:22–22:02 UTC, mostly soccer, had 11 (0.29%).
+  - The data-infrastructure sample (Oct 10–12) had 2 of 2,000 (0.1%).
+  - The 50-50s concentrate in specific market types: tennis match/set totals and set handicaps, esports game-3+ and
+    objective props, and child moneylines.
+  - Model the tail per `sportsMarketType`, not per category.
 - Clarifications: "Additional context" updates are published on-chain via a bulletin board contract and should not change the question's intent
   ([/concepts/resolution](https://docs.polymarket.com/concepts/resolution.md)). `/v2/resolutions.new_version_q` ("rules updated after posing") was true on 1,276 of 2,160 rows, including
   100% of politics, culture and tech. That looks systematic (possibly re-registration), so do not read it as "clarified". UNSUPPORTED interpretation.
@@ -425,7 +444,9 @@ means resolved before `endDate` (early resolution of "by date X" markets, or a p
 | finance | 47 | −5.9 | 0.8 | 18.3 |
 | tech | 287 | −131 | −9.9 | 4.1 |
 
-VERIFIED (sample). The undisputed UMA path is about 2–3 h after the event. Disputed markets add days (4–6+). Early resolution is common: the market
+VERIFIED (sample). The undisputed UMA path is about 2–3 h after the event. **[corrected by verifier 2026-10-17]** For
+sports this is measured from the scheduled start: `endDate` = `gameStartTime` on 97.8% of sports markets (§0.5). It
+is not measured from the end of the game, so the post-game lock-up is shorter than the table suggests. Disputed markets add days (4–6+). Early resolution is common: the market
 closes as soon as a "by date" event happens, so lock-up can end well before `endDate`.
 
 ### 4.6 Redemption and auto-redeem
@@ -499,6 +520,8 @@ They play no part in settlement or resolution of prediction markets.
 8. **`min_order_size` unit:** shares (docs table) vs "USDC notional" (SDK comment).
 9. **CONTEXT.md refinements:** "Positions span Conditional Tokens and a PositionManager". In fact, **no open market is v2**; all trading and settlement today is CTF via CTF Exchange V2 contracts, and v1
    markets carry V2 migration ids for Combos. `secondsDelay` is 1 s on ~92% of open sports markets and 3 s on ~533, never outside sports. Crypto up/down instead has the 150 ms `itode` delay.
+   **[corrected by verifier 2026-10-17]** `itode` is set only on the 5-min, 15-min and hourly crypto up/down markets, not
+   on the 4-hour or daily ones. It is also set on some single-stock/ETF up/down markets (§3.4).
 10. **`pmr.api.books()` caveat (affects other agents):** `POST /books` **does not preserve request order** (8 of 30 two-token requests came back
     reversed). Always key results by `asset_id`. VERIFIED.
 11. **`automaticallyResolved`** is true on every closed market sampled, so it is not a sports auto-resolution signal.

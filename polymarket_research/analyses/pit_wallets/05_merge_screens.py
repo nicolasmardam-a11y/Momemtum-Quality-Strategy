@@ -70,7 +70,7 @@ def main(K: int):
     cand["t_plain"] = cand.mean_edge / np.sqrt(var.clip(lower=1e-12) / cand.n_res)
     # S5 global cut
     s5_rows, thr = [], []
-    for D, g in cand[(cand.flags & 256) > 0].groupby("D"):
+    for D, g in cand[(cand["flags"] & 256) > 0].groupby("D"):
         n_e5 = int(base.loc[base.D == D, "n_res5"].iloc[0])
         n_top = max(1, math.ceil(0.01 * n_e5))
         g = g.sort_values("pnl", ascending=False)
@@ -79,14 +79,14 @@ def main(K: int):
         worst = g.groupby("bucket").pnl.min()
         full = cand[(cand.D == D)]
         ok = bool((worst <= cut).all())
-        thr.append({"D": D, "n_res5": n_e5, "s5_n_top": n_top, "s5_pnl_cut": float(cut), "s5_cut_inside_all_buckets": ok,
+        thr.append({"D": D, "s5_n_top": n_top, "s5_pnl_cut": float(cut), "s5_cut_inside_all_buckets": ok,
                     "s5_n_candidates": len(g)})
         s5_rows.append(g.head(n_top).assign(screen="S5"))
     thr = pd.DataFrame(thr)
     base = base.merge(thr, on="D", how="left")
     mem = []
     for scr, bit in BITS.items():
-        mem.append(cand[(cand.flags & bit) > 0].assign(screen=scr))
+        mem.append(cand[(cand["flags"] & bit) > 0].assign(screen=scr))
     mem.append(pd.concat(s5_rows))
     mem = pd.concat(mem, ignore_index=True)
     mem["D_date"] = pd.to_datetime(mem.D, unit="s", utc=True)
