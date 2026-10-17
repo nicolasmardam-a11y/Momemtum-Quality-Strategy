@@ -1,0 +1,6 @@
+# Raw API responses and large derived datasets are reproducible from pmr/ and are not committed.
+data/raw/
+data/derived/*.parquet
+data/derived/*.sqlite
+alerts/*.sqlite
+alerts/config.local.yaml
