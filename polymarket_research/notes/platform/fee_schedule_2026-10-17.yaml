@@ -1,0 +1,187 @@
+# Polymarket (international, docs.polymarket.com) fee, rebate and incentive schedule as of 2026-10-17.
+# Machine-readable companion to notes/platform/fees_incentives.md (read that file for caveats).
+# status: VERIFIED = checked against official docs and/or live API / on-chain data on 2026-10-17
+#         PLAUSIBLE = consistent with evidence but not directly verified; SECONDARY = news/blog only.
+# Polymarket US (the separate CFTC-regulated app) has a different schedule and is out of scope.
+
+as_of: "2026-10-17"
+scope: "Polymarket international CLOB (Protocol V2, pUSD collateral)"
+
+fee_formula:
+  current:
+    expr: "fee_pusd = shares * rate * p * (1 - p)"
+    applies_since: "<= 2026-04-29 (on-chain); docs formula since ~2026-03-31/04-01 (secondary)"
+    payer: taker_only            # makers never pay a platform fee
+    charged_in: pUSD             # buy: added on top of notional; sell: deducted from proceeds
+    rounding: "5 decimal places; fees < 0.00001 round to 0"
+    per_market_source: "Gamma feeSchedule {rate, exponent, takerOnly, rebateRate}; CLOB /clob-markets/{condition_id} fd {r, e, to}"
+    status: VERIFIED
+    sources:
+      - https://docs.polymarket.com/trading/fees.md
+      - https://docs.polymarket.com/market-data/market-details.md
+      - https://docs.polymarket.com/programs/builders/fees.md
+      - "on-chain OrderFilled.fee, 20,740 V2 taker fills at 21 dates 2026-04-29..2026-10-16 (analyses/fees/onchain_fee_sampler.py)"
+  legacy_v1:
+    expr: "fee = shares * p * rate * (p * (1 - p)) ** exponent"
+    used_for: "15-min crypto (2026-01-05), 5-min crypto (2026-02-12), all crypto (new markets from 2026-03-06): rate 0.25, exponent 2 (peak 1.56% of notional at p=0.5); NCAAB/Serie A sports (2026-02-18): rate 0.0175, exponent 1 (peak 0.44%)"
+    also_used_by: "Fee Structure V2 announcement of 2026-03-30 (crypto 0.072, sports 0.03, ...), replaced within days by the current formula"
+    status: PLAUSIBLE   # params VERIFIED on legacy Gamma markets (crypto_15_min, crypto_fees, sports_fees); formula from changelog peak % + secondary
+    sources:
+      - https://docs.polymarket.com/changelog/predictions.md
+      - https://pineanalytics.substack.com/p/polymarket-fee-rollout
+      - https://news.cnyes.com/news/id/6404252
+      - https://igamingbusiness.com/prediction-markets/polymarket-sports-fee-hike-2026/
+
+# Documented category table (docs /trading/fees, /programs/maker-rebates, /programs/taker-rebates).
+categories:
+  crypto:      {taker_rate: 0.07, maker_fee: 0, maker_rebate_share: 0.20, taker_wv_weight: 2.3, gamma_feeType: crypto_fees_v2}
+  sports:      {taker_rate: 0.05, maker_fee: 0, maker_rebate_share: 0.15, taker_wv_weight: 1.0, gamma_feeType: sports_fees_v3,
+                exceptions: [{gamma_feeType: sports_fees_v2, taker_rate: 0.03, maker_rebate_share: 0.25, note: "markets created before 2026-07-10; undocumented; on-chain these were charged 0.05 from 2026-07-11 to at least 07-28 (Gamma shows 0.03) and 0.03 again on 09-03..10-16"},
+                             {gamma_feeType: sports_fees_nfl_cfb_oct26, taker_rate: 0.03, maker_rebate_share: 0.15, note: "NFL + college football game markets created from 2026-09-04; undocumented; 0.03 charged on-chain 2026-10-16"}]}
+  finance:     {taker_rate: 0.04, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.3, gamma_feeType: finance_prices_fees}
+  politics:    {taker_rate: 0.04, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.3, gamma_feeType: politics_fees}
+  mentions:    {taker_rate: 0.04, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.3, gamma_feeType: mentions_fees}
+  tech:        {taker_rate: 0.04, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.3, gamma_feeType: tech_fees}
+  economics:   {taker_rate: 0.05, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.7, gamma_feeType: economics_fees}
+  culture:     {taker_rate: 0.05, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.7, gamma_feeType: culture_fees}
+  weather:     {taker_rate: 0.05, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.7, gamma_feeType: weather_fees}
+  other:       {taker_rate: 0.05, maker_fee: 0, maker_rebate_share: 0.25, taker_wv_weight: 1.7, gamma_feeType: general_fees}
+  geopolitics: {taker_rate: 0.00, maker_fee: 0, maker_rebate_share: null, taker_wv_weight: 0.0, gamma_feeType: null, note: "feesEnabled=false, no feeSchedule; only 29% of markets tagged 'geopolitics' are fee-free - fee class is per market, not per tag"}
+  zero_fees:   {taker_rate: 0.00, maker_rebate_share: 0.0, gamma_feeType: zero_fees, note: "32 open markets (album-release, a few politics/CFB); undocumented"}
+status_categories: VERIFIED   # docs + Gamma + on-chain agree for every documented rate
+
+# Live census of all open Gamma markets (closed=false, include_tag=true), fetched 2026-10-17T15:00Z.
+open_market_census:
+  n_open_markets: 288003
+  fee_enabled_share_of_markets: 0.9959
+  fee_enabled_share_of_vol24h: 0.931
+  total_vol24h_usd_gamma: 54134557
+  exponent_not_1: {count: 1, feeType: crypto_15_min, rate: 0.25, exponent: 2, market: "xrp-updown-5m-1771916400 (Feb 24 2026, stale, never closed)"}
+  by_feeType:   # feeType: [rate, exponent, rebateRate, n_open, share_of_vol24h]
+    sports_fees_v3:            [0.05, 1, 0.15, 215626, 0.4514]
+    politics_fees:             [0.04, 1, 0.25, 11481, 0.1331]
+    culture_fees:              [0.05, 1, 0.25, 2808, 0.1278]
+    none_fee_free:             [0.00, null, null, 1169, 0.0690]
+    sports_fees_nfl_cfb_oct26: [0.03, 1, 0.15, 38967, 0.0515]
+    crypto_fees_v2:            [0.07, 1, 0.20, 5891, 0.0466]
+    sports_fees_v2:            [0.03, 1, 0.25, 2460, 0.0364]
+    weather_fees:              [0.05, 1, 0.25, 3600, 0.0338]
+    economics_fees:            [0.05, 1, 0.25, 999, 0.0295]
+    finance_prices_fees:       [0.04, 1, 0.25, 2730, 0.0138]
+    tech_fees:                 [0.04, 1, 0.25, 1936, 0.0064]
+    general_fees:              [0.05, 1, 0.25, 118, 0.0003]
+    mentions_fees:             [0.04, 1, 0.25, 185, 0.0003]
+    zero_fees:                 [0.00, 1, 0.00, 32, 0.0001]
+    crypto_15_min:             [0.25, 2, 0.20, 1, 0.0]
+  legacy_fields:
+    makerBaseFee_takerBaseFee: "1000 on every fee-enabled market, null on fee-free; not the charged rate (makers pay 0)"
+    clob_fee_rate_endpoint: "GET /fee-rate?token_id= returns base_fee 1000 (fee-enabled) or 0 (fee-free); use /clob-markets fd.r for the rate"
+  data: data/derived/open_market_fees_2026-10-17.parquet
+  status: VERIFIED
+
+taker_rebate_program:
+  start: "2026-05-28"
+  basis: "share of taker fees paid (one exact reconciliation: 18% Gold rebate = 0.18 x a wallet's 2026-06-16 fees to the cent)"
+  weighted_volume: "wV = notional_usd * (1 - entry_price) * category_weight * bonuses; taker trades only; 30-day rolling; updated daily 00:00 UTC; no backfill"
+  tiers:   # [tier, name, wv_30d_min_usd, rebate_share_of_fees, level_up_bonus_usd]
+    - [0, None,     0,        0.00, 0]
+    - [1, Bronze,   2000,     0.03, 10]
+    - [2, Silver,   20000,    0.08, 50]
+    - [3, Gold,     200000,   0.18, 250]
+    - [4, Platinum, 1000000,  0.32, 1500]
+    - [5, Diamond,  4000000,  0.44, 7500]
+    - [6, Obsidian, 10000000, 0.50, 25000]
+  payout: "pUSD, documented daily at 00:00 UTC, $1 minimum; observed payouts for two wallets were batched (2026-06-23, 2026-07-08)"
+  exclusions: ["geopolitics / fee-free markets earn no wV", "omnibus-wallet integrations", "wash/self-matching"]
+  can_change_without_notice: true
+  status: VERIFIED
+  sources: [https://docs.polymarket.com/programs/taker-rebates.md]
+
+maker_rebates:
+  funding: "rebateRate x taker fees collected in the same market"
+  distribution: "daily per market, pro rata to fee_equivalent = shares * rate * p * (1 - p) of the maker's filled orders"
+  share_by_category: {crypto: 0.20, sports: 0.15, sports_legacy_v2: 0.25, others: 0.25, geopolitics: null}
+  payout: "pUSD daily, $1 minimum accrued"
+  per_maker_query: "GET https://clob.polymarket.com/rebates/current?date=YYYY-MM-DD&maker_address=0x.. (public; maker rebates only, not taker)"
+  discretionary: true
+  status: VERIFIED
+  sources: [https://docs.polymarket.com/programs/maker-rebates.md, https://docs.polymarket.com/api-reference/rebates/get-current-rebated-fees-for-a-maker.md]
+
+liquidity_rewards:
+  scoring: "S(v,s) = ((v - s)/v)^2 * b ; v = max spread (cents) from size-cutoff-adjusted midpoint, s = order spread, b = in-game multiplier"
+  sides: "Q_one/Q_two sum bids on m + asks on complement (and vice versa); Q_min = max(min(Q1,Q2), max(Q1/c, Q2/c)) if 0.10 <= mid <= 0.90 else min(Q1,Q2); c = 3.0"
+  sampling: "once per minute at random offset; epoch = UTC day (<= 1,440 samples); two-stage normalization"
+  per_market_params: "Gamma rewardsMinSize (shares), rewardsMaxSpread (cents), clobRewards[].rewardsDailyRate; CLOB /rewards/markets/current"
+  min_payout_usd: 1
+  min_order_age_note: "3.5 s minimum resting time quoted for March Madness 2026 (changelog); order-scoring endpoint mentions a required live duration"
+  live_snapshot_2026_10_17: {markets: 14608, total_daily_rate_usd: 289412, sponsored_daily_usd: 3994, median_market_daily_usd: 3.0, p99_market_daily_usd: 104, max_market_daily_usd: 8850, asset: pUSD}
+  temporary_programs: ["March Madness $2M+ (from 2026-03-17)", "Crypto TWAP $1M through August 2026 (ended)"]
+  status: VERIFIED
+  sources: [https://docs.polymarket.com/programs/liquidity-rewards.md, https://docs.polymarket.com/api-reference/rewards/get-current-active-rewards-configurations.md]
+
+holding_rewards:
+  field: holdingRewardsEnabled
+  rate_stated: {docs_positions_tokens: 0.04, help_center_2026_06_01: 0.0325}
+  mechanics: "position value (Yes+No shares x latest mid) sampled hourly at random; paid daily (activity type YIELD, ~00:10 UTC)"
+  funded_by: "Polymarket Treasury; rate and caps discretionary"
+  open_markets_enabled: {markets: 339, events: 41}
+  observed: "one large holder's YIELD payouts imply ~1.7-1.8% APY on current eligible value (unexplained; open question)"
+  status: VERIFIED   # existence and daily payment; rate UNRESOLVED
+  sources: [https://docs.polymarket.com/concepts/positions-tokens.md, https://help.polymarket.com/en/articles/13364459-holding-rewards]
+
+referral_program:
+  terms_effective: "2026-05-28"
+  eligibility: "referrer lifetime volume >= $10,000"
+  reward: {direct: 0.10, indirect: 0.05, basis: "net fees = fees after the referred user's tier rebate"}
+  caps: "ends when referral reaches Platinum or 30 days after sign-up, whichever first"
+  previous_terms_secondary: "30% of gross taker fees direct / 10% indirect around 2026-03-30 (Pine Analytics)"
+  status: VERIFIED
+  sources: [https://docs.polymarket.com/programs/referral-program.md]
+
+builder_fees:
+  expr: "builder_fee = notional * builder_bps / 10000 (flat, additive to platform fee)"
+  limits_bps: {taker_max: 100, maker_max: 50, default: 0}
+  change_policy: "one change per 7 days, effective 3 days after scheduling"
+  note: "a third-party front end can charge you up to 1% of notional as taker on top of platform fees; makers can be charged up to 0.5%"
+  status: VERIFIED
+  sources: [https://docs.polymarket.com/programs/builders/fees.md]
+
+exchange_contract_cap:
+  max_fee_rate_bps_default: 500   # Fees.sol maxFeeRateBps default 5% of cash value; on-chain sanity cap only
+  source: "github.com/Polymarket/ctf-exchange-v2 src/exchange/mixins/Fees.sol"
+  status: VERIFIED
+
+non_trading_costs:
+  split_merge_redeem: {ratio: "1 pUSD <-> 1 YES + 1 NO; redeem winning token -> 1 pUSD", protocol_fee: 0, status: VERIFIED}
+  gas:
+    deposit_wallet_proxy_safe: "gasless via Polymarket Relayer (Relayer API key; Builder keys capped 100/day unverified, 10k verified, unlimited partner)"
+    eoa: "user pays POL gas for approvals, transfers, split/merge/redeem"
+    trading: "orders are signed off-chain; operator submits settlement"
+    status: VERIFIED
+  deposits: {polymarket_fee: 0, bridge: "Fun.xyz bridge; quote endpoint exposes gasUsd, appFeePercent, swapImpact; minimum checkout USD per asset", live_min_usd: {polygon: 2, arbitrum: 2, base: 2, solana: 2, ethereum: 3, bitcoin: 3.6, tron: 2}, status: VERIFIED}
+  withdrawals: {polymarket_fee: 0, path: "pUSD -> CollateralOfframp -> USDC.e -> Uniswap v3 pool -> native USDC; UI enforces < 10 bp output difference", status: VERIFIED}
+  pusd_wrap_unwrap: {fee: 0, note: "CollateralOnramp.wrap / CollateralOfframp.unwrap 1:1, pausable", status: VERIFIED}
+  order_constraints:
+    min_order_size_shares: 5        # 287,974 of 288,003 open markets; docs disagree on units (shares vs USDC)
+    tick_sizes_open_markets: {"0.01": 239209, "0.001": 48793, "0.0025": 1}
+    seconds_delay_open_markets: {"1": 237644, "3": 544, "0": 4277, "null": 45538}
+    crypto_taker_delay_ms: 150      # since 2026-09-04 14:00 UTC (changelog)
+    status: VERIFIED
+
+history:   # date, event, status, source
+  - ["2026-01-05", "Taker fees + maker rebates on 15-min crypto (peak 1.56% at p=0.5)", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-02-12", "5-min crypto markets launched with fees", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-02-18", "Sports fees on NCAAB and Serie A (announced 2026-02-11); maker rebates computed per market", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-03-06", "Fees extended to all crypto markets (1H/4H/daily/weekly), new markets only", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-03-17", "March Madness $2M+ liquidity rewards", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-03-30", "Fee Structure V2: fees on all categories except geopolitics", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-03-31", "Fees to be computed from Gamma feeSchedule; formula changed to shares*rate*p*(1-p) around 03-31/04-01", PLAUSIBLE, "https://docs.polymarket.com/changelog/predictions.md ; https://news.cnyes.com/news/id/6404252"]
+  - ["2026-04-28", "CLOB V2 + pUSD cutover ~11:00 UTC; feeRateBps removed from orders; fees set at match time; open orders wiped", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-04-29", "On-chain: crypto charged 0.072, sports 0.03, politics/finance/tech/mentions 0.04, econ/culture/weather 0.05", VERIFIED, "on-chain OrderFilled sample"]
+  - ["2026-05-04..2026-05-07", "Crypto rate 0.072 -> 0.070 (on-chain: 0.072 on 05-04 16:00, 0.070 on 05-07 16:00 UTC; undocumented)", VERIFIED, "on-chain OrderFilled sample"]
+  - ["2026-05-04", "Deposit Wallet becomes default for new accounts (gasless via relayer)", VERIFIED, https://docs.polymarket.com/trading/wallets-auth.md]
+  - ["2026-05-28", "Taker Rebate Program live; new referral terms", VERIFIED, https://docs.polymarket.com/programs/taker-rebates.md]
+  - ["2026-07-10", "Sports rate 0.03 -> 0.05, sports maker rebate 25% -> 15% (new markets get sports_fees_v3); on-chain the 0.05 applied to ALL sports markets between 07-10 02:00 and 07-11 02:00 UTC", VERIFIED, https://docs.polymarket.com/changelog/predictions.md]
+  - ["2026-07-28..2026-09-03", "Legacy sports_fees_v2 markets charged 0.03 again (sparse fills)", VERIFIED, "on-chain OrderFilled sample"]
+  - ["2026-08", "Crypto TWAP liquidity rewards $1M (5m/15m/4h), ended", VERIFIED, https://docs.polymarket.com/programs/liquidity-rewards.md]
+  - ["2026-09-04", "First sports_fees_nfl_cfb_oct26 markets (0.03 / 15%) created; undocumented", VERIFIED, "Gamma census"]

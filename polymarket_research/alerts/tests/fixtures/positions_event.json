@@ -1,0 +1,21 @@
+{
+ "body": {
+  "data": [],
+  "pagination": {
+   "has_more": false,
+   "limit": 100,
+   "next_cursor": null,
+   "offset": 0
+  }
+ },
+ "meta": {
+  "note": "OPEN positions in the event",
+  "params": {
+   "event_id": "31552",
+   "user": "0xc8c1f765515347a725afff5faa4f5632dd8d1e41"
+  },
+  "recorded_at_utc": "2026-10-17T15:28:54+00:00",
+  "status": 200,
+  "url": "https://data-api.polymarket.com/v2/positions"
+ }
+}

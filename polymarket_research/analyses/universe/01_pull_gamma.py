@@ -11,7 +11,7 @@ Source: GET https://gamma-api.polymarket.com/markets/keyset?closed=true&include_
         GET /events/keyset?id=..&id=..  for event ids referenced by markets but not found by date window.
 Gamma returns only open markets unless closed=true (CONTEXT.md). Every raw page is stored by
 pmr.http under data/raw/gamma/cache/ (cache=True: resolved markets are treated as immutable history).
-Slim per-window chunks go to data/raw/gamma_universe/{markets,events}/<YYYY-MM>.json.gz.
+Slim per-window chunks go to data/raw/gamma_universe/{markets,events}/<YYYY-MM>.ndjson.gz (+ .meta.json).
 """
 from __future__ import annotations
 
@@ -82,7 +82,8 @@ def write_chunk(path: Path, meta: dict, rows: list[dict]) -> None:
 
 
 def pull_window(kind: str, label: str, lo: str, hi: str) -> tuple[str, int, int]:
-    path = OUT / kind / f"{label}.json.gz"
+    """Stream one end-date window to <label>.ndjson.gz (one slim JSON row per line) + <label>.meta.json."""
+    path = OUT / kind / f"{label}.ndjson.gz"
     if path.exists():
         return label, -1, -1
     params = {"closed": "true", "limit": 100, "end_date_min": lo, "end_date_max": hi}
@@ -91,66 +92,125 @@ def pull_window(kind: str, label: str, lo: str, hi: str) -> tuple[str, int, int]
     else:
         params["include_markets"] = "false"
     t0 = time.time()
-    rows, pages = [], 0
+    n, pages = 0, 0
     p = dict(params)
-    while True:
-        j = request_json(f"{api.GAMMA}/{kind}/keyset", p, source="gamma", cache=True)
-        batch = j.get(kind) or []
-        rows += [slim_market(x) if kind == "markets" else slim_event(x) for x in batch]
-        pages += 1
-        cur = j.get("next_cursor")
-        if not cur or not batch:
-            break
-        p["after_cursor"] = cur
-        if pages % 100 == 0:
-            print(f"  {kind} {label}: {pages} pages, {len(rows)} rows, {time.time() - t0:.0f}s", flush=True)
-    meta = {"kind": kind, "window": [lo, hi], "params": params, "pages": pages, "n": len(rows),
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    with gzip.open(tmp, "wt", compresslevel=3) as f:
+        while True:
+            j = request_json(f"{api.GAMMA}/{kind}/keyset", p, source="gamma", cache=True)
+            batch = j.get(kind) or []
+            for x in batch:
+                f.write(json.dumps(slim_market(x) if kind == "markets" else slim_event(x)) + "\n")
+            n += len(batch)
+            pages += 1
+            cur = j.get("next_cursor")
+            del j
+            if not cur or not batch:
+                break
+            p["after_cursor"] = cur
+            if pages % 200 == 0:
+                print(f"  {kind} {label}: {pages} pages, {n} rows, {time.time() - t0:.0f}s", flush=True)
+    meta = {"kind": kind, "window": [lo, hi], "params": params, "pages": pages, "n": n,
             "built_at_utc": datetime.now(timezone.utc).isoformat(), "endpoint": f"{api.GAMMA}/{kind}/keyset"}
-    write_chunk(path, meta, rows)
-    return label, pages, len(rows)
+    (OUT / kind / f"{label}.meta.json").write_text(json.dumps(meta))
+    tmp.replace(path)
+    return label, pages, n
 
 
-def run(kind: str, start: str, end: str, workers: int = 6) -> None:
+def read_rows(path: Path):
+    with gzip.open(path, "rt") as f:
+        for line in f:
+            yield json.loads(line)
+
+
+def run(kind: str, start: str, end: str, workers: int = int(__import__("os").environ.get("PULL_WORKERS", "6"))) -> None:
     wins = month_windows(start, end)
     # biggest (most recent) windows first so the long tail overlaps with small ones
     wins = sorted(wins, key=lambda w: w[0], reverse=True)
     with ThreadPoolExecutor(workers) as ex:
-        futs = {ex.submit(pull_window, kind, *w): w for w in wins}
+        futs = {ex.submit(pull_window_retry, kind, *w): w for w in wins}
         for f in as_completed(futs):
             try:
                 label, pages, n = f.result()
                 print(f"{kind} {label}: pages={pages} rows={n}", flush=True)
-            except Exception as e:  # keep other windows going; rerun picks up the failed one
-                print(f"FAILED {kind} {futs[f][0]}: {e}", flush=True)
+            except Exception as e:  # keep other windows going; retry as weekly sub-windows
+                label, lo, hi = futs[f]
+                print(f"FAILED {kind} {label}: {e} -> retrying as weekly sub-windows", flush=True)
+                try:
+                    pull_split(kind, label, lo, hi)
+                except Exception as e2:
+                    print(f"FAILED {kind} {label} (weekly split): {e2}", flush=True)
 
 
-def events_missing() -> None:
-    """Fetch parent events referenced by markets but absent from the event date-window pull."""
+def pull_window_retry(kind: str, label: str, lo: str, hi: str, attempts: int = 5):
+    """pmr.http raises at once on 4xx; a transient Cloudflare 403 (HTML) was seen on 2026-10-17 while
+    several agents shared the IP. Retry with back-off; cached pages make each retry cheap. HTTP 500 on a
+    whole month (a server-side query failure) is not retried here but split into weeks by the caller."""
+    for a in range(attempts):
+        try:
+            return pull_window(kind, label, lo, hi)
+        except RuntimeError as e:
+            if "HTTP 500" in str(e) or a == attempts - 1:
+                raise
+            print(f"  retry {kind} {label} after error: {str(e)[:120]}", flush=True)
+            time.sleep(30 * 2 ** a)
+
+
+def pull_split(kind: str, label: str, lo: str, hi: str, days: int = 7) -> None:
+    """Gamma /events/keyset returned HTTP 500 for a full-month window (2026-09, reproducible on 2026-10-17)
+    while week windows worked, so a failed month is re-pulled as consecutive sub-windows labelled
+    <YYYY-MM>w<k>. Overlapping boundary rows are removed later by id de-duplication."""
+    a = datetime.fromisoformat(lo.replace("Z", "+00:00"))
+    b = datetime.fromisoformat(hi.replace("Z", "+00:00"))
+    from datetime import timedelta
+    k = 0
+    while a < b:
+        c = min(a + timedelta(days=days), b)
+        sub = f"{label}w{k}"
+        r = pull_window_retry(kind, sub, a.strftime("%Y-%m-%dT%H:%M:%SZ"), c.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        print(f"{kind} {sub}: pages={r[1]} rows={r[2]}", flush=True)
+        a, k = c, k + 1
+
+
+def events_missing(batch: int = 100, workers: int = 4) -> None:
+    """Fetch parent events referenced by markets but absent from the event date-window pull.
+
+    Referenced ids come from the stage-A parts (column event_ids_all = every event embedded in each
+    market). GET /events/keyset?id=..&id=.. (repeated id params, <=100 per request) was verified on
+    2026-10-17 to return closed events by id; a parent event can still be open while child markets
+    closed, so ids not found with closed=true are re-queried with closed=false.
+    """
+    import pyarrow.parquet as pq
     have = set()
-    for p in (OUT / "events").glob("*.json.gz"):
-        with gzip.open(p, "rt") as f:
-            have |= {str(r["id"]) for r in json.load(f)["rows"]}
+    for p in (OUT / "events").glob("*.ndjson.gz"):
+        have |= {str(r["id"]) for r in read_rows(p)}
     want = set()
-    for p in (OUT / "markets").glob("*.json.gz"):
-        with gzip.open(p, "rt") as f:
-            for r in json.load(f)["rows"]:
-                for e in json.loads(r.get("events_json") or "[]"):
-                    want.add(str(e["id"]))
+    for p in sorted((OUT / "parts").glob("*.parquet")):
+        for ids in pq.read_table(p, columns=["event_ids_all"])["event_ids_all"].to_pylist():
+            want.update(ids or [])
     miss = sorted(want - have, key=int)
     print(f"events referenced={len(want)} have={len(have)} missing={len(miss)}", flush=True)
-    rows = []
-    for i in range(0, len(miss), 50):
-        ids = miss[i:i + 50]
-        for closed in ("true", "false"):  # a parent event can still be open while some child markets closed
-            j = request_json(f"{api.GAMMA}/events/keyset",
-                             {"id": ids, "closed": closed, "include_markets": "false", "limit": 100},
-                             source="gamma", cache=True)
-            rows += [slim_event(x) for x in j.get("events") or []]
-        if (i // 50) % 20 == 0:
-            print(f"  missing batch {i // 50}: rows={len(rows)}", flush=True)
+
+    def fetch(ids: list[str], closed: str) -> list[dict]:
+        j = request_json(f"{api.GAMMA}/events/keyset",
+                         {"id": ids, "closed": closed, "include_markets": "false", "limit": 100},
+                         source="gamma", cache=True)
+        return [slim_event(x) for x in j.get("events") or []]
+
+    rows: list[dict] = []
+    for closed in ("true", "false"):
+        got = {str(r["id"]) for r in rows}
+        todo = [i for i in miss if i not in got]
+        chunks = [todo[i:i + batch] for i in range(0, len(todo), batch)]
+        with ThreadPoolExecutor(workers) as ex:
+            for k, res in enumerate(ex.map(lambda c: fetch(c, closed), chunks)):
+                rows += res
+                if k % 200 == 0:
+                    print(f"  closed={closed} batch {k}/{len(chunks)}: rows={len(rows)}", flush=True)
     meta = {"kind": "events_missing", "n_requested": len(miss), "n": len(rows),
-            "built_at_utc": datetime.now(timezone.utc).isoformat()}
-    write_chunk(OUT / "events" / "_missing_by_id.json.gz", meta, rows)
+            "endpoint": f"{api.GAMMA}/events/keyset?id=..", "built_at_utc": datetime.now(timezone.utc).isoformat()}
+    write_chunk(OUT / "events_missing_by_id.json.gz", meta, rows)
     print(f"missing fetched rows={len(rows)} of {len(miss)}", flush=True)
 
 

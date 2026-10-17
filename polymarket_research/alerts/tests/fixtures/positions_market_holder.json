@@ -1,0 +1,60 @@
+{
+ "body": {
+  "data": [
+   {
+    "archived": false,
+    "avg_price": 0.7899,
+    "condition_id": "0x99827dddc01ac984aee620769e40413164a7965ca059c7f7d8eb1ce46d4c65ea",
+    "current_price": 0.655,
+    "current_size": 1773.5063,
+    "current_value": 1161.6466,
+    "end_date": "2026-10-17",
+    "entry_cost_usdc": 1401.0682,
+    "entry_fees_usdc": 14.71122,
+    "event_id": "1128875",
+    "event_slug": "fl1-str-psg-2026-10-17-more-markets",
+    "first_entry_at": 1792250960,
+    "icon": "",
+    "last_event_at": 1792250961,
+    "mergeable": false,
+    "name": "",
+    "negative_risk": false,
+    "opposite_outcome": "Over",
+    "opposite_token_id": "71257506496060046044885953205981396874164594163209452521601680460043443228203",
+    "outcome": "Under",
+    "outcome_index": 1,
+    "percent_pnl": -17.0885,
+    "percent_realized_pnl": -17.0885,
+    "profile_image": "",
+    "proxy_wallet": "",
+    "realized_pnl": 0.0,
+    "redeemable": false,
+    "slug": "fl1-str-psg-2026-10-17-first-half-team-total-away-1pt5",
+    "status": "OPEN",
+    "title": "RC Strasbourg Alsace vs. Paris Saint-Germain FC: Paris Saint-Germain FC 1st Half O/U 1.5",
+    "token_id": "28565334787824842812526919513638812992729403095288347288565785858143950957326",
+    "total_cost_usdc": 1415.77942,
+    "total_pnl": -239.4216,
+    "total_size": 1773.5063,
+    "unrealized_pnl": -239.4216,
+    "verified": false
+   }
+  ],
+  "pagination": {
+   "has_more": false,
+   "limit": 100,
+   "next_cursor": null,
+   "offset": 0
+  }
+ },
+ "meta": {
+  "note": "OPEN positions of an anonymous recent buyer in one market",
+  "params": {
+   "condition": "0x99827dddc01ac984aee620769e40413164a7965ca059c7f7d8eb1ce46d4c65ea",
+   "user": "<anonymous holder>"
+  },
+  "recorded_at_utc": "2026-10-17T15:29:25+00:00",
+  "status": 200,
+  "url": "https://data-api.polymarket.com/v2/positions"
+ }
+}

@@ -1,0 +1,94 @@
+# Read-only Polymarket bet-alert configuration (example).
+# Run from polymarket_research/:  python -m alerts.run --config alerts/config.example.yaml --once
+# Relative paths below are resolved against polymarket_research/.
+# No credentials belong in this file: Telegram/SMTP settings come only from environment variables.
+version: 1
+
+wallets:
+  # cluster_confidence: confirmed | probable | weak | none. These cluster labels are
+  # placeholders from CONTEXT.md (profile creation times only); update them from
+  # notes/wallets/ once the wallet research is finished.
+  - address: "0x96cfcb0c30942cfcd1cdf76c7d408794d66b1acb"
+    label: mintblade
+    cluster_id: "c-2026-06-02"
+    cluster_confidence: weak
+    cluster_note: "Profile created 2026-06-02T14:47Z, 14 min before GRIMDRIP; no on-chain link verified."
+    thresholds:
+      min_usdc: 1000
+  - address: "0x3f87d51f27ba6e19ec52aaeebb68559a839c742c"
+    label: GRIMDRIP
+    cluster_id: "c-2026-06-02"
+    cluster_confidence: weak
+    cluster_note: "Profile created 2026-06-02T15:01Z, 14 min after mintblade; no on-chain link verified."
+    thresholds:
+      min_usdc: 1000
+  - address: "0x5e4c3b5b81171e2ca4ab776ac0d6bba787f9dba2"
+    label: endlessFate
+    cluster_confidence: none
+    cluster_note: "Shared TAKER_REBATE timestamps with mintblade are daily batch payouts, not evidence of a link."
+    thresholds:
+      min_usdc: 1000
+
+poll:
+  interval_seconds: 30        # each poll is one /v2/activity request per wallet (+ pages when backfilling)
+  jitter_seconds: 5
+  overlap_seconds: 600        # re-read window before the watermark; max tolerated late ingestion
+  ingest_safety_seconds: 30   # watermark = server time - max(this, /v2/status serving lag)
+  page_limit: 500             # Data API v2 caps limit at 1000
+  activity_types: [TRADE, SPLIT, MERGE, REDEEM, CONVERSION]
+  initial_backfill_hours: 24  # first poll of a new wallet: baseline, alerts suppressed (see alerting)
+  gap_horizon_hours: 6        # larger gaps are still fully backfilled, and flagged as a DATA PROBLEM
+  max_pages_per_poll: 5000    # exceeding this is a failure, never a silent truncation
+  request_timeout_seconds: 15
+  retries: 2
+  status_check: true          # GET /v2/status each cycle (serving lag)
+  cache_bust: true            # vary `end` so the CDN (max-age=15 s) never serves a stale page
+
+grouping:
+  gap_minutes: 10             # fills on the same wallet/market/outcome/side within this gap form one bet
+
+alerting:
+  alert_sides: [BUY]          # SELL/MERGE/SPLIT/REDEEM/CONVERSION are recorded and summarised only
+  min_usdc: 0                 # global default; per-wallet thresholds override it
+  max_alert_age_minutes: 360  # older bets (e.g. found while backfilling an outage) are recorded, not sent
+  alert_on_bootstrap: false
+  follow_usd: 100             # hypothetical follower size for the fee figure
+  taker_crosscheck: true      # one /v2/trades call per alert to label maker vs taker fills
+  max_enrichments_per_cycle: 10        # freshest bets first; the rest wait for the next cycle
+  max_alerts_per_wallet_per_hour: 30   # beyond this, bets are recorded (suppressed) and one ALERT CAP notice is sent
+
+copy_candidate:
+  # Disabled: every alert is labelled NEW BET DETECTED and states that no copy signal
+  # has been validated by the research. Enabling these rules only changes the label.
+  enabled: false
+  max_detection_lag_seconds: 60
+  max_deterioration_cents: 1.0
+  max_spread_cents: 2.0
+  require_not_in_play: true
+  require_accepting_orders: true
+  min_ask_depth_usd_within_1c: 500
+  max_follower_fee_pct: 2.0
+  min_cluster_confidence: none
+
+health:
+  status_lag_threshold_seconds: 120
+  status_snapshot_max_age_seconds: 300
+  stale_after_intervals: 5
+  notify_after_consecutive_failures: 2
+  renotify_minutes: 60
+  digest_interval_hours: 24
+
+notifications:
+  delivery_semantics: at_least_once   # or at_most_once (see README)
+  max_attempts: 8
+  backoff_base_seconds: 5
+  backoff_max_seconds: 600
+  send_timeout_seconds: 10
+  channels:
+    console: {enabled: true}
+    file: {enabled: true, path: alerts/out/alerts.ndjson}
+    telegram: {enabled: false, rate_per_minute: 20, burst: 3}   # needs PM_ALERT_TELEGRAM_BOT, PM_ALERT_TELEGRAM_CHAT
+    email: {enabled: false, rate_per_minute: 1, burst: 3}       # needs PM_ALERT_SMTP_* (see README)
+
+storage:
+  db_path: alerts/out/alerts.sqlite

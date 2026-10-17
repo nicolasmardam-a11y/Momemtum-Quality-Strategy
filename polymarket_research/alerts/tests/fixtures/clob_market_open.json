@@ -1,0 +1,67 @@
+{
+ "body": {
+  "accepting_order_timestamp": "2025-07-11T19:05:50Z",
+  "accepting_orders": true,
+  "active": true,
+  "archived": false,
+  "closed": false,
+  "condition_id": "0xe2bdf6c18c8ab5ad5d3be5f95dd749e88d1dee7ac7c4dbf5101013a5c055e3df",
+  "enable_order_book": true,
+  "end_date_iso": "2028-11-08T00:00:00Z",
+  "fpmm": "",
+  "game_start_time": null,
+  "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/the+rock.png",
+  "image": "https://polymarket-upload.s3.us-east-2.amazonaws.com/the+rock.png",
+  "is_50_50_outcome": false,
+  "maker_base_fee": 1000,
+  "market_slug": "will-dwayne-the-rock-johnson-win-the-2028-us-presidential-election",
+  "minimum_order_size": 5,
+  "minimum_tick_size": 0.001,
+  "neg_risk": true,
+  "neg_risk_market_id": "0xb9aa4595bbe8ca1ecceeb16d24fb5df6d27d4e2116787ad874ff31f682bdb400",
+  "neg_risk_request_id": "0x3fdcb18feb10c5b72ad559117da45bbaa218f8c85b90be7c065041aa44d081b9",
+  "notifications_enabled": true,
+  "question": "Will Dwayne 'The Rock' Johnson win the 2028 US Presidential Election?",
+  "question_id": "0xb9aa4595bbe8ca1ecceeb16d24fb5df6d27d4e2116787ad874ff31f682bdb417",
+  "rewards": {
+   "max_spread": 4.5,
+   "min_size": 50,
+   "rates": null
+  },
+  "seconds_delay": 0,
+  "tags": [
+   "Politics",
+   "Elections",
+   "United States",
+   "US Election",
+   "Global Elections",
+   "World Elections",
+   "Earn 3.25%",
+   "President",
+   "Main Election"
+  ],
+  "taker_base_fee": 1000,
+  "tokens": [
+   {
+    "outcome": "Yes",
+    "price": 0.0155,
+    "token_id": "76252402837334795047528042167618984089231134882494719641438604550246396692717",
+    "winner": false
+   },
+   {
+    "outcome": "No",
+    "price": 0.9845,
+    "token_id": "82779978600617806806814031291287454099780828258739355925042203335968508676880",
+    "winner": false
+   }
+  ],
+  "version": "v1"
+ },
+ "meta": {
+  "note": "CLOB market state (not CDN-cached)",
+  "params": null,
+  "recorded_at_utc": "2026-10-17T15:28:53+00:00",
+  "status": 200,
+  "url": "https://clob.polymarket.com/markets/0xe2bdf6c18c8ab5ad5d3be5f95dd749e88d1dee7ac7c4dbf5101013a5c055e3df"
+ }
+}

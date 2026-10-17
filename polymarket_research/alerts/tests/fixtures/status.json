@@ -1,0 +1,74 @@
+{
+ "body": {
+  "data": {
+   "age_seconds": 13,
+   "computed_at": "2026-10-17T15:28:37Z",
+   "ingestion": {
+    "chain_id": 137,
+    "cursors": 175,
+    "lagging": [
+     {
+      "behind_max": 1,
+      "block": 95697045,
+      "source": "binary_module_positions_merged"
+     },
+     {
+      "behind_max": 1,
+      "block": 95697045,
+      "source": "binary_module_resolution_unpaused"
+     },
+     {
+      "behind_max": 1,
+      "block": 95697045,
+      "source": "combinatorial_module_combinatoria_3bbb8f100f"
+     },
+     {
+      "behind_max": 1,
+      "block": 95697045,
+      "source": "combinatorial_module_compressed"
+     },
+     {
+      "behind_max": 1,
+      "block": 95697045,
+      "source": "combinatorial_module_injected"
+     }
+    ],
+    "max_synced_block": 95697046,
+    "min_synced_block": 95697045,
+    "most_lagged": {
+     "behind_max": 1,
+     "block": 95697045,
+     "source": "binary_module_positions_merged"
+    },
+    "network": "polygon"
+   },
+   "serving": {
+    "lag_seconds": 1,
+    "mechanisms": [
+     {
+      "age_seconds": 0,
+      "name": "activity_feed"
+     },
+     {
+      "age_seconds": 1,
+      "blocks_behind": 1,
+      "name": "custody_balances"
+     },
+     {
+      "age_seconds": 1,
+      "blocks_behind": 2,
+      "name": "pnl"
+     }
+    ],
+    "worst": "custody_balances"
+   }
+  }
+ },
+ "meta": {
+  "note": "live freshness snapshot",
+  "params": null,
+  "recorded_at_utc": "2026-10-17T15:28:50+00:00",
+  "status": 200,
+  "url": "https://data-api.polymarket.com/v2/status"
+ }
+}

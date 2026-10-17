@@ -68,8 +68,9 @@ def main() -> None:
     for df in (evdf, mkdf):
         df["fetched_at_utc"] = fetched.isoformat()
     out = ROOT / "data" / "derived"
-    evdf.to_parquet(out / f"la_events_{fetched:%Y-%m-%d}.parquet", index=False)
-    mkdf.to_parquet(out / f"la_markets_{fetched:%Y-%m-%d}.parquet", index=False)
+    tag = sys.argv[1] if len(sys.argv) > 1 else f"{fetched:%Y-%m-%d}"  # e.g. 2026-10-17w2 for a 2nd window
+    evdf.to_parquet(out / f"la_events_{tag}.parquet", index=False)
+    mkdf.to_parquet(out / f"la_markets_{tag}.parquet", index=False)
     print("events", len(evdf), "open markets", len(mkdf))
 
 

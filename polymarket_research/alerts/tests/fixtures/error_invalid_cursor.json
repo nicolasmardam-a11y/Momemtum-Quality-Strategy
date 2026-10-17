@@ -1,0 +1,17 @@
+{
+ "body": {
+  "code": "invalid_request",
+  "error": "invalid cursor",
+  "retryable": false,
+  "trace_id": "2fac635dfc464d18956af1bc213d5aa9"
+ },
+ "meta": {
+  "note": "live 400 error envelope",
+  "params": {
+   "cursor": "garbage"
+  },
+  "recorded_at_utc": "2026-10-17T15:28:51+00:00",
+  "status": 400,
+  "url": "https://data-api.polymarket.com/v2/activity"
+ }
+}

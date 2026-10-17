@@ -1,0 +1,12 @@
+{
+ "body": {
+  "error": "No orderbook exists for the requested token id"
+ },
+ "meta": {
+  "note": "no orderbook for a resolved market's token",
+  "params": null,
+  "recorded_at_utc": "2026-10-17T15:28:52+00:00",
+  "status": 404,
+  "url": "https://clob.polymarket.com/book"
+ }
+}

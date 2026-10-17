@@ -42,6 +42,10 @@ def main():
         except Exception as e:  # record the failure, do not hide it
             small[path] = {"error": str(e)}
 
+    # Full hourly P&L series (source fidelity is daily snapshots)
+    pnl = request_json(f"{api.DATA}/v2/user-pnl", {"user": ADDR, "interval": "all"}, source="data-api")
+    save(pnl["data"]["points"], "user_pnl_all")
+
     # Activity: default, and with exclude_deposits_withdrawals both ways
     act = api.activity(ADDR, cache=False)
     save(act, "activity")

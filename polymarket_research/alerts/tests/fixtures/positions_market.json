@@ -1,0 +1,21 @@
+{
+ "body": {
+  "data": [],
+  "pagination": {
+   "has_more": false,
+   "limit": 100,
+   "next_cursor": null,
+   "offset": 0
+  }
+ },
+ "meta": {
+  "note": "OPEN positions in the market",
+  "params": {
+   "condition": "0xe2bdf6c18c8ab5ad5d3be5f95dd749e88d1dee7ac7c4dbf5101013a5c055e3df",
+   "user": "0xc8c1f765515347a725afff5faa4f5632dd8d1e41"
+  },
+  "recorded_at_utc": "2026-10-17T15:28:54+00:00",
+  "status": 200,
+  "url": "https://data-api.polymarket.com/v2/positions"
+ }
+}
