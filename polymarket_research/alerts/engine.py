@@ -15,9 +15,10 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from . import DISCLAIMER, grouping, render, rules
+from .clock import as_server_clock
 from .config import Config, WalletConfig
 from .dispatch import Dispatcher
-from .enrich import Enricher
+from .enrich import Enricher, Enrichment, fill_stats
 from .health import HealthMonitor
 from .http_client import DataError
 from .notify import Notifier
@@ -46,7 +47,10 @@ class CycleReport:
 class Engine:
     def __init__(self, cfg: Config, store: Store, sources: Sources, notifiers: dict[str, Notifier], *,
                  clock: Callable[[], float] = time.time, forced_backfill_hours: float | None = None) -> None:
+        # One server-corrected clock for every decision compared with block timestamps (clock.py).
+        clock = as_server_clock(clock)
         self.cfg, self.store, self.sources, self.notifiers, self.clock = cfg, store, sources, notifiers, clock
+        self.last_lag_s: float | None = None    # last /v2/status serving lag, reused while /v2/status is down
         self.started_at = clock()
         self.forced_backfill_hours = forced_backfill_hours
         self.health = HealthMonitor(store, cfg, notifiers, clock=clock)
@@ -71,10 +75,26 @@ class Engine:
             rep.status_error = str(e)
             self.health.problem("data-api", "status_unavailable", f"/v2/status failed: {e}", error_class=e.kind,
                                 min_occurrences=2)
-            return None
+            return self.last_lag_s          # unknown now: keep the last known margin rather than the minimum
         rep.status = st
+        self.clock.observe(st.get("server_now") or st.get("server_time"))
         self.health.check_status(st)
-        return float(st["lag_seconds"]) if st.get("lag_seconds") is not None else None
+        if st.get("lag_seconds") is not None:
+            self.last_lag_s = float(st["lag_seconds"])
+        return self.last_lag_s
+
+    def check_clock(self) -> None:
+        """Report (and, via ServerClock, correct for) a local clock that is off the server's."""
+        off = self.clock.offset
+        limit = self.cfg.health.max_clock_skew_seconds
+        if abs(off) > limit:
+            self.health.problem(
+                "local-clock", "clock_skew",
+                f"this machine's clock is {render.dur(abs(off))} {'behind' if off > 0 else 'ahead of'} the Data "
+                f"API's (HTTP Date). Times are being corrected by {off:+.0f}s; fix NTP on this machine.",
+                error_class="clock_skew", severity="warning")
+        else:
+            self.health.resolve("local-clock", ["clock_skew"])
 
     def run_cycle(self) -> CycleReport:
         rep = CycleReport(started_at=self.clock())
@@ -83,6 +103,7 @@ class Engine:
             if w.enabled:
                 rep.polls.append(self.poller.poll(w, status_lag_s=lag, forced_backfill_hours=self.forced_backfill_hours))
         self.forced_backfill_hours = None    # --backfill-hours applies to the first cycle only
+        self.check_clock()
         rep.bets_touched = len(grouping.assign_pending(self.store, self.cfg.grouping.gap_minutes * 60, self.clock()))
         created, suppressed = self.evaluate_bets()
         rep.alerts_created, rep.alerts_suppressed = created, suppressed
@@ -162,7 +183,13 @@ class Engine:
         if self.store.q1("SELECT 1 FROM alerts WHERE dedupe_key = ?", (key,)):
             return None
         fills = self.store.q("SELECT * FROM fills WHERE bet_id = ? ORDER BY ts, fill_id", (bet["bet_id"],))
-        en = self.enricher.enrich(bet, fills)
+        try:
+            en = self.enricher.enrich(bet, fills)
+        except Exception as e:    # a bug or payload surprise must not block this and every later bet
+            log.exception("enrichment crashed for bet %s; alerting without enrichment", bet["bet_id"])
+            err = DataError("internal", "engine", "", f"enrichment crashed: {type(e).__name__}: {e}", retryable=False)
+            en = Enrichment(data={"fills": fill_stats([dict(f) for f in fills]),
+                                  "enrichment_errors": [f"unexpected: {err.detail}"]}, errors=[err])
         for e in en.errors:
             self.health.problem(e.source, "enrichment", f"alert enrichment failed: {e}", error_class=e.kind,
                                 min_occurrences=self.cfg.health.notify_after_consecutive_failures)

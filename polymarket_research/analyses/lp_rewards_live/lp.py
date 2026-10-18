@@ -85,13 +85,23 @@ def our_quote(bids, asks, tick, capital, variant="join"):
     return pb, pa, capital / per
 
 
+def with_order(levels, p, n, is_bid):
+    """Insert our order (price p, n shares) into best-first levels."""
+    d = dict(levels)
+    d[p] = d.get(p, 0.0) + n
+    return sorted(d.items(), key=lambda t: t[0], reverse=is_bid)
+
+
 def reward_estimate(bids, asks, tick, v, min_size, daily_rate, capital, mid_mode="cum", variant="join", level_filter=False):
-    am = adj_mid(bids, asks, min_size, mid_mode)
     oq = our_quote(bids, asks, tick, capital, variant)
-    if am is None or oq is None or not v:
+    if oq is None or not v:
+        return None
+    pb, pa, n = oq
+    # the scored book includes our own orders, so the adjusted mid is computed with them added
+    am = adj_mid(with_order(bids, pb, n, True), with_order(asks, pa, n, False), min_size, mid_mode)
+    if am is None:
         return None
     _, _, mid = am
-    pb, pa, n = oq
     q1c = side_score(bids, mid, v, "bid", min_size, level_filter)
     q2c = side_score(asks, mid, v, "ask", min_size, level_filter)
     eligible = n >= (min_size or 0)

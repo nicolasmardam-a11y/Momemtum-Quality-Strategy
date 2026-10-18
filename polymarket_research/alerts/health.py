@@ -65,7 +65,10 @@ class HealthMonitor:
         key = f"health:{event_id}:" + (f"renotify:{ev['notify_count']}" if renotify else "open")
         text = render.data_problem(self.scope_label(scope), kind, ev["error_class"], detail, first_at=ev["first_at"],
                                    occurrences=ev["occurrences"], watermark_ts=watermark_ts, renotify=renotify)
-        channels = [c for c in self.channels if c not in set(exclude_channels)]
+        # A failing channel is excluded from its own failure notice, unless it is the only channel:
+        # then the notice is queued on it anyway (it is delivered once the channel recovers)
+        # rather than being created with no channel at all, which would make the loss silent.
+        channels = [c for c in self.channels if c not in set(exclude_channels)] or list(self.channels)
         self.store.create_alert(dedupe_key=key, kind="DATA_PROBLEM", label="DATA PROBLEM", text=text,
                                 payload={"scope": scope, "kind": kind, "error_class": ev["error_class"],
                                          "detail": detail, "event_id": event_id, "occurrences": ev["occurrences"]},

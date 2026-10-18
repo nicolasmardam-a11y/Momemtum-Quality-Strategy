@@ -79,8 +79,13 @@ class OccurrenceCounter:
         return n
 
 
-def to_fill(row: dict, occ: OccurrenceCounter, *, seen_at: float, poll_mode: str) -> dict:
+def to_fill(row: dict, occ: OccurrenceCounter, *, seen_at: float, poll_mode: str,
+            live_from_ts: float | None = None) -> dict:
+    """``live_from_ts``: in a bootstrap poll, rows executed at or after this time (when monitoring
+    of the wallet began) are live activity, not the pre-existing baseline."""
     ident = identity(row)
+    if live_from_ts is not None and int(row["timestamp"]) >= live_from_ts:
+        poll_mode = "live"
     role, fee = fee_role(row)
     return {
         "fill_id": fill_id_for(ident, occ.next(ident)),
@@ -107,8 +112,9 @@ def to_fill(row: dict, occ: OccurrenceCounter, *, seen_at: float, poll_mode: str
     }
 
 
-def to_fills(rows: Iterable[dict], occ: OccurrenceCounter, *, seen_at: float, poll_mode: str) -> list[dict]:
-    return [to_fill(r, occ, seen_at=seen_at, poll_mode=poll_mode) for r in rows]
+def to_fills(rows: Iterable[dict], occ: OccurrenceCounter, *, seen_at: float, poll_mode: str,
+             live_from_ts: float | None = None) -> list[dict]:
+    return [to_fill(r, occ, seen_at=seen_at, poll_mode=poll_mode, live_from_ts=live_from_ts) for r in rows]
 
 
 def trade_key(fill: dict) -> tuple:

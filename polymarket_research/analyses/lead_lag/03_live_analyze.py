@@ -88,11 +88,29 @@ def sigma_series(sym, t0, t1):
     return sd.reindex(range(int(t0) - 5, int(t1) + 5)).ffill(), k
 
 
-def asof(times, values, q):
-    """Last value at or before each q (times sorted)."""
+def asof(times, values, q, max_age=5.0):
+    """Last value at or before each q (times sorted); NaN if that value is older than max_age seconds (stalled feed)."""
     idx = np.searchsorted(times, q, side="right") - 1
-    out = np.where(idx >= 0, values[np.clip(idx, 0, None)], np.nan)
-    return out
+    ok = idx >= 0
+    ii = np.clip(idx, 0, None)
+    out = np.where(ok, values[ii], np.nan)
+    age = np.where(ok, q - times[ii], np.inf)
+    return np.where(age <= max_age, out, np.nan)
+
+
+def gap_times():
+    """Disconnect times (books stale until the next snapshot): gaps parquet, or the collector log for older runs."""
+    try:
+        return pd.read_parquet(f"{D}live_{TAG}_gaps.parquet").query("src == 'clob'").t.values
+    except Exception:  # noqa: BLE001
+        out = []
+        day = None
+        for ln in open(f"{D}live_{TAG}.log"):
+            if "clob error" in ln:
+                hh = ln.split()[0]
+                day = day or json.load(open(f"{D}live_{TAG}_markets.json"))["opened_utc"][:10]
+                out.append(pd.Timestamp(f"{day}T{hh}Z").timestamp())
+        return np.array(out)
 
 
 def fair_binance(S, K, sig, tau):
@@ -101,7 +119,7 @@ def fair_binance(S, K, sig, tau):
     return norm.cdf(z)
 
 
-def fair_twap(S, K, sig, t, T, cl_t, cl_v):
+def fair_twap(S, K, sig, t, T, cl_t, cl_v, cl_recv):
     """Chainlink TWAP-60s settlement: final = mean of the stream over [T-60, T]."""
     out = np.empty(len(t))
     for i, (s, sg, ti) in enumerate(zip(S, sig, t)):
@@ -110,7 +128,7 @@ def fair_twap(S, K, sig, t, T, cl_t, cl_v):
             out[i] = norm.cdf(math.log(s / K) / v) if v > 0 else float(s >= K)
         else:
             w = min(1.0, (ti - (T - 60)) / 60.0)
-            m = (cl_t >= T - 60) & (cl_t <= ti)
+            m = (cl_t >= T - 60) & (cl_t <= ti) & (cl_recv <= ti)   # only values already received at ti
             A = cl_v[m].mean() if m.any() else s
             mean = w * A + (1 - w) * s
             v = (1 - w) * sg * math.sqrt(max(T - ti, 0) / 3.0)
@@ -118,58 +136,7 @@ def fair_twap(S, K, sig, t, T, cl_t, cl_v):
     return out
 
 
-def main():
-    meta = json.load(open(f"{D}live_{TAG}_markets.json"))
-    md = metadata(meta)
-    md.to_parquet(f"{D}live_{TAG}_meta.parquet")
-    snap, ref, tob = load("snap"), load("ref"), load("tob")
-    t_lo, t_hi = snap.t.min(), snap.t.max()
-    print("snap", len(snap), "ref", len(ref), "tob", len(tob), "window", pd.to_datetime(t_lo, unit="s"), pd.to_datetime(t_hi, unit="s"))
-    sig, k1s = {}, {}
-    for a, sym in (("bitcoin", "BTCUSDT"), ("ethereum", "ETHUSDT")):
-        sig[a], k1s[a] = sigma_series(sym, t_lo, t_hi)
-    ref = ref.sort_values("recv")
-    R = {}
-    for a, bsym, csym in (("bitcoin", "BTCUSDT", "btc/usd"), ("ethereum", "ETHUSDT", "eth/usd")):
-        b = ref[(ref.src == "binance_bt") & (ref.sym == bsym)]
-        c = ref[(ref.src == "chainlink") & (ref.sym == csym)]
-        R[a] = dict(b_t=b.recv.values, b_v=b.price.values, c_t=c.recv.values, c_v=c.price.values,
-                    c_src=c.src_ts.values / 1000.0)
-    snap = snap.sort_values("t")
-    grids = []
-    for m in md.itertuples():
-        if m.strike is None or (isinstance(m.strike, float) and math.isnan(m.strike)):
-            continue
-        lo = max(t_lo, m.start if m.kind != "above" else t_lo)
-        hi = min(t_hi, m.end - 0.5)
-        if hi <= lo:
-            continue
-        s0 = snap[(snap.asset == m.tok0) & (snap.t >= lo) & (snap.t <= hi)].set_index("t")
-        s1 = snap[(snap.asset == m.tok1) & (snap.t >= lo) & (snap.t <= hi)].set_index("t")
-        g = s0[["bid", "bid_sz", "ask", "ask_sz", "ask_d1"]].join(s1[["bid", "ask", "ask_sz", "ask_d1"]], rsuffix="_1", how="inner")
-        if g.empty:
-            continue
-        t = g.index.values
-        r = R[m.asset]
-        sg = sig[m.asset].reindex(np.floor(t).astype(int)).values
-        if m.ref == "binance":
-            S = asof(r["b_t"], r["b_v"], t)
-            P = fair_binance(S, float(m.strike), sg, m.end - t)
-        else:
-            S = asof(r["c_t"], r["c_v"], t)
-            P = fair_twap(S, float(m.strike), sg, t, m.end, r["c_src"], r["c_v"])
-        g = g.assign(slug=m.slug, kind=m.kind, asset=m.asset, S=S, sig=sg, tau=m.end - t, fair=P, win0=m.win0, rate=m.rate,
-                     minsize=m.minsize)
-        grids.append(g.reset_index())
-    G = pd.concat(grids, ignore_index=True)
-    G["mid"] = (G.bid + G.ask) / 2
-    G["spread"] = G.ask - G.bid
-    G["edge0"] = G.fair - G.ask - fee(G.ask, G.rate)
-    G["edge1"] = (1 - G.fair) - G.ask_1 - fee(G.ask_1, G.rate)
-    G.to_parquet(f"{D}live_{TAG}_grid.parquet")
-    print("grid rows", len(G), "markets", G.slug.nunique())
-
-    # --------------------------------------------------------------- episodes
+def build_episodes(G):
     eps = []
     for (slug, side), _ in [((s, sd), None) for s in G.slug.unique() for sd in (0, 1)]:
         g = G[G.slug == slug].sort_values("t").reset_index(drop=True)
@@ -214,8 +181,85 @@ def main():
                         rec[f"{nm}_mk{h}_bid"] = bid_h - p - fee(p, rr.rate)
                         rec[f"{nm}_mk{h}_bidfee"] = bid_h - p - fee(p, rr.rate) - fee(bid_h, rr.rate)
             eps.append(rec)
-    E = pd.DataFrame(eps)
+    return pd.DataFrame(eps)
+
+
+def main():
+    meta = json.load(open(f"{D}live_{TAG}_markets.json"))
+    md = metadata(meta)
+    md.to_parquet(f"{D}live_{TAG}_meta.parquet")
+    snap, ref, tob = load("snap"), load("ref"), load("tob")
+    t_lo, t_hi = snap.t.min(), snap.t.max()
+    print("snap", len(snap), "ref", len(ref), "tob", len(tob), "window", pd.to_datetime(t_lo, unit="s"), pd.to_datetime(t_hi, unit="s"))
+    sig, k1s = {}, {}
+    for a, sym in (("bitcoin", "BTCUSDT"), ("ethereum", "ETHUSDT")):
+        sig[a], k1s[a] = sigma_series(sym, t_lo, t_hi)
+    ref = ref.sort_values("recv")
+    R = {}
+    for a, bsym, csym in (("bitcoin", "BTCUSDT", "btc/usd"), ("ethereum", "ETHUSDT", "eth/usd")):
+        b = ref[(ref.src == "binance_bt") & (ref.sym == bsym)]
+        c = ref[(ref.src == "chainlink") & (ref.sym == csym)]
+        R[a] = dict(b_t=b.recv.values, b_v=b.price.values, c_t=c.recv.values, c_v=c.price.values,
+                    c_src=c.src_ts.values / 1000.0)
+        # EXPLORATORY (not pre-registered): Chainlink/Binance basis, ratio of each Chainlink value to the Binance mid at its source time,
+        # known once the Chainlink value has been received; trailing 60-s median
+        rb = R[a]["c_v"] / asof(R[a]["b_t"], R[a]["b_v"], R[a]["c_src"], max_age=5.0)
+        R[a]["basis"] = pd.Series(rb, index=pd.to_datetime(R[a]["c_t"], unit="s")).rolling("60s").median()
+    snap = snap.sort_values("t")
+    grids = []
+    for m in md.itertuples():
+        if m.strike is None or (isinstance(m.strike, float) and math.isnan(m.strike)):
+            continue
+        lo = max(t_lo, m.start if m.kind != "above" else t_lo)
+        hi = min(t_hi, m.end - 0.5)
+        if hi <= lo:
+            continue
+        s0 = snap[(snap.asset == m.tok0) & (snap.t >= lo) & (snap.t <= hi)].set_index("t")
+        s1 = snap[(snap.asset == m.tok1) & (snap.t >= lo) & (snap.t <= hi)].set_index("t")
+        g = s0[["bid", "bid_sz", "ask", "ask_sz", "ask_d1"]].join(s1[["bid", "ask", "ask_sz", "ask_d1"]], rsuffix="_1", how="inner")
+        if g.empty:
+            continue
+        t = g.index.values
+        r = R[m.asset]
+        sg = sig[m.asset].reindex(np.floor(t).astype(int)).values
+        if m.ref == "binance":
+            S = asof(r["b_t"], r["b_v"], t)
+            P = fair_binance(S, float(m.strike), sg, m.end - t)
+            Pb = P
+        else:
+            S = asof(r["c_t"], r["c_v"], t)
+            P = fair_twap(S, float(m.strike), sg, t, m.end, r["c_src"], r["c_v"], r["c_t"])
+            bs = r["basis"]
+            bas = asof(bs.index.astype("datetime64[ns]").asi8 / 1e9, bs.values, t, max_age=10.0)
+            Sb = asof(r["b_t"], r["b_v"], t) * bas
+            Pb = fair_twap(np.where(np.isnan(Sb), S, Sb), float(m.strike), sg, t, m.end, r["c_src"], r["c_v"], r["c_t"])
+        g = g.assign(slug=m.slug, kind=m.kind, asset=m.asset, S=S, sig=sg, tau=m.end - t, fair=P, fair_b=Pb, win0=m.win0, rate=m.rate,
+                     minsize=m.minsize)
+        grids.append(g.reset_index())
+    G = pd.concat(grids, ignore_index=True)
+    gt = gap_times()
+    bad = np.zeros(len(G), bool)
+    for g0 in gt:
+        bad |= (G.t.values >= g0 - 5) & (G.t.values <= g0 + 10)
+    G = G[~bad & G.S.notna() & G.sig.notna()].copy()
+    print("gap-excluded rows", int(bad.sum()), "disconnects", len(gt))
+    G["mid"] = (G.bid + G.ask) / 2
+    G["spread"] = G.ask - G.bid
+    G["edge0"] = G.fair - G.ask - fee(G.ask, G.rate)
+    G["edge1"] = (1 - G.fair) - G.ask_1 - fee(G.ask_1, G.rate)
+    G.to_parquet(f"{D}live_{TAG}_grid.parquet")
+    print("grid rows", len(G), "markets", G.slug.nunique())
+
+    # --------------------------------------------------------------- episodes
+    E = build_episodes(G)
     E.to_parquet(f"{D}live_{TAG}_episodes.parquet")
+    # EXPLORATORY: same rules, fair value from basis-adjusted Binance (fastest free feed) for the Chainlink-TWAP markets
+    Gx = G.copy()
+    Gx["fair"] = Gx["fair_b"]
+    Gx["edge0"] = Gx.fair - Gx.ask - fee(Gx.ask, Gx.rate)
+    Gx["edge1"] = (1 - Gx.fair) - Gx.ask_1 - fee(Gx.ask_1, Gx.rate)
+    Ex = build_episodes(Gx[Gx.kind.isin(["5m", "15m", "4h"])])
+    Ex.to_parquet(f"{D}live_{TAG}_episodes_binfair.parquet")
 
     def boot(df, col, n=2000):
         df = df[df[col].notna()]

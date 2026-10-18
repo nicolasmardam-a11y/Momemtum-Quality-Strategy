@@ -106,6 +106,8 @@ class ActivityPage:
     next_cursor: str | None
     server_time: float | None
     page_no: int
+    server_now: float | None = None     # Date + Age, for clock-offset estimation
+    window_end: int | None = None       # the ``end`` actually requested (rows after it were not asked for)
 
 
 class Sources:
@@ -136,14 +138,17 @@ class Sources:
     # ------------------------------------------------------------------ Data API v2
 
     def iter_activity(self, wallet: str, *, start: int, types: tuple[str, ...], limit: int = 500,
-                      max_pages: int = 5000) -> Iterator[ActivityPage]:
-        """Walk /v2/activity for one wallet oldest-first from ``start`` (inclusive) to now.
+                      max_pages: int = 5000, end: int | None = None) -> Iterator[ActivityPage]:
+        """Walk /v2/activity for one wallet oldest-first from ``start`` (inclusive) to ``end``.
 
         Follows ``next_cursor`` until it is null. Raises DataError on a schema
-        problem, a repeated cursor or more than ``max_pages`` pages, so a walk is
-        never silently truncated.
+        problem, a repeated cursor, a walk that goes backwards in time (a page that
+        re-serves rows from before its anchor would otherwise be stored as phantom
+        repeats) or more than ``max_pages`` pages, so a walk is never silently
+        truncated or padded. Each page is checked *before* it is yielded.
         """
-        end = int(self.clock()) + 86_400   # the API default ("now plus one day"); unique per second -> CDN miss
+        if end is None:   # the API default ("now plus one day"); unique per second -> CDN miss
+            end = int(self.clock()) + 86_400
         params: dict[str, Any] = {
             "user": wallet,
             "type": ",".join(types),
@@ -154,6 +159,7 @@ class Sources:
         }
         seen_cursors: set[str] = set()
         page_no = 0
+        last_ts: int | None = None
         while True:
             resp = self.http.get_json(f"{DATA}/v2/activity", params, source="data-api")
             rows, pag = _check_envelope(resp, "/v2/activity")
@@ -161,13 +167,21 @@ class Sources:
             for i, r in enumerate(rows):
                 for p in validate_activity_row(r, wallet, types):
                     problems.append(f"row {i}: {p}")
+            if not problems:
+                for i, r in enumerate(rows):
+                    if last_ts is not None and r["timestamp"] < last_ts:
+                        problems.append(f"row {i} (page {page_no + 1}): timestamp {r['timestamp']} < previous "
+                                        f"{last_ts}; sort_direction=ASC walk went backwards (re-served or "
+                                        "unordered rows), refusing to store possible phantom repeats")
+                        break
+                    last_ts = r["timestamp"]
             if problems:
                 raise DataError("schema", "data-api", resp.url,
                                 f"/v2/activity schema surprise ({len(problems)} problem(s)): " + "; ".join(problems[:5]),
                                 status=resp.status, retryable=False, params=params)
             page_no += 1
             cur = pag.get("next_cursor")
-            yield ActivityPage(rows, cur, resp.server_time, page_no)
+            yield ActivityPage(rows, cur, resp.server_time, page_no, server_now=resp.server_now, window_end=end)
             if not cur:
                 return
             if cur in seen_cursors:
@@ -197,17 +211,43 @@ class Sources:
             params["cursor"] = cur
         raise DataError("schema", "data-api", f"{DATA}{path}", f"{path}: more than {max_pages} pages", retryable=False)
 
-    def taker_fill_keys(self, wallet: str, start: int, end: int) -> set[tuple]:
-        """Identity tuples of this wallet's TAKER fills in [start, end] (/v2/trades, taker_only default true).
+    def trade_fill_keys(self, wallet: str, start: int, end: int, *, taker_only: bool = True) -> set[tuple]:
+        """Identity tuples of this wallet's fills in [start, end] from /v2/trades.
 
         /v2/trades rows have no maker/taker field; the default taker_only=true
         serves each fill once on its taker side, so for a ``user`` query it returns
         exactly the wallet's taker fills (verified: subset of taker_only=false).
+        ``taker_only=False`` returns every fill (verified equal to the activity
+        TRADE rows, 727 = 727) and is used to prove the index has caught up before
+        absence from the taker set is read as "maker".
         """
         rows = self._walk("/v2/trades", {"user": wallet, "start": int(start), "end": int(end), "limit": 1000,
-                                         "taker_only": "true"})
+                                         "taker_only": "true" if taker_only else "false"})
         return {(str(r.get("transaction_hash", "")).lower(), r.get("token_id"), r.get("side"), float(r.get("size", 0)),
                  float(r.get("price", 0)), int(r.get("timestamp", 0))) for r in rows}
+
+    def taker_fill_keys(self, wallet: str, start: int, end: int) -> set[tuple]:
+        return self.trade_fill_keys(wallet, start, end, taker_only=True)
+
+    def latest_activity(self, wallet: str, types: tuple[str, ...], *, end: int | None = None) -> dict | None:
+        """The wallet's newest activity row of ``types`` over its full history, or None.
+
+        Used once per wallet when the bootstrap window is empty: it distinguishes a
+        dormant account (the row becomes a known "canary" that later polls must
+        re-read) from an address the Data API has never seen (wrong address type).
+        """
+        params = {"user": wallet, "type": ",".join(types), "start": 1,
+                  "end": end if end is not None else int(self.clock()) + 86_400,
+                  "sort_direction": "DESC", "limit": 1}
+        resp = self.http.get_json(f"{DATA}/v2/activity", params, source="data-api")
+        rows, _ = _check_envelope(resp, "/v2/activity")
+        if not rows:
+            return None
+        problems = validate_activity_row(rows[0], wallet, types)
+        if problems:
+            raise DataError("schema", "data-api", resp.url, "/v2/activity (latest): " + "; ".join(problems[:5]),
+                            status=resp.status, retryable=False, params=params)
+        return rows[0]
 
     def positions(self, wallet: str, *, condition: str | None = None, event_id: str | None = None) -> list[dict]:
         """OPEN positions (the superset incl. settled-but-unredeemed) for a wallet, optionally narrowed."""
@@ -228,6 +268,7 @@ class Sources:
             "age_seconds": data.get("age_seconds"),
             "computed_at": data.get("computed_at"),
             "server_time": resp.server_time,
+            "server_now": resp.server_now,
         }
 
     # ------------------------------------------------------------------ Gamma
@@ -244,7 +285,16 @@ class Sources:
             if not isinstance(resp.body, list):
                 raise DataError("schema", "gamma", resp.url, "/markets: expected a JSON list", retryable=False)
             if resp.body:
-                return resp.body[0]
+                # Never trust position 0: if the filter were ignored or renamed, Gamma would answer with
+                # its default listing and the alert would show another market's question, fees and state.
+                want = condition_id.lower()
+                hit = [m for m in resp.body if isinstance(m, dict) and str(m.get("conditionId", "")).lower() == want]
+                if not hit:
+                    got = [str(m.get("conditionId"))[:12] for m in resp.body[:3] if isinstance(m, dict)]
+                    raise DataError("schema", "gamma", resp.url,
+                                    f"/markets?condition_ids={want[:12]}...: no returned market has this conditionId "
+                                    f"(got {got}); filter ignored?", retryable=False)
+                return hit[0]
         return None
 
     # ------------------------------------------------------------------ CLOB (public)
@@ -269,6 +319,9 @@ class Sources:
         b = resp.body
         if not isinstance(b, dict) or "bids" not in b or "asks" not in b:
             raise DataError("schema", "clob", resp.url, "/book: missing bids/asks", retryable=False)
+        if b.get("asset_id") is not None and str(b["asset_id"]) != str(token_id):
+            raise DataError("schema", "clob", resp.url, f"/book: asset_id {str(b['asset_id'])[:16]}... is not the "
+                            f"requested token {str(token_id)[:16]}... (wrong book)", retryable=False)
         try:
             nb = normalize_book(b)
         except (KeyError, TypeError, ValueError) as e:

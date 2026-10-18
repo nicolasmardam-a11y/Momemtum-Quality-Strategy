@@ -82,6 +82,17 @@ class Response:
     elapsed_s: float
     url: str
 
+    @property
+    def server_now(self) -> float | None:
+        """The server's clock now: ``Date`` plus ``Age`` (a CDN-cached body keeps its origin Date)."""
+        if self.server_time is None:
+            return None
+        try:
+            age = float(self.headers.get("age") or 0)
+        except (TypeError, ValueError):
+            age = 0.0
+        return self.server_time + max(0.0, age)
+
 
 def requests_transport(session: requests.Session | None = None) -> Transport:
     s = session or requests.Session()

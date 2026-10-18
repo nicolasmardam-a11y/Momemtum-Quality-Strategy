@@ -2,6 +2,21 @@
 
 As-of 2026-10-17. Builds on `notes/strategies/universe.md` (stage 1). Family: data. Verdict: n/a (data build).
 
+**Summary.**
+- **Sample:** 8,000 binary markets with lifetime volume >= $10k, stratified by category x quarter (TEST 4,999, validation 1,500,
+  train 1,501), with population weights and leakage clusters.
+- **Panel:** a long-format price panel (133k rows) at T-30d..T-15m before `min(endDate, closedTime)`, before the scheduled endDate,
+  and before gameStartTime, built from 28.6M CLOB `/prices-history` points (0 errors).
+- **Tapes:** taker tapes for the 1,503 most liquid sampled markets: 5.66M trades, 0 errors, 1 market truncated at the 100-page cap.
+- **Costs:** a live-book spread/depth model (1,292 volume-screened plus 2,384 unscreened open markets, 3 snapshots) and a historical
+  effective-spread model from the tapes.
+- **Checks:** 6 of 7 pre-registered checks pass. Check 2 fails as specified, for a structural reason: short-lived markets did not
+  exist at T-1d.
+- **Two warnings for every downstream test:**
+  1. The full-life volume screen is a material look-ahead in TEST. Only 52% of the most liquid TEST markets had $10k of volume by
+     T-1d.
+  2. `res` horizons are look-ahead for the 19-23% of markets that closed early. Decide on `sched` or `game` horizons.
+
 ## 0. Pre-registered acceptance checks (written 2026-10-17 before any panel/tape/book result was computed)
 
 Only one probe (`analyses/panel/00_probe.py`, 9 markets) was run before this section was written. It established that the CLOB
@@ -51,7 +66,7 @@ Pipeline (run from `polymarket_research/`, `PMR_RATE_SCALE=2`): `00_probe.py` ->
 20 chunks of 400 markets) -> `03_pull_tapes.py select|pull` (resumable, 17 chunks of 100) -> `04_books.py 10000 vol10k` and
 `04_books.py` (all open) -> `04b_resnap_books.py r2|r3` -> `05_build_panel.py` -> `06_spread_model.py` -> `07_effective_spread.py`.
 All history requests are cached under `data/raw/{clob,data-api}/cache/` with URL, params and UTC fetch time; the live books are under
-`data/raw/clob/live/20261017/`. All pulls ran on 2026-10-17 between 22:38 and 23:30 UTC. Errors: 0 of 22,476 price requests and
+`data/raw/clob/live/20261017/`. All pulls ran on 2026-10-17 between 22:38 and 23:14 UTC. Errors: 0 of 22,476 price requests and
 0 of 6,435 tape pages. **VERIFIED.**
 
 ## 2. Sample design
@@ -64,7 +79,7 @@ payout and are dropped. Neg-risk constituents (2,981 in the sample) are their ow
 
 **What the sample conditions on.** Everything except two items is known at listing.
 - **The volume screen uses full-life `volumeNum`.** This is a look-ahead: a market qualifies because of volume it had not yet
-  traded at the decision time. Section 4.3 measures the size of the effect.
+  traded at the decision time. Section 4.1 measures the size of the effect.
 - **The resolution filter** drops only the 12 unresolved markets.
 
 Blank `volumeNum` (43% of the universe, almost all 2026 sports and crypto) fails the screen. An audit of 100 random blank-volume
@@ -131,13 +146,15 @@ quarter and highly repetitive.
 - Reference types:
   - `res`: horizons before `ref_ts` (T-30d, T-7d, T-3d, T-1d, T-12h, T-6h, T-1h, T-15m), as specified.
   - `sched`: the same horizons before the **scheduled endDate**. A horizon after closedTime is null (`post_close`).
-  - `game`: gameStartTime -60m and -15m, for the 2,589 markets with a gameStartTime (1,995 sports plus others). A game horizon after
-    the fetched series end is null (`after_series_end`, 186 rows where endDate falls before the game).
+  - `game`: gameStartTime -60m and -15m, for the 2,589 markets with a gameStartTime: 1,786 of the 1,995 sports markets, plus
+    weather 485, culture 133, finance 110 and others, where Gamma uses the field as an event start. A game horizon after the
+    fetched series end is null (`after_series_end`, 202 rows where endDate falls before the game). Game horizons come from the
+    minute series in 94% of priced rows. Median time since the last price change: 0.23 h at G-15m.
 - Columns: `price, obs_ts, staleness_s` (= horizon - obs_ts), `src` (m1/h60), `last_change_ts`/`last_change_age_s` (time since the
   series value last changed; `change_censored` when the value never changed inside the fetched window). Market keys are included:
   `token_id_0, y0, event_id, cluster_id, cluster_week, split, category, structure, sample_weight, clean_resolution, early_close`.
 - Tape markets also get: `last_trade_ts`/`last_trade_age_s`, `last_trade_p0` (in token-0 terms), `tape_notional_before`,
-  `volnum_at_h_est` and `vol_screen_at_h` (section 4.3).
+  `volnum_at_h_est` and `vol_screen_at_h` (section 4.1).
 - **Look-ahead warning on `res`.** For early-closing markets (19-23%), `ref_ts = closedTime` is known only after the fact, and
   closing early is correlated with the outcome (a YES "by date" market closes when the event happens). Any rule that conditions on a
   `res` horizon is using information from the future. Strategy tests should decide on `sched` or `game` horizons, where the clock is
@@ -187,6 +204,8 @@ split. Coverage of `sched` is lower (T-1h 78%) because sports deadlines fall aft
   first 90 days?"). Only its newest 100,000 trades are kept, so `truncated = True` and its volume-at-horizon is a lower bound.
 - No empty pages with `has_more`, no out-of-order timestamps across pages, no exact duplicate rows.
 - Tape length per market: median 2,013 (TEST), 1,464 (validation), 1,737 (train); max 76,440 below the cap.
+- Rows by split: TEST 3,592,268, validation 749,102, train 1,322,502. Trades run from 2023-12-01 to 2026-10-15.
+- Median `volumeNum` of tape markets: TEST $236k, validation $402k, train $619k.
 - The `/v2/trades` condition window is a fixed three years back. That reaches 2023-10, which covers the whole universe (CONTEXT.md /
   data_infrastructure.md).
 
@@ -194,7 +213,7 @@ split. Coverage of `sched` is lower (T-1h 78%) because sports deadlines fall aft
 0.26, p90 0.62, about the same in every split. **PLAUSIBLE:** `volumeNum` counts both sides of each fill (maker plus taker), about
 twice the taker notional.
 
-### 4.3 How much the full-life volume screen looks ahead
+### 4.1 How much the full-life volume screen looks ahead
 
 For tape markets, `volnum_at_h_est = volumeNum x (tape notional at or before the horizon / total tape notional)`.
 `vol_screen_at_h` = estimate >= $10k (for the one truncated market, a lower bound on what was available).
@@ -218,7 +237,194 @@ The flag exists only for the 1,503 tape markets. These are the most liquid, so t
 
 ## 5. Spread and cost model
 
-SPREAD_SECTION_PLACEHOLDER
+No historical order book exists (CONTEXT.md). Two estimates are provided.
+1. **Live books (5.1-5.2):** today's books applied to history. **This is an ASSUMPTION** and probably optimistic for 2024-25, when
+   ticks were coarser, there were no rebates, and fewer market makers were active.
+2. **Historical effective half-spread (5.3):** what takers actually paid relative to the panel series, in each split. Only valid for
+   the small sizes takers actually traded.
+
+### 5.1 Live-book method (`04_books.py`, `04b_resnap_books.py`, `06_spread_model.py`)
+
+**Candidates.** Open markets from the Gamma open-market pull of 21:27 UTC (`la_markets_2026-10-17w2.parquet`, 303k markets) plus a
+fresh Gamma pull of 25,000 open markets ending within 24 h (capped at 250 pages, so it is a subset).
+
+**Two book universes.**
+- `vol10k` (primary, comparable to the panel's volume screen): Gamma `volumeNum` to date >= $10k. That leaves 6,208 candidates and
+  1,292 sampled.
+- `allopen` (reference): no volume screen; 283,806 candidates, 2,384 sampled.
+
+**Sampling.** Up to 45 random markets per category x time-to-resolution (TTR) cell.
+- TTR = time to gameStartTime for sports (`in_play` once started), endDate otherwise (`past_end` once passed).
+- Buckets are right-closed so panel horizons map one to one: T-15m and T-1h -> `<=1h`, T-6h -> `1-6h`, T-12h and T-1d -> `6-24h`,
+  T-3d -> `1-3d`, T-7d -> `3-7d`, T-30d -> `7-30d`.
+
+**Snapshots.** POST `/books` for `token_id_0`, taken three times on 2026-10-17:
+- r1 at 22:54 UTC (`vol10k`) and 22:51 (`allopen`), metrics only;
+- r2 at 22:58 and r3 at 23:14, with every price level stored.
+
+The `token_id_1` book is the mirror of `token_id_0`'s (best bid = 1 - other best ask in 99-100% of 150 markets per universe;
+**VERIFIED**). Each book is therefore used for both outcome sides, bucketed by **that side's own mid**, so buying a 2c long shot and
+buying a 98c favourite land in different cells.
+
+**Per side.** Half-spread, and for $500 / $2,500 / $10,000 the VWAP slippage from mid of a marketable buy (walking the asks) and
+sell (walking the bids), the share of books that can fill the full size, and USD depth within 2c and 5c of mid. Slippage medians use
+only books that fill the whole size.
+
+**Stability.** r1 vs r2 half-spread for the same markets, 4-8 minutes apart: Spearman 0.98 (`vol10k`, n = 1,055; 84% unchanged) and 0.97
+(`allopen`, n = 1,688; 78% unchanged).
+
+**Coverage.** 1,055 two-sided `vol10k` markets per round, 1,694 `allopen`.
+- `vol10k` is thin in short-TTR cells (`<=1h`: 48 markets at 35-65c, almost all sports; no crypto). Gamma `volumeNum` is blank for open
+  short-horizon crypto and most sports markets, so the screen drops them.
+- Geopolitics and mentions have only 2 `vol10k` markets each.
+- Only 4 of 356 L0 cells (category x price x TTR) reach 20 markets. 47 of 98 L1 cells (category x price) and 26 of 83 L2 cells
+  (price x TTR) do. Use the finest level with `n_markets_two_sided >= 20`, otherwise L3.
+- r2 and r3 observations of the same market are pooled, so medians count each market up to twice.
+
+### 5.2 Live-book results (`vol10k`, both rounds)
+
+Costs are in price units (0.01 = 1c per share). Columns `buy $X` are the median slippage from mid for a buy of $X notional (fillable
+books only). **VERIFIED** (computed from the stored books); applying them to history is an assumption.
+
+| token price | markets | half-spread med | p75 | buy $500 | buy $2.5k | buy $10k | sell $500 | sell $2.5k | fillable buy $2.5k | fillable buy $10k | ask depth 2c $ | spread>10c |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| <2c | 213 | 0.0010 | 0.0045 | 0.0565 | 0.1895 | 0.4127 | 0.0026 | 0.0045 | 0.9569 | 0.8971 | 37.0000 | 0.0000 |
+| 2-5c | 179 | 0.0068 | 0.0145 | 0.0839 | 0.2562 | 0.5360 | 0.0145 | 0.0149 | 0.9147 | 0.8147 | 27.0000 | 0.0000 |
+| 5-15c | 213 | 0.0100 | 0.0200 | 0.0795 | 0.2431 | 0.4589 | 0.0184 | 0.0221 | 0.7415 | 0.6268 | 52.0000 | 0.0512 |
+| 15-35c | 258 | 0.0100 | 0.0400 | 0.0495 | 0.1954 | 0.3604 | 0.0155 | 0.0190 | 0.7435 | 0.5666 | 69.0000 | 0.2266 |
+| 35-65c | 221 | 0.0050 | 0.0300 | 0.0100 | 0.0108 | 0.0134 | 0.0050 | 0.0050 | 0.7683 | 0.6548 | 759.0000 | 0.2156 |
+| 65-85c | 254 | 0.0100 | 0.0400 | 0.0175 | 0.0365 | 0.0751 | 0.0168 | 0.0253 | 0.7399 | 0.5181 | 209.0000 | 0.2298 |
+| 85-95c | 211 | 0.0100 | 0.0200 | 0.0150 | 0.0258 | 0.0346 | 0.0143 | 0.0230 | 0.8108 | 0.5848 | 595.0000 | 0.0565 |
+| 95-98c | 182 | 0.0070 | 0.0145 | 0.0117 | 0.0161 | 0.0195 | 0.0142 | 0.0251 | 0.8497 | 0.6561 | 1413.0000 | 0.0000 |
+| >98c | 215 | 0.0010 | 0.0045 | 0.0020 | 0.0028 | 0.0045 | 0.0032 | 0.0073 | 0.7512 | 0.5474 | 11519.0000 | 0.0000 |
+| ALL | 1055 | 0.0055 | 0.0150 | 0.0189 | 0.0376 | 0.0894 | 0.0100 | 0.0139 | 0.7990 | 0.6450 | 218.0000 | 0.1092 |
+
+Half-spread by TTR x token price (median):
+
+| half-spread median | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| <=1h |  |  | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 |  |  |
+| 1-6h | 0.0025 | 0.0150 | 0.0242 | 0.0100 | 0.0050 | 0.0100 | 0.0242 | 0.0150 | 0.0025 |
+| 6-24h | 0.0010 | 0.0100 | 0.0265 | 0.0050 | 0.0050 | 0.0050 | 0.0265 | 0.0100 | 0.0010 |
+| 1-3d | 0.0005 | 0.0043 | 0.0100 | 0.1600 | 0.0050 | 0.1600 | 0.0100 | 0.0055 | 0.0005 |
+| 3-7d | 0.0010 | 0.0070 | 0.0050 | 0.0100 | 0.0250 | 0.0060 | 0.0050 | 0.0070 | 0.0010 |
+| 7-30d | 0.0015 | 0.0075 | 0.0050 | 0.0100 | 0.0155 | 0.0085 | 0.0050 | 0.0095 | 0.0018 |
+| >30d | 0.0010 | 0.0060 | 0.0100 | 0.0100 | 0.0250 | 0.0100 | 0.0105 | 0.0065 | 0.0010 |
+| in_play |  | 0.0057 | 0.0050 | 0.0300 | 0.0100 | 0.0300 | 0.0050 | 0.0058 |  |
+| past_end | 0.0045 | 0.0200 | 0.0222 | 0.1115 | 0.3250 | 0.1115 | 0.0222 | 0.0200 | 0.0045 |
+
+Slippage of a $2,500 buy by TTR x token price (median):
+
+| buy $2.5k slippage median | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| <=1h |  |  | 0.0103 | 0.0050 | 0.0050 | 0.0050 | 0.0050 |  |  |
+| 1-6h | 0.1573 | 0.4043 | 0.4252 | 0.3955 | 0.0050 | 0.0378 | 0.0446 | 0.0236 | 0.0081 |
+| 6-24h | 0.1744 | 0.3664 | 0.0102 | 0.0082 | 0.0050 | 0.0050 | 0.0050 | 0.0191 | 0.0038 |
+| 1-3d | 0.1186 | 0.1398 | 0.1638 | 0.3728 | 0.0052 | 0.0248 | 0.0210 | 0.0113 | 0.0028 |
+| 3-7d | 0.1981 | 0.2124 | 0.2532 | 0.1054 | 0.1099 | 0.0395 | 0.0402 | 0.0177 | 0.0025 |
+| 7-30d | 0.1847 | 0.2025 | 0.0920 | 0.1026 | 0.0922 | 0.0500 | 0.0176 | 0.0166 | 0.0036 |
+| >30d | 0.1997 | 0.3014 | 0.3207 | 0.2301 | 0.2653 | 0.0560 | 0.0318 | 0.0151 | 0.0025 |
+| in_play |  | 0.1211 | 0.0213 | 0.2141 | 0.0289 | 0.0300 | 0.0149 | 0.0245 |  |
+| past_end | 0.4956 | 0.5355 | 0.6099 | 0.3118 | 0.2465 | 0.0263 | 0.0364 | 0.0192 | 0.0057 |
+
+Two-sided markets per cell:
+
+| markets | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| <=1h |  |  | 2 | 5 | 48 | 5 | 2 |  |  |
+| 1-6h | 8 | 4 | 3 | 6 | 28 | 6 | 3 | 4 | 8 |
+| 6-24h | 6 | 6 | 7 | 12 | 31 | 12 | 7 | 6 | 6 |
+| 1-3d | 24 | 13 | 14 | 21 | 19 | 21 | 14 | 12 | 24 |
+| 3-7d | 13 | 11 | 13 | 12 | 18 | 11 | 14 | 11 | 14 |
+| 7-30d | 70 | 54 | 73 | 68 | 43 | 67 | 72 | 54 | 70 |
+| >30d | 77 | 78 | 84 | 114 | 32 | 112 | 82 | 82 | 78 |
+| in_play |  | 2 | 4 | 8 | 25 | 8 | 4 | 2 |  |
+| past_end | 15 | 11 | 15 | 15 | 9 | 15 | 15 | 11 | 15 |
+
+$2,500 buy slippage by Gamma volume-to-date tier:
+
+| buy $2.5k by volume tier | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| 100k-1M | 0.1023 | 0.1063 | 0.0939 | 0.0289 | 0.0050 | 0.0126 | 0.0146 | 0.0077 | 0.0016 |
+| 10k-100k | 0.2637 | 0.3501 | 0.2943 | 0.2393 | 0.0126 | 0.0514 | 0.0307 | 0.0186 | 0.0048 |
+| >=1M | 0.0156 | 0.0239 | 0.0115 | 0.0050 | 0.0049 | 0.0071 | 0.0050 | 0.0024 | 0.0007 |
+
+**Reading.**
+- Quoted half-spreads are small. The median is 0.5-1c at mid prices and 0.1c at the extremes; 75% of books are at or below 1.5c.
+- Size is the binding cost.
+  - Buying cheap tokens: $500 of a sub-15c token moves the VWAP 5.7-8.4c above mid. Ask depth within 2c of mid is a median $27-52.
+  - Buying expensive tokens: $500 of a 95c+ token costs 0.2-1.2c.
+  - $10k is fillable in only 52-90% of books.
+- Liquidity tier matters more than category. Markets with lifetime volume of $1M or more have 0.1-2.4c slippage at $2.5k on every price
+  bucket. The $10k-100k tier pays 24-35c on cheap tokens.
+- In `allopen` (no volume screen), the median half-spread at 35-65c is 19.5c and 60% of books have spreads above 10c. Most open
+  markets are empty placeholder books, which is why `vol10k` is the primary universe.
+
+### 5.3 Historical effective half-spread (`07_effective_spread.py`, `effective_spread_hist.parquet`)
+
+**Method.** 2,316,839 taker trades from 1,484 tape markets, in the 72 h before `ref_ts` where the minute series exists. For each
+trade, the traded token's mid is the series value at the last minute at or before the trade (at most 60 s old). The effective
+half-spread is (price - mid) for a taker BUY and (mid - price) for a SELL. Cells: split x category x price x TTR, and split x price x
+notional size.
+
+Median effective half-spread:
+
+| eff_half_med | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| train | 0.0010 | 0.0025 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0020 | 0.0010 |
+| validation | 0.0005 | 0.0026 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0015 | 0.0005 |
+| test | 0.0005 | 0.0025 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0025 | 0.0005 |
+
+Mean effective half-spread:
+
+| eff_half_mean | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| train | 0.0015 | 0.0045 | 0.0081 | 0.0087 | 0.0120 | 0.0089 | 0.0081 | 0.0035 | 0.0011 |
+| validation | 0.0018 | 0.0094 | 0.0122 | 0.0138 | 0.0124 | 0.0110 | 0.0075 | 0.0016 | 0.0010 |
+| test | 0.0118 | 0.0210 | 0.0336 | 0.0270 | 0.0219 | 0.0099 | 0.0004 | -0.0021 | -0.0008 |
+
+TEST median by TTR (sports `in_play` = after gameStartTime):
+
+| TEST eff_half_med by TTR | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| <=1h | 0.0045 | 0.0050 | 0.0150 | 0.0150 | 0.0150 | 0.0150 | 0.0150 | 0.0050 | 0.0025 |
+| 1-6h | 0.0005 | 0.0015 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0025 | 0.0005 |
+| 6-24h | 0.0005 | 0.0025 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0020 | 0.0005 |
+| 1-3d | 0.0005 | 0.0020 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0015 | 0.0005 |
+| in_play | 0.0025 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0005 |
+
+TEST median by category:
+
+| TEST eff_half_med by category | <2c | 2-5c | 5-15c | 15-35c | 35-65c | 65-85c | 85-95c | 95-98c | >98c |
+|---|---|---|---|---|---|---|---|---|---|
+| crypto | 0.0024 | 0.0050 | 0.0150 | 0.0150 | 0.0150 | 0.0150 | 0.0150 | 0.0050 | 0.0010 |
+| culture | 0.0005 | 0.0015 | 0.0045 | 0.0050 | 0.0050 | 0.0050 | 0.0040 | 0.0015 | 0.0005 |
+| economics | 0.0005 | 0.0030 | 0.0050 | 0.0005 | 0.0050 | 0.0005 | 0.0083 | 0.0035 | 0.0005 |
+| finance | 0.0010 | 0.0055 | 0.0050 | 0.0050 | 0.0100 | 0.0050 | 0.0050 | 0.0050 | 0.0005 |
+| geopolitics | 0.0005 | 0.0020 | 0.0050 | 0.0100 | 0.0135 | 0.0090 | 0.0050 | 0.0010 | 0.0005 |
+| mentions | 0.0005 | 0.0083 | 0.0150 | 0.0100 | 0.0150 | 0.0100 | 0.0100 | 0.0090 | 0.0025 |
+| other | 0.0005 | 0.0040 | 0.0100 | 0.0100 | 0.0050 | 0.0150 | 0.0150 | 0.0100 | 0.0010 |
+| politics | 0.0005 | 0.0035 | 0.0040 | 0.0100 | 0.0050 | 0.0100 | 0.0030 | 0.0025 | 0.0005 |
+| sports | 0.0005 | 0.0010 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0050 | 0.0005 | 0.0005 |
+| tech | 0.0005 | 0.0040 | 0.0115 | 0.0156 | 0.0113 | 0.0125 | 0.0100 | 0.0015 | 0.0005 |
+| weather | 0.0024 | 0.0074 | 0.0100 | 0.0125 | 0.0105 | 0.0102 | 0.0100 | 0.0075 | 0.0010 |
+
+**Reading.**
+- Small taker trades paid a median of **half a tick** in every split: 0.5c at mid prices, 0.05-0.25c at the extremes. This agrees with
+  the live-book quoted half-spreads.
+- **Exception: the last hour in TEST, and crypto.** The median is 1.5c at mid prices. Means are larger (TEST 1.75c overall vs 0.66c train)
+  and 29% of TEST trades show a *negative* effective spread. This is the signature of a series that is up to a minute stale in fast
+  markets (5- and 15-minute crypto windows). In those markets the minute snapshot is not a reliable mid, so true costs are uncertain;
+  use the medians or the live books.
+- Selection: takers choose when to trade, so these are lower bounds for a strategy that must trade at a fixed horizon.
+
+**Recommendation for backtests.**
+- Small orders (under about $500): cost = max(historical median effective half-spread for split x price x TTR, live-book half-spread),
+  plus fees.
+- Larger orders: add the live-book slippage at that size from the `vol10k` model (or the volume tier, V1/V2), and state that it is
+  today's book.
+- Sensitivity: double the cost.
+
 
 ## 6. Acceptance checks (pre-registered in section 0)
 
@@ -230,7 +436,17 @@ SPREAD_SECTION_PLACEHOLDER
 | 4 | fidelity-60 point = fidelity-1 point at the same minute within 0.5c in >= 90% | 100% (exactly equal, n = 409,692) | **PASS**: fidelity-60 points are snapshots |
 | 5 | median gap to the last trade at t <= the gap at t+5 min | 0.5c = 0.5c at every lag | **PASS, but uninformative** (see below) |
 | 6 | >= 95% of tapes complete; IQR of tape notional / volumeNum inside [0.2, 5] | 99.93% complete (1 hit the cap); IQR 0.41-0.56 | **PASS** |
-| 7 | >= 800 two-sided live books; headline cells n >= 20 or collapsed | CHECK7_PLACEHOLDER | CHECK7_VERDICT |
+| 7 | >= 800 two-sided live books; headline cells n >= 20 or collapsed | 1,055 `vol10k` + 1,694 `allopen` two-sided markets per round; headline table (5.2) cells all have >= 179 markets; finer cells below 20 are flagged and collapsed by level | **PASS** (but L0 cells are mostly < 20: 4/356) |
+
+**Changes made after seeing results (declared here, not pre-registered).**
+1. The `vol10k` book universe was added after the first all-open snapshot showed that most open markets have empty placeholder books.
+   That snapshot is kept as `allopen`.
+2. Books are bucketed by each outcome side's own price, using the mirror. The first version bucketed by min(p, 1-p), which mixed
+   cheap-token buys with expensive-token buys.
+3. The historical effective-spread model (5.3) was added.
+4. The mean-gap and change-event tests were added to check 5.
+5. A `null_reason = after_series_end` rule was added for 202 game-horizon rows. Without it, those rows would have carried a price
+   older than the horizon by more than one fidelity step.
 
 **Check 2.** The failure is structural, not a data gap. 1,455 of the 1,512 markets unpriced at T-1d did not exist a day before
 `ref_ts` (short-lived crypto and sports). Among markets that existed at T-1d, 99.1% are priced at both T-1d and T-1h. Consequence:
@@ -255,7 +471,7 @@ trade also move the series, and trades follow quote changes.
   current state of the market). Train and validation markets were fee-free.
 - **Which reference clock.** Decide on `sched` or `game` horizons (known in advance). `res` horizons condition on the realised
   close time, which is look-ahead for the 19-23% of markets that closed early.
-- **Volume screen.** Full-life `volumeNum` is a strong look-ahead for TEST short-horizon markets (4.3). Use `vol_screen_at_h`
+- **Volume screen.** Full-life `volumeNum` is a strong look-ahead for TEST short-horizon markets (4.1). Use `vol_screen_at_h`
   on the tape subsample, or a design that does not screen on volume.
 - **Inference.** Cluster on `cluster_id` and block on `cluster_week`. TEST has 42 weeks. Weight with `sample_weight` to
   generalise to the eligible population, or report per category unweighted.

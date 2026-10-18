@@ -8,7 +8,7 @@ import yaml
 from alerts import run as run_mod
 from alerts.http_client import HttpClient
 
-from .conftest import MINTBLADE, SECOND, Clock, FakeApi, Harness, base_config, load_fixture
+from .conftest import MINTBLADE, SECOND, Clock, FakeApi, Harness, add_dormant, base_config, load_fixture
 
 
 def write_cfg(tmp_path, **over) -> str:
@@ -30,6 +30,7 @@ def test_cli_once_report_and_exit_codes(tmp_path, monkeypatch, capsys) -> None:
     api.clock = time.time
     rows = load_fixture("activity_second.json")
     api.add_activity(SECOND, rows)
+    add_dormant(api, MINTBLADE, int(time.time()) - 40 * 86400)    # a dormant account, not an unknown address
     patch_http(monkeypatch, api)
     cfg = write_cfg(tmp_path)
     db = str(tmp_path / "cli.sqlite")
@@ -54,7 +55,8 @@ def test_cli_loop_runs_bounded_cycles_with_dispatcher_thread(tmp_path, monkeypat
     t0 = time.monotonic()
     assert run_mod.main(["--config", cfg, "--db", db, "--interval", "1", "--max-cycles", "2"]) == 0
     assert time.monotonic() - t0 < 20
-    assert api.count("/v2/activity") == 4                     # 2 wallets x 2 cycles
+    # 2 wallets x 2 cycles, plus one full-history probe per wallet at bootstrap (empty window; review fix)
+    assert api.count("/v2/activity") == 6
 
 
 def test_digest_every_interval_once(tmp_path, second_rows) -> None:

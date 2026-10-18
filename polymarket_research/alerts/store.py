@@ -152,6 +152,12 @@ CREATE TABLE IF NOT EXISTS meta (
     value TEXT NOT NULL
 );
 """),
+    # Review 2026-10-17: when monitoring of a wallet first began (first poll attempt, even a
+    # failed one). Fills executed after it are live, not bootstrap baseline, even if the
+    # first *successful* poll comes much later.
+    (2, """
+ALTER TABLE poll_state ADD COLUMN first_attempt_at REAL;
+"""),
 ]
 
 SCHEMA_VERSION = MIGRATIONS[-1][0]
@@ -256,6 +262,7 @@ class Store:
             c.execute("INSERT OR IGNORE INTO poll_state (wallet) VALUES (?)", (wallet,))
             c.execute(
                 """UPDATE poll_state SET
+                     first_attempt_at = COALESCE(first_attempt_at, ?),
                      watermark_ts = MAX(COALESCE(watermark_ts, 0), ?),
                      last_seen_row_ts = MAX(COALESCE(last_seen_row_ts, 0), COALESCE(?, 0)),
                      last_cursor = NULL, last_attempt_at = ?, last_success_at = ?,
@@ -263,7 +270,21 @@ class Store:
                      bootstrapped_at = COALESCE(bootstrapped_at, CASE WHEN ? THEN ? END),
                      polls_ok = polls_ok + 1, rows_seen = rows_seen + ?, fills_new = fills_new + ?
                    WHERE wallet = ?""",
-                (int(watermark_ts), last_seen_row_ts, now, now, int(bootstrap), now, rows, new_fills, wallet))
+                (now, int(watermark_ts), last_seen_row_ts, now, now, int(bootstrap), now, rows, new_fills, wallet))
+
+    def advance_checkpoint(self, wallet: str, checkpoint_ts: int, *, last_seen_row_ts: int | None) -> bool:
+        """Move the watermark forward (never back) to a point a *failed* walk proved complete.
+
+        Only for wallets that already have a watermark: a bootstrap stays a bootstrap
+        until one walk completes. Returns True if the watermark moved.
+        """
+        with self.tx() as c:
+            cur = c.execute(
+                """UPDATE poll_state SET watermark_ts = ?,
+                     last_seen_row_ts = MAX(COALESCE(last_seen_row_ts, 0), COALESCE(?, 0))
+                   WHERE wallet = ? AND watermark_ts IS NOT NULL AND watermark_ts < ?""",
+                (int(checkpoint_ts), last_seen_row_ts, wallet, int(checkpoint_ts)))
+            return cur.rowcount == 1
 
     def mark_poll_failure(self, wallet: str, *, now: float, error: str, last_cursor: str | None,
                           new_fills: int) -> int:
@@ -272,8 +293,9 @@ class Store:
             c.execute("INSERT OR IGNORE INTO poll_state (wallet) VALUES (?)", (wallet,))
             c.execute(
                 """UPDATE poll_state SET last_attempt_at = ?, consecutive_failures = consecutive_failures + 1,
+                     first_attempt_at = COALESCE(first_attempt_at, ?),
                      last_error = ?, last_cursor = ?, polls_failed = polls_failed + 1, fills_new = fills_new + ?
-                   WHERE wallet = ?""", (now, error[:1000], last_cursor, new_fills, wallet))
+                   WHERE wallet = ?""", (now, now, error[:1000], last_cursor, new_fills, wallet))
             r = c.execute("SELECT consecutive_failures FROM poll_state WHERE wallet = ?", (wallet,)).fetchone()
         return int(r[0])
 
@@ -292,6 +314,26 @@ class Store:
                 if cur.rowcount == 1:
                     new.append(f["fill_id"])
         return new
+
+    def known_fill_ids(self, wallet: str, types: Iterable[str], since_ts: int, until_ts: int) -> set[str]:
+        """Ids of stored fills of ``types`` with since_ts <= block ts <= until_ts (what a re-read must return)."""
+        types = list(types)
+        rows = self.q(f"SELECT fill_id FROM fills WHERE wallet = ? AND ts >= ? AND ts <= ? AND activity_type IN "
+                      f"({', '.join('?' * len(types))})", (wallet, int(since_ts), int(until_ts), *types))
+        return {r[0] for r in rows}
+
+    def canary_ts(self, wallet: str, types: Iterable[str]) -> int | None:
+        """Block ts of the wallet's second-newest stored second of activity (newest if only one).
+
+        Every poll window starts no later than this, so each successful poll must
+        return at least one row this system has already seen: a 200 response with
+        no rows then means "the API is not serving this wallet", not "no trades".
+        Two seconds are used so that one row vanishing (reindex) cannot block polling.
+        """
+        types = list(types)
+        rows = self.q(f"SELECT DISTINCT ts FROM fills WHERE wallet = ? AND activity_type IN "
+                      f"({', '.join('?' * len(types))}) ORDER BY ts DESC LIMIT 2", (wallet, *types))
+        return int(rows[-1][0]) if rows else None
 
     def count(self, table: str, where: str = "1", params: Iterable[Any] = ()) -> int:
         return int(self.q1(f"SELECT COUNT(*) FROM {table} WHERE {where}", params)[0])

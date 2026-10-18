@@ -6,7 +6,36 @@ was computed in this stage. Pre-registration: `notes/strategies/pit_wallets_prer
 Labels: **VERIFIED** = I inspected the primary data or source myself; **PLAUSIBLE** = consistent with the
 evidence but not checked directly; **UNSUPPORTED** = not established.
 
-__RESULTS__
+## 0. Stage-1 result in brief (resumed session, finished 2026-10-17T23:17Z)
+
+- **Built (VERIFIED).** The point-in-time screens were computed at all 24 selection dates
+  (2024-01-01 .. 2025-12-01) over all 256 wallet buckets:
+  - S1, S1m, S2, S3, S4 (4 categories), S5 and the B1 random-eligible sample;
+  - 973,951 (date, screen, wallet) member rows covering 153,604 distinct wallets;
+  - base-rate counts per date;
+  - per-wallet signal features.
+- **Evaluation-window export (VERIFIED).**
+  - 963,643 new decisions of sampled screened wallets in the following calendar month (primary signal).
+  - 1,650,952 BUY fills of the fill-export sub-sample (secondary signal), capped at 1,000 per (date, wallet)
+    under addendum A9.
+- **Cluster signal (VERIFIED).** 773 fresh-wallet cluster signals in 389 underlying events.
+- **Checks (VERIFIED).**
+  - The fill rule matched the Data API on 28/28 fills.
+  - The independent Data API audit reproduced 39/39 sampled screen memberships.
+  - Member counts equal the server counts.
+  - The S5 cut lies inside every bucket's candidate list.
+- **No follower return or evaluation-window performance was computed** (stages 2-4).
+- **What the trader's screen actually selects** (VERIFIED, trailing in-sample description, not a test):
+  - "5 bets in 12 months, all won" (S1) is not a rare-skill filter. It holds 10k-12k wallets a month in
+    2025-H2, 1-4% of eligible wallets.
+  - 82% of S1 member rows have an average entry price >= 0.90 (70% >= 0.95), so the five wins are mostly
+    favourites bought near certainty.
+  - The median S1 wallet's trailing P&L on those bets is $0.56, and only 4.4% made more than $100.
+  - Membership turns over by about half each month.
+  - So S1 mostly picks small favourite buyers. Copying such buys at worse prices after detection leaves little
+    room for profit. That is a prior (PLAUSIBLE), not a result; stage 2 tests it.
+- **New constraint.** CryptoHouse enforces 120 queries per hour (section 2). Stage 2 must batch its
+  follower-price pulls.
 
 ## 1. Pipeline and files
 
@@ -182,7 +211,7 @@ token key is the last 18 decimal digits of the token id; it is unique over all 3
 5. S3 and S4 use z = sum(y - p) / sqrt(sum p(1-p) + 0.25 k), k = 10, with shrunken mean edge sum(y - p)/(n + k).
 6. S5 is the global top 1% of decision-market P&L among wallets with >= 5 resolved decisions. It is cut in
    `05_merge_screens.py` from bucket-local top-2% candidate lists, and the script checks that the cut lies
-   inside every bucket's list.
+   inside every bucket's list. Three buckets failed that check and were re-run with a top-8% + 12 list (section 6).
 7. B1 is a fixed 1% hash sample of eligible wallets.
 
 **The P&L formula.** P&L = sum over tokens of (sell proceeds - buy cost + payout x net shares). This is exact
@@ -312,7 +341,89 @@ period as a rough check only. Validation and test carry the evidence.
 - "Last activity before D" for F2 is in the evaluation export (`w_last_before`, `prev_active_day_gap`), not
   here.
 
-__EVAL__
+## 7. Evaluation-window export (step 6) — data only, no performance
+
+**Followed set and sample (A7).**
+- The followed set is fixed at D: the members of each screen at D.
+- Per (D, screen), the first 1,000 members ranked by md5(wallet|screen) go into the decision export, and the
+  first 150 also go into the fill export. Screens with fewer members are exported in full.
+- B1 is the 1% hash sample of eligible wallets, exported under the same caps.
+- The sample is set by hash, so it does not depend on outcomes.
+- `eval_sample_members.parquet` lists every member with its rank and sample flags.
+- `eval_wallet_index.parquet` maps the integer wallet ids used in the chunks to addresses.
+
+**Queries.**
+- One CryptoHouse query per (D, wallet chunk). The query reads the chunk wallets' whole fill history up to the
+  window end, with an external table of wallets and `meta_ext.tsv`.
+- A chunk that overflows the 1 MB cap is halved. A single heavy wallet is split by time slice.
+- Format v1 was used for 2024-01..09, 2025-05 and 2025-06, uncapped. Format v2 (A9) was used for every other
+  month, with the fill cap and a slimmer decision row.
+- `06b_eval_merge.py` puts both formats into one schema and applies the A9 cap to v1 locally.
+- Chunks of 2024-10 and 2025-07 written in v1 before the quota stop were superseded (moved to
+  `eval_chunks_superseded/`), and those months were re-exported whole in v2.
+- Query count: 419 chunk files plus 24 per-month count queries. About 45 more queries were rejected by the
+  quota and then re-run.
+
+**`eval_decisions.parquet` (primary signal: new decisions).** One row per (D, wallet, new decision), where the
+decision's event-level first BUY falls in [D, first day of next month). Columns:
+- the wallet's screens at D and the screens it was sampled for;
+- the token, condition, underlying event, question, outcome, category and negRisk;
+- `t0`;
+- the followed wallet's own fills: first-second shares, $ and price, taker share of the first-second $, $ in
+  the first 10 min (F1 input), the 6 h episode's shares, $, VWAP, sells and fill count;
+- `first_tx` (transaction hash of the first fill);
+- payout `p`, `clean_resolution`, `outcome_won` and `t_res`;
+- `w_last_before`, `prev_active_day_gap` and `F2_returning`;
+- `med_usd_at_D` and `F1_large`.
+
+The followed wallet's prices are **not** follower prices. Stage 2 must price entries from other wallets' fills
+at t + delay.
+
+**`eval_buys.parquet` (secondary signal).** Every BUY fill in the window by the fill-export sub-sample, on
+every token, with or without metadata, capped under A9. Columns: D, wallet, token key / token_id / condition /
+underlying event / category, ts, shares, $, price, role (maker/taker), tx hash, and whether the token is the
+wallet's new decision. `eval_fill_wallets.parquet` gives each sampled (D, wallet)'s total window buys, its
+exported buys and whether the cap applied.
+
+**`eval_coverage.parquet`.** Per (D, screen): members, number sampled for decisions and for fills, decisions
+exported, and wallets with at least one new decision. Totals by split:
+
+| screen | sampled (D, wallet) train / val / test | new decisions exported train / val / test | (D, wallet) pairs with >= 1 new decision train / val / test | fill-export (D, wallet) train / val / test |
+|---|---|---|---|---|
+| B1_random_eligible | 1,338 / 5,836 / 6,000 | 6,771 / 14,616 / 22,633 | 665 / 2,779 / 1,931 | 775 / 900 / 900 |
+| S1 | 3,469 / 6,000 / 6,000 | 9,527 / 10,409 / 4,801 | 1,833 / 2,987 / 1,528 | 1,065 / 900 / 900 |
+| S1m | 3,152 / 6,000 / 6,000 | 9,456 / 11,511 / 5,407 | 1,725 / 3,153 / 1,923 | 1,021 / 900 / 900 |
+| S2 | 5,613 / 6,000 / 6,000 | 18,450 / 11,994 / 8,008 | 3,282 / 3,542 / 2,411 | 1,332 / 900 / 900 |
+| S3 | 607 / 2,864 / 5,144 | 15,889 / 69,024 / 464,853 | 393 / 1,477 / 2,491 | 518 / 900 / 900 |
+| S4_crypto | 81 / 307 / 1,311 | 868 / 6,526 / 342,442 | 55 / 169 / 739 | 81 / 307 / 829 |
+| S4_other | 61 / 137 / 363 | 1,975 / 4,293 / 20,383 | 42 / 90 / 250 | 61 / 137 / 363 |
+| S4_politics | 346 / 1,396 / 1,306 | 6,590 / 20,771 / 31,187 | 205 / 636 / 713 | 318 / 900 / 900 |
+| S4_sports | 91 / 1,089 / 2,314 | 7,778 / 49,087 / 123,322 | 71 / 620 / 1,093 | 91 / 809 / 900 |
+| S5 | 1,472 / 5,882 / 6,000 | 35,094 / 89,950 / 203,134 | 941 / 3,046 / 2,865 | 827 / 900 / 900 |
+
+**Structural checks (VERIFIED, no outcomes inspected).**
+- Every exported decision has `t0` inside its window: 100%.
+- Every first-fill transaction hash is 66 hex characters. It is found among the wallet's own same-second
+  window fills in 100% of the decisions that also have fills (v1: 1,931/1,931, v2: 5,811/5,811 in the months
+  tested). This confirms the UInt256 hash encoding round-trips correctly.
+- All exported prices are in (0, 1]. All buys fall inside their window.
+- The only duplicate (D, wallet, underlying event) rows are decisions on tokens without metadata (436 rows),
+  which have no event key.
+- Decisions on tokens without metadata: 0.07%. Clean resolution: 99.6%.
+- F2 "returning" is set for 0.62% of decisions and F1 "large bet" for 10.5% (where defined). These shares are
+  similar in v1 and v2 months (F2 1.1% vs 0.9%).
+- In 50.4% of decisions the first second is entirely taker fills.
+- Counts by split:
+  - train: 113,978 decisions, 7,089 underlying events, 6,352 wallets;
+  - validation: 217,803 decisions, 15,634 events, 9,533 wallets;
+  - test: 631,862 decisions, 54,385 events, 6,515 wallets.
+  - Many test decisions come from S3, S4-crypto and S5 bots. S3 alone has 464,853 decisions in test, so stage 2
+    must weight by wallet or event, not by decision.
+- Fill export:
+  - 19,588 sampled (D, wallet) pairs, of which 10,095 had any buy.
+  - 11,667,861 window buys in total, of which 1,650,952 were exported after the A9 cap.
+  - 944 (D, wallet) pairs were capped. Role split: 25.9% taker, 74.1% maker.
+  - 0.04% of the exported buys are on tokens without metadata.
 
 ## 8. Cluster signal candidate (pre-registration section 12, A4) — signals exported, no performance
 

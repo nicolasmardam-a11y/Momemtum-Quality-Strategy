@@ -12,6 +12,16 @@ those two commits the outcome is unknown. On restart:
 * ``at_most_once``: the delivery is marked ``unknown``, never re-sent, and a
   health event is recorded so the possible loss is not silent.
 
+The same recovery also runs inside a live process for any delivery that has been
+``sending`` for longer than a lease (``max(60 s, 3 x send_timeout_seconds)``): that
+only happens when recording the outcome failed (e.g. ``database is locked`` after
+the send), and without it such a delivery stayed stuck until the next restart.
+
+Retryable failures are retried with exponential backoff until *both*
+``max_attempts`` is reached and the alert is older than ``give_up_after_minutes``,
+so a channel or internet outage shorter than that loses nothing; only then (or on
+a non-retryable error) is a delivery ``failed`` and reported.
+
 Alerts themselves are created exactly once (UNIQUE dedupe_key), so re-polling
 or re-evaluating never produces a second alert for the same bet.
 
@@ -48,10 +58,19 @@ class Dispatcher:
         # on_problem(scope, kind, detail) lets the engine record health events.
         self.on_problem = on_problem or (lambda scope, kind, detail: None)
 
-    def recover_inflight(self) -> int:
-        """Handle deliveries left in 'sending' by a crash. Returns how many were found."""
-        rows = self.store.q("SELECT alert_id, channel FROM deliveries WHERE status = 'sending'")
+    @property
+    def lease_s(self) -> float:
+        return max(60.0, 3 * self.cfg.notifications.send_timeout_seconds)
+
+    def recover_inflight(self, *, older_than_s: float | None = None) -> int:
+        """Handle deliveries left in 'sending' by a crash (startup: all of them) or by a failure to
+        record the outcome (in-process: those older than ``older_than_s``). Returns how many."""
         now = self.clock()
+        if older_than_s is None:
+            rows = self.store.q("SELECT alert_id, channel FROM deliveries WHERE status = 'sending'")
+        else:
+            rows = self.store.q("SELECT alert_id, channel FROM deliveries WHERE status = 'sending' "
+                                "AND COALESCE(last_attempt_at, 0) < ?", (now - older_than_s,))
         for r in rows:
             if self.cfg.notifications.delivery_semantics == "at_least_once":
                 self.store.conn.execute(
@@ -72,7 +91,7 @@ class Dispatcher:
     def _due(self, limit: int) -> list:
         return self.store.q(
             """SELECT d.alert_id, d.channel, d.attempts, d.possible_duplicate, a.dedupe_key, a.kind, a.label,
-                      a.text, a.payload_json
+                      a.text, a.payload_json, a.created_at
                  FROM deliveries d JOIN alerts a ON a.alert_id = d.alert_id
                 WHERE d.status = 'pending' AND d.next_attempt_at <= ?
                 ORDER BY d.alert_id, d.channel LIMIT ?""", (self.clock(), limit))
@@ -81,6 +100,7 @@ class Dispatcher:
         """Attempt every due delivery once (bounded). Returns counts by outcome."""
         stats = {"sent": 0, "retry": 0, "failed": 0, "rate_limited": 0, "skipped": 0}
         t_end = None if deadline_s is None else time.monotonic() + deadline_s
+        self.recover_inflight(older_than_s=self.lease_s)
         for d in self._due(max_items):
             if t_end is not None and time.monotonic() > t_end:
                 break
@@ -129,7 +149,8 @@ class Dispatcher:
         n = self.cfg.notifications
         attempts = d["attempts"] + 1
         now = self.clock()
-        if e.retryable and attempts < n.max_attempts:
+        age = now - float(d["created_at"] or now)
+        if e.retryable and (attempts < n.max_attempts or age < n.give_up_after_minutes * 60):
             delay = min(n.backoff_max_seconds, n.backoff_base_seconds * 2 ** (attempts - 1))
             if e.retry_after_s:
                 delay = max(delay, e.retry_after_s)

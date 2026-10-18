@@ -7,7 +7,7 @@ import pytest
 
 from alerts.config import ConfigError, load_config, parse_config
 from alerts.fills import OccurrenceCounter, fee_role, to_fill, trade_key
-from alerts.store import SCHEMA_VERSION, Store
+from alerts.store import MIGRATIONS, SCHEMA_VERSION, Store
 
 from .conftest import MINTBLADE, SECOND, base_config, load_fixture
 
@@ -61,7 +61,7 @@ def test_migrations_are_idempotent(tmp_path) -> None:
     s2 = Store(p)                                         # reopen runs migrate() again
     assert s2.get_meta("x") == "1"
     assert s2.q1("PRAGMA user_version")[0] == SCHEMA_VERSION
-    assert s2.count("schema_migrations") == 1
+    assert s2.count("schema_migrations") == len(MIGRATIONS)
     tables = {r[0] for r in s2.q("SELECT name FROM sqlite_master WHERE type = 'table'")}
     assert {"wallets", "fills", "bets", "alerts", "deliveries", "poll_state", "health_events"} <= tables
 

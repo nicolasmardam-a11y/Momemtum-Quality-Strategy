@@ -220,30 +220,58 @@ class Enricher:
         self.taker_crosscheck = taker_crosscheck
         self.clock = clock
 
-    def _try(self, en: Enrichment, label: str, fn: Callable[[], Any]) -> Any:
+    PAYLOAD_ERRORS = (KeyError, TypeError, ValueError, AttributeError, IndexError)
+
+    def _try(self, en: Enrichment, label: str, fn: Callable[[], Any], source: str = "enrich") -> Any:
+        """Run one enrichment component. Network failures (DataError) and payload-shape surprises
+        (a field of the wrong type) are both recorded as errors of that component only."""
         try:
             return fn()
         except DataError as e:
-            en.errors.append(e)
-            en.data.setdefault("enrichment_errors", []).append(f"{label}: {e}")
-            return None
+            err = e
+        except self.PAYLOAD_ERRORS as e:
+            err = DataError("schema", source, "", f"{label}: unexpected payload ({type(e).__name__}: {e})",
+                            retryable=False)
+        en.errors.append(err)
+        en.data.setdefault("enrichment_errors", []).append(f"{label}: {err}")
+        return None
+
+    def _roles(self, en: Enrichment, bet: sqlite3.Row, fills: list[dict]) -> str:
+        """Resolve 'unknown' liquidity roles via /v2/trades; returns the cross-check outcome.
+
+        "maker" is inferred from *absence* from the taker-only feed, which is only valid
+        once /v2/trades has ingested these fills. So the full feed (taker_only=false,
+        verified equal to the activity TRADE rows) must contain every fill of the bet
+        first; otherwise roles stay unknown ("incomplete").
+        """
+        if not (self.taker_crosscheck and bet["side"] in ("BUY", "SELL")
+                and any(f["liquidity_role"] == "unknown" for f in fills)):
+            return "not run"
+        span = (bet["wallet"], bet["first_ts"], bet["last_ts"])
+        everything = self._try(en, "trades index check", lambda: self.sources.trade_fill_keys(*span, taker_only=False),
+                               "data-api")
+        if everything is None:
+            return "failed"
+        missing = [f for f in fills if trade_key(f) not in everything]
+        if missing:
+            return f"incomplete: /v2/trades has not yet ingested {len(missing)} of {len(fills)} fill(s)"
+        takers = self._try(en, "taker cross-check", lambda: self.sources.trade_fill_keys(*span, taker_only=True),
+                           "data-api")
+        if takers is None:
+            return "failed"
+        for f in fills:
+            if f["liquidity_role"] == "unknown":
+                f["liquidity_role"] = "taker" if trade_key(f) in takers else "maker"
+            elif f["liquidity_role"] == "taker" and trade_key(f) not in takers:
+                f["liquidity_role"] = "unknown"     # fee seen but not a taker fill (builder fee?): do not guess
+        return "ok"
 
     def enrich(self, bet: sqlite3.Row, fills: list[sqlite3.Row]) -> Enrichment:
         en = Enrichment()
         d = en.data
         fills = [dict(f) for f in fills]
-        # 1. Maker/taker: fee-embedded rows are takers; optionally confirm the rest via /v2/trades.
-        crosscheck = "not run"
-        if self.taker_crosscheck and bet["side"] in ("BUY", "SELL") and any(f["liquidity_role"] == "unknown" for f in fills):
-            keys = self._try(en, "taker cross-check", lambda: self.sources.taker_fill_keys(
-                bet["wallet"], bet["first_ts"], bet["last_ts"]))
-            if keys is not None:
-                crosscheck = "ok"
-                for f in fills:
-                    if f["liquidity_role"] == "unknown":
-                        f["liquidity_role"] = "taker" if trade_key(f) in keys else "maker"
-            else:
-                crosscheck = "failed"
+        # 1. Maker/taker: fee-embedded rows are takers; the rest are checked against /v2/trades.
+        crosscheck = self._roles(en, bet, fills)
         d["maker_taker_basis"] = (
             "fee embedded in usdc_size => taker; " +
             ("remaining fills checked against /v2/trades taker-only feed" if crosscheck == "ok"
@@ -251,28 +279,40 @@ class Enricher:
         d["fills"] = fill_stats(fills)
 
         # 2. Market metadata (Gamma) and fresh state (CLOB).
-        gamma = self._try(en, "gamma market", lambda: self.sources.gamma_market(bet["condition_id"]))
-        clob = self._try(en, "clob market", lambda: self.sources.clob_market(bet["condition_id"]))
-        g = gamma or {}
-        ev = (g.get("events") or [{}])[0] if g.get("events") else {}
+        gamma = self._try(en, "gamma market", lambda: self.sources.gamma_market(bet["condition_id"]), "gamma")
+        clob = self._try(en, "clob market", lambda: self.sources.clob_market(bet["condition_id"]), "clob")
+        g = gamma if isinstance(gamma, dict) else {}
+
+        def market_section() -> tuple[dict, dict]:
+            evs = g.get("events")
+            ev = evs[0] if isinstance(evs, list) and evs else {}
+            if not isinstance(ev, dict):
+                raise TypeError(f"events[0] is {type(ev).__name__}, not an object")
+            return ev, {
+                "question": g.get("question") or bet["title"],
+                "event_title": ev.get("title"),
+                "event_id": str(ev["id"]) if ev.get("id") is not None else None,
+                "outcomes": jlist(g.get("outcomes")),
+            }
+        sect = self._try(en, "gamma market fields", market_section, "gamma")
+        ev, mfields = sect if sect is not None else ({}, {"question": bet["title"], "event_title": None,
+                                                           "event_id": None, "outcomes": []})
         event_slug = bet["event_slug"] or ev.get("slug")
         market_slug = bet["market_slug"] or g.get("slug")
         d["market"] = {
-            "question": g.get("question") or bet["title"],
-            "event_title": ev.get("title"),
-            "event_id": str(ev["id"]) if ev.get("id") is not None else None,
+            **mfields,
             "outcome": bet["outcome"],
-            "outcomes": jlist(g.get("outcomes")),
             "condition_id": bet["condition_id"],
             "token_id": bet["token_id"],
             "gamma_found": gamma is not None,
             **links(event_slug, market_slug),
         }
-        d["market_state"] = market_state(gamma, clob, self.clock())
+        d["market_state"] = self._try(en, "market state", lambda: market_state(
+            g if sect is not None else {k: v for k, v in g.items() if k != "events"}, clob, self.clock()), "gamma") or {}
 
-        # 3. Fresh executable book for the traded outcome.
+        # 3. Fresh executable book for the traded outcome (Sources.book checks asset_id == token).
         n_err = len(en.errors)
-        book = self._try(en, "clob book", lambda: self.sources.book(bet["token_id"])) if bet["token_id"] else None
+        book = self._try(en, "clob book", lambda: self.sources.book(bet["token_id"]), "clob") if bet["token_id"] else None
         if not bet["token_id"]:
             d["book"] = {"available": False, "reason": "no single outcome token (split/merge/conversion)"}
         elif len(en.errors) > n_err:
@@ -291,26 +331,34 @@ class Enricher:
         d["deterioration"] = deterioration(avg, best, bet["side"])
 
         # 4. Follower fee at the current ask from the market's feeSchedule.
-        if gamma is not None:
-            fs = g.get("feeSchedule") if isinstance(g.get("feeSchedule"), dict) else {}
-            rate = market_fee_rate(g, g.get("category"))
-            exponent = float(fs.get("exponent") or 1.0) if fs else 1.0
-            basis = "feeSchedule" if fs.get("rate") is not None else "category fallback (pmr.fees)"
-        else:
-            rate, exponent, basis = None, 1.0, "unknown (Gamma lookup failed)"
-        d["follower_fee"] = (follower_fee(best, rate, exponent, self.follow_usd)
-                             if rate is not None else {"fee_rate": None, "fee_cents_per_share": None,
-                                                       "follow_fee_usd": None, "follow_usd": self.follow_usd})
-        if exponent != 1.0:
-            # notes/platform/fees_incentives.md: legacy (v1) exponent-2 markets used a different formula.
-            basis += f"; exponent {exponent:g} != 1: legacy fee formula, figure may be wrong"
-        d["follower_fee"]["basis"] = basis
-        d["follower_fee"]["fee_type"] = g.get("feeType")
+        def fee_section() -> dict:
+            if gamma is None:
+                rate, exponent, basis = None, 1.0, "unknown (Gamma lookup failed)"
+            else:
+                fs = g.get("feeSchedule") if isinstance(g.get("feeSchedule"), dict) else {}
+                rate = market_fee_rate(g, g.get("category"))
+                exponent = float(fs.get("exponent") or 1.0) if fs else 1.0
+                basis = "feeSchedule" if fs.get("rate") is not None else "category fallback (pmr.fees)"
+            out = (follower_fee(best, rate, exponent, self.follow_usd)
+                   if rate is not None else {"fee_rate": None, "fee_cents_per_share": None,
+                                             "follow_fee_usd": None, "follow_usd": self.follow_usd})
+            if exponent != 1.0:
+                # notes/platform/fees_incentives.md: legacy (v1) exponent-2 markets used a different formula.
+                basis += f"; exponent {exponent:g} != 1: legacy fee formula, figure may be wrong"
+            out["basis"] = basis
+            out["fee_type"] = g.get("feeType")
+            return out
+        d["follower_fee"] = self._try(en, "follower fee", fee_section, "gamma") or {
+            "fee_rate": None, "fee_cents_per_share": None, "follow_fee_usd": None, "follow_usd": self.follow_usd,
+            "basis": "unknown (fee fields unparseable)"}
 
         # 5. Exposure: this market, and the whole event when the event id is known.
-        mpos = self._try(en, "positions (market)", lambda: self.sources.positions(bet["wallet"], condition=bet["condition_id"]))
+        mpos = self._try(en, "positions (market)",
+                         lambda: self.sources.positions(bet["wallet"], condition=bet["condition_id"]), "data-api")
         eid = d["market"]["event_id"]
-        epos = self._try(en, "positions (event)", lambda: self.sources.positions(bet["wallet"], event_id=eid)) if eid else None
-        d["exposure"] = exposure(mpos, epos, bet["token_id"]) if mpos is not None else None
+        epos = self._try(en, "positions (event)", lambda: self.sources.positions(bet["wallet"], event_id=eid),
+                         "data-api") if eid else None
+        d["exposure"] = (self._try(en, "exposure", lambda: exposure(mpos, epos, bet["token_id"]), "data-api")
+                         if mpos is not None else None)
         d["enriched_at"] = self.clock()
         return en

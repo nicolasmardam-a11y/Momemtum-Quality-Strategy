@@ -240,3 +240,53 @@ return or evaluation-window statistic existed.
   - Months exported only in part (2024-10 and 2025-07) are re-exported whole in the new format.
   - Decided only from export volume and the quota. No evaluation-window price, outcome or follower return had
     been looked at.
+
+- **A10 (2026-10-17T23:27Z, stage 2) follower-simulation implementation, written before any follower price,
+  follower return or benchmark return was computed.** Sections 7-11 stay the primary, confirmatory test. Everything
+  else below is either implementation detail or an exploratory extension asked for in stage 2, which is reported
+  separately and cannot turn a rejection into an edge.
+  - *Taker BUY print*: an `orders_filled` row whose `taker` is an exchange contract and whose `maker_asset_id = '0'`
+    (the taker order paid collateral); price = collateral / shares of that row; prints by the followed wallet itself
+    are excluded (cluster signals: no exclusion).
+  - *Primary model (section 7, unchanged)*: first taker BUY print of the same token at >= t + delay, + 0.01
+    (capped at 0.999), unfilled if none within 60 min; delays 2 min (primary), 30 s, 10 min, 60 min; $100 stake;
+    hold to resolution.
+  - *Exploratory grid (stage-2 brief)*: delays 5 s, 30 s, 2 min, 15 min, 60 min and an hourly poll (detection at the
+    next full UTC hour after t); entry = VWAP of taker BUY prints by other wallets in [detection, detection + 30 min)
+    accumulated to $100 / $500 / $2,500 / $10,000, else unfilled; extra slippage 0 / 0.5 / 1 cent; fees (a) the
+    on-chain fee field in force (zero on taker fills from 2025-04, near zero before) and (b) the current schedule
+    fee = shares x rate x p(1-p), rate crypto 0.07, sports 0.05, politics 0.04, other 0.05; exit variant: the follower
+    sells at the VWAP of taker SELL prints by other wallets in [t_sell + delay, + 30 min) for its shares, where
+    t_sell is the followed wallet's first SELL fill of the token after the follower's entry and before t_res;
+    otherwise it holds (computed at the 2-minute delay).
+  - *Signal types*: P = new decision at t0. F1 = pre-registered large bet, signal time t0 + 600 s, because the
+    10-minute notional is only known then. F1b (exploratory) = first-second $ >= 5 x median, known at t0, evaluated
+    inside the P sample. F2 = returning, at t0. ADD (secondary, "every add-on buy") = each BUY fill-second of the
+    fill-export sub-sample except the first-fill second of a new decision. CL = cluster signal at signal_ts.
+    S4_<cat> follows only decisions in its category. Unclean or no-metadata markets are excluded and counted
+    (3,560 decisions, 11,508 add-on buy-seconds, 26 cluster signals).
+  - *Pricing sample (forced by the 120 queries/hour quota)*: Bernoulli hash sample per (split, screen, type) with
+    u = md5(wallet|k|t0) and inclusion u < min(1, cap / n); caps P 8,000, F1 2,000, ADD 2,000; F2 and CL in full.
+    242,431 distinct (token, signal time, wallet) rows to price (`12_signals.py`). Within a (split, screen, type)
+    every sampled signal has equal weight, so no reweighting is needed.
+  - *Hypothesis family for criterion 2*: {S1, S1m, S2, S3, S4_sports, S4_politics, S4_crypto, S4_other, S5} x
+    {P, F1, F2} plus CL = 28 hypotheses at the primary model. Per hypothesis, p = max(one-sided p vs B1, one-sided
+    p vs B2) (intersection-union), then Holm over the 28. B1 for a filter = B1 with the same filter; CL is compared
+    with B1-P. p-values come from an event-clustered bootstrap (2,000 resamples) of the net-ROI difference: vs B1 a
+    joint resample of events of both groups; vs B2 the paired difference between each signal's net ROI and its
+    matched B2 cell mean.
+  - *B2 and the stage-2 benchmarks* use a hash sample of taker BUY prints (cityHash64(id) % M = 0, 2024-01-01 ..
+    2026-01-05), priced at the print price plus the same slippage. B2 cell = (signal month, category, decile of the
+    follower price). Benchmark (i) = same category, same ISO week, |print price - follower price| <= 0.05,
+    different underlying event. (ii) favourite rule = prints priced 0.70-0.95 in the same category and week.
+    (iii) S5. (iv) 3-month T-bill (FRED DTB3) accrued over each signal's holding period.
+  - *Criteria details*: (1) 95% percentile event-clustered bootstrap CI; (3) distinct underlying events with a
+    filled signal; (4) evaluated on positive total P&L only (a non-positive P&L already fails (1)); (5) validation
+    net ROI point estimate > 0 at the primary model. Calendar-week clustered intervals are reported alongside.
+  - *Exploratory multiple testing*: the number of (screen/type x delay x size x slippage x fee) variants is reported,
+    Holm is applied over the grid's test-split p-values (vs zero net ROI), and a White reality check (event-clustered
+    bootstrap of the centred maximum) is run for the best variant.
+  - *Portfolio*: accounts $5k / $25k / $100k; stake 2% of the initial account per signal ($100 / $500 / $2,000)
+    executed at the 2-minute-delay VWAP for $100 / $500 / $2,500; at most 5% of the account per underlying event;
+    at most 100% deployed; signals in time order; a signal without free cash is skipped (counted); capital is locked
+    until t_res; run on the sampled signal stream (so it is "follow a random subset of signals"); no annualisation.

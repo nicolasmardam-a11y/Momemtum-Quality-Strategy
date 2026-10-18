@@ -44,6 +44,7 @@ tob_rows, ref_rows, snap_rows = [], [], []
 last_tob: dict[str, tuple] = {}
 ref_last: dict[str, dict] = {}
 stats = defaultdict(int)
+gaps = []   # (time, source, reason) of every disconnect; books are stale until the next snapshot
 part = 0
 raw_files: dict[str, gzip.GzipFile] = {}
 
@@ -182,6 +183,7 @@ async def clob_conn(assets):
         except Exception as ex:
             log("clob error", repr(ex)[:200])
             stats["clob_reconnect"] += 1
+            gaps.append((time.time(), "clob", repr(ex)[:80]))
             await asyncio.sleep(2)
 
 
@@ -199,14 +201,18 @@ async def generic(name, url, sub_msgs, handler, ping=None):
                 for s in sub_msgs:
                     await ws.send(json.dumps(s))
                 last = time.monotonic()
+                last_msg = time.monotonic()
                 while time.time() < T_END:
                     if ping and time.monotonic() - last > ping:
                         await ws.send("PING")
                         last = time.monotonic()
+                    if time.monotonic() - last_msg > 20:
+                        raise RuntimeError("watchdog: no frame for 20 s")
                     try:
                         raw = await asyncio.wait_for(ws.recv(), timeout=5)
                     except asyncio.TimeoutError:
                         continue
+                    last_msg = time.monotonic()
                     recv = time.time()
                     raw_write(name, recv, raw)
                     try:
@@ -216,6 +222,7 @@ async def generic(name, url, sub_msgs, handler, ping=None):
         except Exception as ex:
             log(name, "error", repr(ex)[:200])
             stats[f"{name}_reconnect"] += 1
+            gaps.append((time.time(), name, repr(ex)[:80]))
             await asyncio.sleep(2)
 
 
@@ -284,6 +291,7 @@ def flush(final=False):
         pd.DataFrame(ref_rows, columns=["recv", "src", "sym", "price", "src_ts", "bid", "ask"]).to_parquet(DER / f"live_{tag}_ref.parquet")
     if snap_rows:
         pd.DataFrame(snap_rows, columns=["t", "asset", "bid", "bid_sz", "ask", "ask_sz", "bid_d1", "ask_d1", "bid_d3", "ask_d3"]).to_parquet(DER / f"live_{tag}_snap.parquet")
+    pd.DataFrame(gaps, columns=["t", "src", "reason"]).to_parquet(DER / f"live_{TAG}_gaps.parquet")
     tob_rows, ref_rows, snap_rows = [], [], []
     for f in raw_files.values():
         f.close()

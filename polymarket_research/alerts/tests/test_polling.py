@@ -1,7 +1,7 @@
 """Dedupe on overlapping polls, failure paths, no-new-trades vs failure, restart recovery."""
 from __future__ import annotations
 
-from .conftest import MINTBLADE, SECOND, Harness, base_config
+from .conftest import MINTBLADE, SECOND, Harness, add_dormant, base_config
 
 
 def uruguay(mint_rows):
@@ -38,13 +38,16 @@ def test_overlapping_polls_never_duplicate_fills_or_alerts(tmp_path, mint_rows) 
     bets = h.store.q("SELECT * FROM bets")
     assert len(bets) == 1 and bets[0]["n_fills"] == 36
     assert len(h.alerts("BET")) == 1                         # one alert despite five polls
-    assert h.store.count("deliveries", "status = 'sent'") == 2   # console + file, once each
+    assert h.store.count("deliveries", "status = 'sent' AND alert_id IN (SELECT alert_id FROM alerts "
+                                       "WHERE kind = 'BET')") == 2   # console + file, once each
     assert h.out.getvalue().count("NEW BET DETECTED") == 1
-    assert h.file_path.read_text().count("\n") == 1
+    # one BET line (the other lines are the no_history notice for this history-less fake wallet and its recovery)
+    assert sum('"kind": "BET"' in ln for ln in h.file_path.read_text().splitlines()) == 1
 
 
 def test_no_new_trades_is_success_not_a_problem(tmp_path) -> None:
     h = Harness(tmp_path, 1_792_250_000, wallets=[SECOND])
+    add_dormant(h.api, SECOND, 1_792_250_000 - 40 * 86400)   # a real, dormant account (review: see no_history)
     for _ in range(4):
         rep = poll(h)
         h.clock.advance(30)
@@ -58,6 +61,7 @@ def test_no_new_trades_is_success_not_a_problem(tmp_path) -> None:
 
 def test_failures_never_advance_state_and_raise_data_problem(tmp_path, second_rows) -> None:
     h = Harness(tmp_path, 1_792_250_000, wallets=[SECOND])
+    add_dormant(h.api, SECOND, 1_792_250_000 - 40 * 86400)
     poll(h)
     wm = h.store.poll_state(SECOND)["watermark_ts"]
     h.clock.advance(30)
@@ -96,6 +100,7 @@ def test_failures_never_advance_state_and_raise_data_problem(tmp_path, second_ro
 
 def test_schema_surprise_notifies_immediately(tmp_path) -> None:
     h = Harness(tmp_path, 1_792_250_000, wallets=[MINTBLADE])
+    add_dormant(h.api, MINTBLADE, 1_792_250_000 - 40 * 86400)
     poll(h)
     h.api.fail("/v2/activity", "missing_field")
     rep = poll(h)
@@ -104,7 +109,7 @@ def test_schema_surprise_notifies_immediately(tmp_path) -> None:
     assert len(probs) == 1 and "schema" in probs[0]["text"]
 
 
-def test_failure_mid_pagination_keeps_facts_but_not_watermark(tmp_path, second_rows) -> None:
+def test_failure_mid_pagination_keeps_facts_and_checkpoints_only_complete_pages(tmp_path, second_rows) -> None:
     d = base_config(poll={"page_limit": 5})
     recent = [r for r in second_rows if r["type"] == "TRADE"][-12:]
     t_first = recent[0]["timestamp"]
@@ -117,7 +122,10 @@ def test_failure_mid_pagination_keeps_facts_but_not_watermark(tmp_path, second_r
     rep = poll(h)
     assert not rep.polls[0].ok and rep.polls[0].new_fills == 5
     assert h.store.count("fills") == 5
-    assert h.store.poll_state(SECOND)["watermark_ts"] == wm   # not advanced
+    # Review: the watermark moves only to a checkpoint the walk proved complete (before the newest row
+    # of page 1, whose successor page failed), never to "now"; the unread rows stay in the next window.
+    cp = h.store.poll_state(SECOND)["watermark_ts"]
+    assert wm <= cp < recent[4]["timestamp"] and cp - h.cfg.poll.overlap_seconds < recent[5]["timestamp"]
     alerts_after_failure = len(h.alerts("BET"))
     h.clock.advance(30)
     rep = poll(h)
@@ -131,6 +139,7 @@ def test_failure_mid_pagination_keeps_facts_but_not_watermark(tmp_path, second_r
 
 def test_status_lag_is_a_data_problem_and_widens_margin(tmp_path) -> None:
     h = Harness(tmp_path, 1_792_250_000, wallets=[SECOND])
+    add_dormant(h.api, SECOND, 1_792_250_000 - 40 * 86400)
     h.api.status_body = {"data": {**h.api.status_body["data"],
                                   "serving": {"lag_seconds": 900, "worst": "activity_feed", "mechanisms": []}}}
     poll(h)

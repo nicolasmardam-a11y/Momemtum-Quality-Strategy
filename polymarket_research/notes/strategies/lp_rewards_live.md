@@ -53,3 +53,48 @@ Nothing below this section may be changed after results are seen. Deviations, if
   markets whose allocation disappears are flagged and excluded from the yield table.
 
 (Sections 1-9 are filled in after collection.)
+
+## 1. Program mechanics (docs read in full 2026-10-17; copies in `data/raw/docs_lp/`)
+
+**Liquidity Rewards** ([/programs/liquidity-rewards](https://docs.polymarket.com/programs/liquidity-rewards.md)) — VERIFIED (docs)
+- Resting limit orders are scored automatically; paid daily at midnight UTC to the maker address; **$1 minimum payout**.
+- Per market: max qualifying spread `v` (cents, `rewardsMaxSpread`), min qualifying size (shares, `rewardsMinSize`), daily allocation.
+- Order score `S(v,s) = ((v−s)/v)² · b`, `s` = distance from the **size-cutoff-adjusted midpoint**, `b` = in-game multiplier.
+  The docs never define the size-cutoff adjustment precisely (UNSUPPORTED which variant is used); I test three variants (section 3).
+- `Q_one` = S-weighted bids on m + asks on m′; `Q_two` = asks on m + bids on m′. `Q_min = max(min(Q1,Q2), max(Q1,Q2)/3)` when the
+  mid is in [0.10, 0.90], else `min(Q1,Q2)` (two-sided required). Per-sample normalisation across makers, sampled once a minute at a
+  random offset (≤1,440 samples per UTC day), then normalised again over the epoch × the market's daily allocation.
+- Implications (my derivation, PLAUSIBLE): (i) `b` multiplies every order in a market-sample, so it cancels in the per-sample share;
+  (ii) because each sample is normalised, the full daily allocation is split among whoever is scoring in the sampled minutes, so a
+  market that is only open (or only quoted) for part of the day pays the whole pool to those present; (iii) the score is quadratic in
+  distance, so a quote at 0.5¢ from mid with v = 4.5¢ scores 0.79/share, at 2¢ it scores 0.31/share.
+- Docs inconsistency: the worked example's `Q_no` lists "bid on m @ 0.485", while equation 3 defines `Q_two` with *asks* on m.
+- The **Crypto TWAP $1M** (August 2026) programme is marked ended.
+- `/order-scoring?order_id=` (auth) says an order scores only if live on a rewards market, ≥ min size, within spread, and **"live for the
+  required duration"** (duration not stated; the changelog quoted 3.5 s for March Madness, see platform notes).
+
+**Maker Rebates** ([/programs/maker-rebates](https://docs.polymarket.com/programs/maker-rebates.md)) — VERIFIED (docs)
+- Pool = rebate share × taker fees **in that market** (Crypto 20%, Sports 15%, others 25%, Geopolitics none; legacy `sports_fees_v2`
+  keeps 25% per Gamma). Split pro rata to `fee_equivalent = C × feeRate × p × (1−p)` of your **filled** maker orders. Daily, $1 minimum.
+  "At the sole discretion of Polymarket and may change." Only filled liquidity earns a rebate; resting quotes earn nothing.
+
+**Market making guide** ([/trading/market-making](https://docs.polymarket.com/trading/market-making.md)) — VERIFIED (docs)
+- GTC/GTD (+ post-only) for passive quotes; **orders cannot be edited in place** (cancel + replace = new queue position);
+  batch submission; keep a local book from the market websocket; inventory via split/merge; GTD to expire before catalysts.
+- Programs listed for MMs: Liquidity Rewards and Maker Rebates, "eligibility, calculations and payouts differ".
+
+**Endpoints (live checks 2026-10-17 23:00 UTC)** — VERIFIED
+- `GET clob/rewards/markets/current` public, 500/page: 14,331 markets with a config, `total_daily_rate` sum **$189,839/day**
+  (vs $289,412/day across 14,608 markets at 15:09 UTC and $191,809 at 22:05 per the verifier; game-day props drop out).
+- `GET clob/rewards/markets/multi` public (`page_size` ≤ 500, `order_by`, `min_volume_24hr`, …). It lists essentially **all** markets,
+  including ones with an empty `rewards_config`; it adds tokens, `volume_24hr`, `spread` and `market_competitiveness`.
+- Gamma `rewardsMinSize` / `rewardsMaxSpread` / `clobRewards` agree with the CLOB endpoint for the sampled markets (section 3).
+- Market websocket `wss://ws-subscriptions-clob.polymarket.com/ws/market`: `book`, `price_change` (new aggregate size per level, plus
+  `best_bid`/`best_ask`), `last_trade_price` (price, size, **taker side**, ms match time, tx hash), `tick_size_change`; with
+  `custom_feature_enabled` also `best_bid_ask`, `new_market` (all new markets, not only subscribed ones), `market_resolved`.
+- The AsyncAPI lists an undocumented subscription `level` (1/2/3). A 25 s probe on one market with level 1 and level 3 returned the
+  **same event types and fields** (aggregated levels only, no order ids) — VERIFIED for that probe (`00_ws_level_probe.py`). The
+  `price_change.hash` field ("hash of the order that caused this change") differs between the YES and NO rows of the same change, so it
+  cannot be used to follow an order through the queue (VERIFIED in the capture). **There is no public per-order (L3) feed**, so queue
+  position can only be modelled, not observed.
+- `last_trade_price.fee_rate_bps` was `0` on every print captured, including fee-charging markets: do not use it for fees (use `feeSchedule`).

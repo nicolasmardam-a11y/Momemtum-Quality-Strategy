@@ -93,7 +93,7 @@ def test_retry_with_backoff_then_success(tmp_path) -> None:
 
 
 def test_permanent_failure_is_reported_on_other_channels(tmp_path) -> None:
-    d = base_config(notifications={"max_attempts": 2})
+    d = base_config(notifications={"max_attempts": 2, "give_up_after_minutes": 0})   # review: give-up is time-based too
     h = Harness(tmp_path, T0, d, wallets=[MINTBLADE])
     flaky = Flaky(10)
     notifiers = {"telegram": flaky, "console": ConsoleNotifier(h.out)}

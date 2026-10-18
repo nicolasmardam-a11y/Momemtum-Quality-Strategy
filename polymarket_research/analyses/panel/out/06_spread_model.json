@@ -1,12 +1,14 @@
 {
- "n_side_rows": 6776,
+ "n_side_rows": 13510,
  "by_universe_round": {
   "allopen_r2": 2126,
-  "vol10k_r2": 1262
+  "allopen_r3": 2111,
+  "vol10k_r2": 1262,
+  "vol10k_r3": 1256
  },
  "two_sided_share": {
-  "allopen": 0.796,
-  "vol10k": 0.836
+  "allopen": 0.792,
+  "vol10k": 0.837
  },
  "stability_r1_r2": {
   "vol10k": {

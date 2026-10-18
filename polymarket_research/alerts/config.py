@@ -96,6 +96,7 @@ class HealthConfig:
     notify_after_consecutive_failures: int = 2
     renotify_minutes: float = 60.0
     digest_interval_hours: float = 24.0
+    max_clock_skew_seconds: float = 60.0
 
 
 @dataclass(frozen=True)
@@ -113,6 +114,9 @@ class NotificationsConfig:
     backoff_base_seconds: float = 5.0
     backoff_max_seconds: float = 600.0
     send_timeout_seconds: float = 10.0
+    # Retryable failures keep retrying (at most every backoff_max_seconds) until BOTH max_attempts
+    # is reached AND the alert is this old, so a channel outage shorter than this loses nothing.
+    give_up_after_minutes: float = 360.0
     channels: dict[str, ChannelConfig] = field(default_factory=lambda: {
         "console": ChannelConfig(enabled=True, rate_per_minute=600, burst=50),
         "file": ChannelConfig(enabled=True, path="alerts/out/alerts.ndjson", rate_per_minute=600, burst=50),
