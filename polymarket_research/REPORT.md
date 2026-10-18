@@ -275,7 +275,8 @@ guarantees thousands of perfect records by luck.
   for ~$314 (down from $18.2k for $545 about 8 h earlier).
 - **Why it might persist.** It needs 19–50 taker orders, months of lock-up for 3–4%, and a manual rules check.
   No neg-risk convert exists to recycle capital, which deters dedicated arbitrageurs.
-- **Main reason it might fail.** It may be a one-off stock, not a flow. The other risks: one wrong Yes among
+- **Main reason it might fail.** It may be a one-off stock, not a flow. A historical price proxy (`logical_arb.md`
+  §11) finds such sets mainly in award season, and the liquid ones were about break-even last year. The other risks: one wrong Yes among
   19–50 UMA resolutions costs 1 per set against ~0.5 of edge; a rule change; and leg risk across many orders.
 - **Kill criteria (my proposal; pre-declare before the forward test).**
   - Fewer than ~$500/month of new TRUE-set net profit at ≥ 10%/yr on locked capital across 8 weekly scans.
@@ -470,7 +471,7 @@ fakes.
 | Historical order books (none official; free archive gap 12–17 June 2026) | Follower and maker fills are proxies. Wallet and LP conclusions are exploratory where noted; the PIT rejection holds under every estimator tried. |
 | On-chain fill history after 2026-01-05 in a queryable form | The 2026 wallet holdout uses a sampled candidate pool (biased; quantified in its note). Free HF datasets (`SII-WANGZJ/Polymarket_data` to 2026-10-04) could extend it; they are not validated here. |
 | Kalshi data (terms risk) and real-time bookmaker odds (paid) | Cross-venue and sports lead–lag are inconclusive, not rejected. |
-| Recurrence of k-of-n sets | Unknown whether D1 is a flow or a one-off; this is the first experiment. |
+| Recurrence of k-of-n sets | Partly answered by a price-history proxy (`logical_arb.md` §11, not executable). 32 nomination-type sets in 2024–26, 30 in one award season. 10 looked profitable for most of their life, but almost all were thin ($2k–$207k lifetime volume). The liquid 2026 Oscars sets were about break-even. So the current Best Actor set looks exceptional rather than a steady flow. Executable recurrence still needs the forward scan. |
 | Your jurisdiction and eligibility | Every strategy is gated on it; cross-venue strategies are infeasible for most people. |
 
 ---

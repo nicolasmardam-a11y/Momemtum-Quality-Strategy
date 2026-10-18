@@ -359,3 +359,35 @@ windows, 10.75% pooled. It is a single ~$250-550 stock that is shrinking, with t
 Risks remain: 19-50 separate UMA resolutions (one wrong Yes costs 1 per set against about 0.5 per set of edge), a
 mid-season rule change, and leg risk across 19-50 taker orders. A forward test (weekly snapshots to 2027-01-21, plus
 other award and playoff sets) is still the right next step. It is never risk-free.
+
+## 11. Historical recurrence proxy for count sets (added 2026-10-18, post hoc; `10_count_set_history.py`)
+
+Question: how often do k-of-n count sets like Best Actor arise? Method: every closed, non-neg-risk event with ≥ 5
+"nominated / nomination" markets in the Gamma universe (32 events, 2024-05 to 2026-01). For each event, the hourly
+CLOB `/prices-history` YES series of every listed market over the 60 days before resolution was summed and compared
+with k. k is the official nominee count: VERIFIED for the Oscars acting, director, documentary, international and
+animated categories and for Best Picture; ASSUMED for Casting, Grammys (8), Golden Globes (6) and Actor Awards (5).
+Every assumed k is consistent with the realised number of Yes resolutions (yes ≤ k). The proxy profit per all-NO set is
+Σ YES − k − 0.02 × n_legs. The cost allowance is calibrated on one live snapshot (Best Actor 2026-10-17: mid-sum 5.92,
+bid-sum 5.68, fees ≈ 0.125). **Prices are trade/mid series, not executable**, and thin markets' series are often stale
+last trades. Output: `analyses/logical_arb/out_10_count_set_history.csv`.
+
+Findings (PLAUSIBLE, proxy):
+- **Frequency.** 30 of 32 sets came in the 2025-26 award season: Grammys (Nov), Golden Globes (Dec), Actor Awards
+  (Jan) and Oscars (Jan). The other 2 are the 2024 party-nominee sets (k = 1).
+- **How many looked profitable.** 10 of 32 had a positive proxy profit for > 50% of their listed hours:
+  - the 2024 Republican and Democratic nominee sets, median proxy return 1.2% and 1.6%;
+  - Grammys Best New Artist (5.5%) and Album of the Year (10%);
+  - Golden Globes Best Actor – Drama (11.4%);
+  - five Actor Awards TV/ensemble sets (1.7-10.3%).
+- **Those 10 are small.** All but the political sets had lifetime volume of $2k-$207k, so executable capacity was
+  probably tens to a few hundred dollars per set (UNSUPPORTED: depth was not observed).
+- **The liquid sets were about break-even.** For the 2026 Oscars categories (lifetime volume $0.6-1.9M), the median
+  proxy profit was about 0 or negative: Best Actor −0.002 per set (positive 49% of hours), Director −0.02 (41%),
+  Supporting Actor −0.13 (21%), Picture −0.60 (0.4%), Actress −0.79 (0%).
+  - The current (2027) Best Actor set, with mid-sum 5.92 versus 5.40 a year earlier, is therefore unusually
+    mispriced for a liquid category.
+- **Implication.** Count-set opportunities recur seasonally, a few times a year and mostly in award season. Where
+  depth exists, the edge has usually been near zero after costs. The sizeable live opportunity of 2026-10-17 looks
+  like the exception, not a steady flow. Not tested here: sports count sets, other keyword families, and executable
+  depth in past seasons.
