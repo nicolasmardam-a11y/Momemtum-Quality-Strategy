@@ -96,12 +96,16 @@ def add_bench(fp: pd.DataFrame, bp: pd.DataFrame) -> pd.DataFrame:
     cell = bp.groupby(["cat", "week", "cent"]).agg(s=("roi", "sum"), n=("roi", "size")).reset_index()
     cell_ue = bp.groupby(["cat", "week", "cent", "ue"]).agg(s=("roi", "sum"), n=("roi", "size")).reset_index()
     q = fp.loc[fp["m1_raw"].notna(), ["sid", "delay", "category4", "week", "cent", "ue"]].rename(columns={"category4": "cat"})
-    qq = pd.concat([q.assign(cent=q["cent"] + o) for o in range(-5, 6)], ignore_index=True)
-    t1 = qq.merge(cell, on=["cat", "week", "cent"], how="left").groupby(["sid", "delay"])[["s", "n"]].sum()
-    t2 = qq.merge(cell_ue, on=["cat", "week", "cent", "ue"], how="left").groupby(["sid", "delay"])[["s", "n"]].sum()
-    r = t1 - t2
-    r["R_roi"] = r["s"] / r["n"].where(r["n"] > 0)
-    r["R_n"] = r["n"]
+    rr = []
+    for width, nm in [(5, "R"), (1, "R1")]:  # R = pre-specified +-5 cents; R1 = exploratory +-1 cent (extremes)
+        qq = pd.concat([q.assign(cent=q["cent"] + o) for o in range(-width, width + 1)], ignore_index=True)
+        t1 = qq.merge(cell, on=["cat", "week", "cent"], how="left").groupby(["sid", "delay"])[["s", "n"]].sum()
+        t2 = qq.merge(cell_ue, on=["cat", "week", "cent", "ue"], how="left").groupby(["sid", "delay"])[["s", "n"]].sum()
+        r = t1 - t2
+        r[f"{nm}_roi"] = r["s"] / r["n"].where(r["n"] > 0)
+        r[f"{nm}_n"] = r["n"]
+        rr.append(r[[f"{nm}_roi", f"{nm}_n"]])
+    r = pd.concat(rr, axis=1)
     fav = bp[(bp["cent"] >= 70) & (bp["cent"] <= 95)]
     fc = fav.groupby(["cat", "week"]).agg(s=("roi", "sum"), n=("roi", "size")).reset_index()
     fcu = fav.groupby(["cat", "week", "ue"]).agg(s=("roi", "sum"), n=("roi", "size")).reset_index()
@@ -109,9 +113,10 @@ def add_bench(fp: pd.DataFrame, bp: pd.DataFrame) -> pd.DataFrame:
     f2 = q.merge(fcu, on=["cat", "week", "ue"], how="left").set_index(["sid", "delay"])[["s", "n"]].fillna(0)
     f = f1 - f2
     f["FAV_roi"] = f["s"] / f["n"].where(f["n"] > 0)
-    fp = fp.merge(r[["R_roi", "R_n"]], left_on=["sid", "delay"], right_index=True, how="left")
+    fp = fp.merge(r, left_on=["sid", "delay"], right_index=True, how="left")
     fp = fp.merge(f[["FAV_roi"]], left_on=["sid", "delay"], right_index=True, how="left")
     fp["d_R"] = fp["m1_roi"] - fp["R_roi"]
+    fp["d_R1"] = fp["m1_roi"] - fp["R1_roi"]
     fp["d_FAV"] = fp["m1_roi"] - fp["FAV_roi"]
     return fp
 
@@ -164,7 +169,7 @@ def main() -> None:
             om = d["own_roi"].notna()
             res["own_roi"] = float(np.average(d.loc[om, "own_roi"], weights=wd[om.to_numpy()])) if om.any() else np.nan
             res["cap_share_1k"] = float(np.mean(d["vol30"] >= 1000))
-            for bn, col in [("R", "d_R"), ("FAV", "d_FAV")]:
+            for bn, col in [("R", "d_R"), ("R1", "d_R1"), ("FAV", "d_FAV")]:
                 mm = okm & s[col].notna().to_numpy()
                 r = ci(s["ue"], np.where(mm, s[col].fillna(0).to_numpy() * ww, 0.0), np.where(mm, ww, 0.0))
                 res.update({f"{bn}_diff": r.get("roi"), f"{bn}_lo": r.get("lo"), f"{bn}_hi": r.get("hi"),
@@ -182,7 +187,8 @@ def main() -> None:
     mt.to_parquet(V2 / "results_main.parquet", index=False)
     c1 = ["group", "wt", "n_sig", "n_filled", "drop_n_ue", "n_wallet", "fill_win", "fill_lose", "avg_px", "hit",
           "made_money_share", "drop_roi", "drop_lo", "drop_hi", "ipw_roi", "ipw_lo", "ipw_hi", "adv_roi", "adv_hi"]
-    c2 = ["group", "wt", "nofee_roi", "own_roi", "R_diff", "R_lo", "R_hi", "p_vs_R", "FAV_diff", "p_vs_FAV", "p_vs_B1",
+    c2 = ["group", "wt", "nofee_roi", "own_roi", "R_diff", "R_lo", "R_hi", "p_vs_R", "R1_diff", "p_vs_R1", "FAV_diff",
+          "p_vs_FAV", "p_vs_B1",
           "p_vs_B1_ipw", "p_holm", "top1pct_share", "top_event_share", "cap_share_1k"]
     lines.append("PRIMARY (M1, 2-min delay, $100, +0.01, current fees) part 1:\n" + mt[[c for c in c1 if c in mt]].round(4).to_string(index=False))
     lines.append("PRIMARY part 2 (benchmarks, inference):\n" + mt[[c for c in c2 if c in mt]].round(4).to_string(index=False))

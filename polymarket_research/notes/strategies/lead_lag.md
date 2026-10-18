@@ -159,16 +159,16 @@ Reading:
 |---|---|---|---|---|
 | L2 | 2026-10-17 22:59:52–23:14:50 (Sat evening US) | 15 min | 50 | — |
 | L3 | 2026-10-17 23:16:51–23:36:50 | 20 min | 35 | 1 CLOB "slow consumer" reconnect; the collector was killed at 23:38 by the session interruption (after the analysed window) |
-| L4 | 2026-10-18 04:56:04–05:35:52 (Sun ~1 am ET, ~5.5 h later) | 40 min | 47 | 51 markets (5m 18, 15m 8, 1h 4, 4h 2, above-K 19), 102 tokens; 6 CLOB disconnects; 697 grid-seconds around them excluded |
+| L4 | 2026-10-18 04:56:04–05:35:52 (Sun ~1 am ET, ~5.5 h later) | 40 min | 51 | 51 markets (5m 18, 15m 8, 1h 4, 4h 2, above-K 19), 102 tokens; 6 CLOB disconnects; 697 grid-seconds around them excluded |
 
 * Total live crypto sample **75 min** in two sessions ~5.5 h apart. Collector `live_collect.py` (public CLOB market WS, RTDS `crypto_prices_chainlink`, Binance `data-stream.binance.vision`
   bookTicker + aggTrade, Coinbase ticker). All times are **local receive times on this sandbox**, so co-located participants see every feed earlier.
   Raw frames: `data/raw/lead_lag_live/20261017/*_L{2,3}_*.tsv.gz` (~430 MB with S1) and `20261018/*_L4_*.tsv.gz` (277 MB). Analysis: `03_live_analyze.py` → `live_<tag>_{meta,grid,episodes}.parquet`,
   `live_<tag>_summary.json`; `05_live_lag.py` → impulse/events; `08_combine.py` → `live_pooled_summary.json`; `09_latency_pool.py` → `live_latency_pool.json`.
-* **Strike (VERIFIED):** Gamma `priceToBeat` equals the mean of the public RTDS Chainlink spot over the 60 s before the window start. Median |diff| is 0.04 / 0.06 / 0.03 bp (L2 n = 2, L3 n = 10, L4 n = 18), with p90 ≤ 0.2 bp.
+* **Strike (VERIFIED):** Gamma `priceToBeat` equals the mean of the public RTDS Chainlink spot over the 60 s before the window start. Median |diff| is 0.04 / 0.06 / 0.03 bp (L2 n = 2, L3 n = 10, L4 n = 22), with p90 ≤ 0.2 bp.
   Against a 30-s mean it is 0.25–0.37 bp, and against the single spot value 0.6–1.6 bp. A live trader can reconstruct the strike at the window start, although Gamma publishes it only afterwards.
-* **Settlement (VERIFIED):** in 66/66 resolved 5m/15m windows, Up won iff the next window's `priceToBeat` ≥ this window's.
-* Spreads at signal time: 1 c median on 5m/15m/1h, 2 c on 4h, **6 c on hourly above-K**. Median best-ask depth: 77 (5m), 63 (15m), 45 (1h), 400 (4h) and **5 (above-K)** shares.
+* **Settlement (VERIFIED):** in 70/70 resolved 5m/15m windows (L2 16, L3 32, L4 22), Up won iff the next window's `priceToBeat` ≥ this window's.
+* Spreads at signal time: 1 c median on 5m/15m/1h, 2 c on 4h, **6 c on hourly above-K**. Median best-ask depth: 77 (5m), 65 (15m), 45 (1h), 400 (4h) and **5 (above-K)** shares.
 
 ## 4. Live results (crypto)
 
@@ -181,17 +181,17 @@ Reading:
 * **Event study** (pooled L2–L4, `live_latency_pool.json`, bootstrap by market). Taker round trip in the direction of the Binance move: buy the favoured side at the ask at t_E + L, sell at the bid at t_E + L + 10 s,
   with the 0.07·p(1−p) fee on both legs.
 
-| Entry latency L after our Binance receive | 1-s ≥ 4σ moves (87 spot events, 246 market events): gross | net of both fees | 10-s ≥ 3σ moves (32 / 96): net |
+| Entry latency L after our Binance receive | 1-s ≥ 4σ moves (90 spot events, 257 market events): gross | net of both fees | 10-s ≥ 3σ moves (33 / 101): net |
 |---|---|---|---|
-| 0 s | **+3.1 c** [+1.5, +5.4] | +0.4 c [−1.2, +2.4] | −1.2 c [−3.0, +1.1] |
-| 0.2 s | +1.8 c [+0.3, +3.6] | −1.0 c [−2.4, +0.8] | −3.0 c [−4.9, −1.0] |
-| 0.5 s | −1.2 c [−2.4, +0.1] | **−3.9 c** [−5.0, −2.7] | −5.7 c |
-| 1 s | −1.6 c | −4.4 c [−5.5, −3.4] | −6.0 c |
-| 2 s | −1.6 c | −4.3 c | −5.7 c |
-| 5 s | −2.1 c | −4.8 c | −5.0 c |
+| 0 s | **+3.1 c** [+1.5, +5.1] | +0.35 c [−1.2, +2.4] | −1.0 c [−2.8, +1.4] |
+| 0.2 s | +1.8 c [+0.3, +3.6] | −1.0 c [−2.4, +0.8] | −2.8 c [−4.6, −0.8] |
+| 0.5 s | −1.1 c [−2.3, +0.0] | **−3.9 c** [−4.9, −2.8] | −5.5 c |
+| 1 s | −1.6 c | −4.4 c [−5.4, −3.4] | −5.8 c |
+| 2 s | −1.6 c | −4.3 c | −5.5 c |
+| 5 s | −2.0 c | −4.7 c | −4.8 c |
 
-  The median time from our Binance receive to a ≥ 1 c mid move is **+0.06 s** (p25 −0.25 s, p75 +0.27 s, p90 +0.42 s). In 35% of fast events the mid moved *before* we received the Binance print.
-  For 10-s moves the market had already moved in 87% of cases by the time the move qualified as an event.
+  The median time from our Binance receive to a ≥ 1 c mid move is **+0.08 s** (p25 −0.24 s, p75 +0.27 s, p90 +0.43 s). In 34% of fast events the mid moved *before* we received the Binance print.
+  For 10-s moves the market had already moved in 86% of cases by the time the move qualified as an event.
 * **Reading (answers "how much is predictable, after costs, at what latency"):** a predictable component exists only at **zero latency**. It is ~3 c gross over 10 s for a 4σ one-second Binance move,
   after crossing the 1-c spread. Even there, two taker fees take it to ≈ 0. It halves by 0.2 s and is negative by 0.5 s. A retail taker's latency is ≥ 0.3–0.5 s: decision, network,
   the **150 ms `itode` taker delay on 5m/15m**, and matching. That puts it in the −1 to −4 c rows. Bots co-located near Binance and the CLOB see the move tens of ms before this sandbox does,
@@ -204,23 +204,24 @@ Signal: edge ≥ 2 c net of the taker fee with best-ask depth ≥ 5 shares; epis
 
 | | L2 | L3 | L4 | **Pooled** |
 |---|---|---|---|---|
-| Distinct episodes (markets) | 149 (11) | 266 (18) | 414 (26) | **829 (53)** |
-| Median duration / share ≥ 2 s / survive to t+1 s | 3.0 s / 70% / 87% | 3.0 s / 71% / 88% | 4.0 s / 73% / 92% | 3.0 s / 72% / 90% |
-| Hold-to-resolution P&L per share, delayed entry (95% CI, bootstrap by market) | −15.8 c [−28.6, −2.5] | −3.7 c [−21.1, +10.8] | −3.9 c [−11.6, +3.3] | **−6.1 c [−13.7, +1.9]** (n 715) |
-| +30 s markout at the bid, entry fee | −2.9 c | −1.0 c | −3.5 c | **−2.6 c [−3.8, −1.5]** |
-| +30 s markout at the bid, both fees | −4.2 c | −2.1 c | −4.7 c | **−3.75 c [−4.9, −2.7]** |
+| Distinct episodes (markets) | 149 (11) | 266 (18) | 446 (30) | **861 (57)** |
+| Median duration / share ≥ 2 s / survive to t+1 s | 3.0 s / 70% / 87% | 3.0 s / 71% / 88% | 4.0 s / 72% / 92% | 3.0 s / 71% / 90% |
+| Hold-to-resolution P&L per share, delayed entry (95% CI, bootstrap by market) | −15.8 c [−28.6, −2.5] | −3.7 c [−21.1, +10.8] | −0.5 c [−7.3, +5.7] | **−4.1 c [−11.3, +2.9]** (n 801, 51 markets) |
+| +30 s markout at the bid, entry fee | −2.9 c | −1.0 c | −3.4 c | **−2.6 c [−3.8, −1.5]** |
+| +30 s markout at the bid, both fees | −4.2 c | −2.1 c | −4.6 c | **−3.75 c [−4.9, −2.7]** |
 | +5 s markout at the mid | −2.1 c | −1.8 c | −1.9 c | **−1.9 c [−2.3, −1.5]** |
-| Log-loss on outcomes, fair vs mid (R3) | 0.727 vs 0.689 | 0.271 vs 0.270 | 0.537 vs 0.514 | **0.354 vs 0.346** (n 3,516, 64 markets) |
+| Log-loss on outcomes, fair vs mid (R3) | 0.727 vs 0.689 | 0.271 vs 0.270 | 0.504 vs 0.494 | **0.360 vs 0.355** (n 3,847, 71 markets) |
 
 * **R1 (persistence): pass.** Median 3 s, 90% survive 1 s. Episodes persist because they are mostly **model disagreement**, not stale quotes.
 * **R2 (P&L): REJECT, no demonstrated edge.** The hold P&L is negative with a CI that includes 0. The +5 s and +30 s markouts are negative and significant in **every window**: prices move *against* the signal after entry.
-* **R3 (model check): REJECT.** The fair model's log-loss is worse than the Polymarket mid's on 15m (0.790 vs 0.757), 5m (0.402 vs 0.386) and 1h (1.008 vs 0.837). It is better only on 4h and above-K, which have few
+* **R3 (model check): REJECT.** The fair model's log-loss is worse than the Polymarket mid's on 15m (0.757 vs 0.730), 5m (0.409 vs 0.397) and 1h (0.731 vs 0.644). It is better only on 4h and above-K, which have few
   markets (2 and 19) and wide books. The "mispricing" is model error.
-* **R5 (sample): ok** (829 episodes).
+* **R5 (sample): ok** (861 episodes).
+* Resolution coverage: 93% of episodes resolved. The L4 4h markets (to 08:00 UTC) and the 1 am ET hourly markets were still unresolved at 06:11 UTC; Binance-sourced hourly markets close via the oracle, not instantly. Their markouts are included.
 * Exploratory (not pre-registered): bigger model gaps do worse. The +30 s markout is −3.2 c for gaps of 2–3 c and **−6.4 c for gaps of 5–10 c**, which is adverse selection. A variant with fair value from basis-adjusted
-  Binance (the fastest free feed) for the Chainlink markets gives hold −6.6 c [−16.5, +3.6] and +30 s markout −3.6 c [−4.9, −2.4] (602 episodes). No time-to-expiry bucket has a positive lower bound.
+  Binance (the fastest free feed) for the Chainlink markets gives hold −4.4 c [−13.4, +5.3] and +30 s markout −3.6 c [−4.8, −2.2] (633 episodes). No time-to-expiry bucket has a positive lower bound.
 * **Persistence across sessions:** the sign is the same in the Saturday-evening windows (L2/L3) and the Sunday-night window (L4) on every markout. The family does not "work sometimes".
-* Size at the signal: median best-ask depth 59 shares (~$28), 130 shares within 1 c (~$65).
+* Size at the signal: median best-ask depth 59 shares (~$28), 132 shares within 1 c (~$65).
 
 ## 5. Cross-venue: Kalshi vs Polymarket (written 2026-10-18 ~05:10 UTC)
 
@@ -349,7 +350,7 @@ pages, not independently tested here.
 | **Verdict** | **Rejected** under the pre-registered R2/R3 (H2) and R4 plus live (H1) | **Inconclusive data** by construction (no Kalshi data, by pre-registered decision) | **Inconclusive** (n = 6 < 10); both rejection conditions trip on the small sample |
 
 **Capacity** (for a strategy without demonstrated edge, the honest capacity is $0. These are the mechanical limits if one ran it anyway):
-* **$5k:** crypto: ~$28 at the best ask and ~$65 within 1 c per signal (5m/15m median). Signals cluster on the same spot moves across markets. Expected P&L is negative: −2.6 c/share at the +30 s markout after the entry fee, −6.1 c/share on hold.
+* **$5k:** crypto: ~$28 at the best ask and ~$65 within 1 c per signal (5m/15m median). Signals cluster on the same spot moves across markets. Expected P&L is negative: −2.6 c/share at the +30 s markout after the entry fee, −4.1 c/share on hold.
   Cross-venue: depth is not the constraint (Polymarket Fed "no change" has $1.66M of ask depth within 3 c), but eligibility and the missing edge are.
 * **$25k / $100k:** crypto: no additional capacity. Book depth binds, not capital, and going beyond the best level adds ≥ 1 c per share. 4h books are deeper (400 shares at best) but have few signals.
   Cross-venue: capital is split across two venues and locked to resolution. Same eligibility limit.
@@ -360,7 +361,7 @@ pages, not independently tested here.
   * Cross-venue: inconclusive data, by the access decision.
   * Sports: inconclusive data (n = 6), but directionally negative.
   * Nothing here is risk-free. Even a matched cross-venue lock carries rule-mismatch, venue and settlement risk.
-* **VERIFIED:** the rules and sources in section 1; `priceToBeat` = 60-s mean of Chainlink spot; settlement consistency (66/66); `prices-history` fidelity=1 ≈ the book mid ~18 s earlier;
+* **VERIFIED:** the rules and sources in section 1; `priceToBeat` = 60-s mean of Chainlink spot; settlement consistency (70/70); `prices-history` fidelity=1 ≈ the book mid ~18 s earlier;
   the sub-second impulse response (0.0–0.4 s) at this vantage point; RTDS Chainlink 2–3 s behind Binance here; the H2 episode statistics and the R1–R3/R5 outcomes; the event-study latency curve;
   the Kalshi public endpoints needing no auth; the Kalshi fee rounding mechanics; the Kalshi Fed-meeting contract terms (2023 CFTC filing); the S1 counts.
 * **PLAUSIBLE:** the Kalshi quadratic fee table values (0.07/0.0175; live PDF 429); the Fed-contract rule match (current KXFED rules not read); the published cross-venue findings (abstracts);

@@ -38,3 +38,17 @@ for rule in ('E2', 'H99_6h'):
 for k, v in out.items():
     print(k, v)
 json.dump(out, open(A.OUT / 'flb_a08.json', 'w'), indent=1)
+
+# ---- model-based expected net return of the TEST portfolio at the pooled calibration ratio k (all splits, both samples)
+R0 = S[(S.horizon == 'A-7d') & (S.m >= 0.95 - 1e-9) & (S.f <= 0.999) & (S.pay != 0.5)]
+L = int((R0.pay == 0).sum()); I = float((1 - R0.m).sum()); post = stats.gamma(a=0.5 + L, scale=1 / I)
+ks = {'k_hat': L / I, 'k_lo95': post.ppf(.025), 'k_hi95': post.ppf(.975)}
+for samp in ('P', 'W'):
+    T = R0[(R0['sample'] == samp) & (R0.split == 'test')]
+    for ctag in ('', '_mean'):
+        f = T['f' + ctag].values; c = f + T.rate.values * f * (1 - f); w = T.weight.values; m = T.m.values
+        er = {kk: round(float(np.sum(w * ((1 - kv * (1 - m)) / c - 1)) / w.sum()), 5) for kk, kv in ks.items()}
+        eru = {kk: round(float(np.mean((1 - kv * (1 - m)) / c - 1)), 5) for kk, kv in ks.items()}
+        out[f'E2_model_ER|{samp}{ctag}'] = dict(weighted=er, unweighted=eru, k=dict((a, round(b, 3)) for a, b in ks.items()))
+        print(f'E2 model E[R] {samp}{ctag}', er, 'unw', eru)
+json.dump(out, open(A.OUT / 'flb_a08.json', 'w'), indent=1)

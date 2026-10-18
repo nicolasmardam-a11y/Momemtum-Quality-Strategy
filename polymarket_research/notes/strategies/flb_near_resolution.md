@@ -192,6 +192,17 @@ cost (P: base half-spread; W: conservative half-spread) + CURRENT taker fee; ret
 - **No rule passes criterion 1** (the Bonferroni lower bound > 0 under both bootstraps).
   - E2 and H99_6h pass criteria 2 to 7. Criterion 8 is n/a (decision-time volume-screened subset: n = 81 and 71).
   - Both are therefore **marginal** under (a), and also under (b).
+  - **[corrected by auditor]** The mapping was applied correctly, and every number in this table re-runs exactly with independent
+    code. The headline E2 +1.01% is nevertheless fragile:
+    - **Weights.** Unweighted, it is +0.57% [-0.49, +1.34]. The Kish effective n is 165 of 394. Making the single highest-weight
+      winner a loss gives -0.75%. Sports carries 24% of the weight with 18 trades.
+    - **Exact-score markets.** 8 soccer exact-score markets, a market type that appears only in TEST, return +3.0%. Without them
+      E2 is +0.77% [-0.13, +1.42]; without sports it is +0.47%.
+    - **Spread statistic.** With mean rather than median half-spreads E2 is +0.78%; with p75 half-spreads +0.50%.
+    - **H99_6h depends on the median 0.1c half-spread.** With the mean half-spread it is +0.09%; with p75, -0.05%. Actual first
+      taker buys of the favourite within 2 h paid on average 0.21c over the series price, against 0.10c modelled. The tape-implied
+      net is therefore about +0.2%.
+    - **Audited H99_6h: no demonstrated edge.** See the Audit section.
 - **As-traded fees** (2026 per-market fee fields) give almost the same net as current fees: E2 +1.03%, H99_6h +0.29%. Fees are
   negligible at these prices.
 - **E2 literal** (the longshot is the "Yes" token): P TEST +0.86%, W +1.15%.
@@ -266,6 +277,10 @@ cost (P: base half-spread; W: conservative half-spread) + CURRENT taker fee; ret
   | E2 | +0.75% | +0.53% | +0.30% | 96% / 79% / 59% |
   | H99_6h | +0.19% | +0.11% | -0.06% | 94% / 75% / 55% |
 
+  **[corrected by auditor]** These nets inherit the weighted +1.0% / +0.28% means. Start instead from the audited central E2
+  estimate (about +0.5%, see the Audit section) and subtract the same size slippage (0.26 / 0.48 / 0.71pp). That gives E2 about
+  +0.25% at $500, about 0 at $2.5k and about -0.2% at $10k. H99_6h is about 0 or negative at every size.
+
 - **Frequency** (P population = vol>=10k universe):
   - E2: about 29 qualifying markets per day, held 8.2 days, so about 237 concurrent positions. Trading all of them at $500 needs about
     $119k.
@@ -283,6 +298,13 @@ cost (P: base half-spread; W: conservative half-spread) + CURRENT taker fee; ret
 - **Family E/H verdict: marginal.** It is the best of 15 pre-registered rules: 2 marginal (E2, H99_6h), 3 rejected (E1, H90_24h,
   H90_1h) and 10 no demonstrated edge. No rule meets the promising criteria; criterion 1 (multiplicity-adjusted significance) fails
   for all.
+  - **[corrected by auditor]** The family verdict stays **marginal**, but it rests on E2 alone; H99_6h is downgraded to no
+    demonstrated edge.
+  - **E2 calibration (VERIFIED).** Pooled over all splits and both samples, favourites priced >= 0.95 at T-7d lose at 0.54x the
+    price-implied rate (95% CI [0.36, 0.78]; 25 losses vs 46.3 implied), so the FLB is real.
+  - **E2 after costs.** Break-even is 0.79x at P base cost and 0.51x at W conservative cost. The model-based expected net is about
+    +0.5% per trade in liquid markets (95% range about 0 to +0.9%), +0.3% with mean half-spreads, and about -0.1% in unscreened
+    markets at conservative cost. That is lower than the +1.0% realised.
 - **E1 is rejected.** Buying liquid favourites priced 0.80-0.95 a day before resolution loses 6.5% net in P. The P figure is biased
   down by the volume screen (section 9.1). In the unscreened W it is still -0.6% (base) to -3.4% (conservative).
 - **H at >= 0.90 or >= 0.95 loses after costs at every horizon.** The thin positive pockets (0.98-0.99 at 6h) are worth +0.2-0.3% per
@@ -307,12 +329,15 @@ cost (P: base half-spread; W: conservative half-spread) + CURRENT taker fee; ret
 - **Holding period:** E2 median 7.3 days (mean 8.2; p99 tail of more than 30 days via settlement delay); H99_6h median 0.66 days.
 - **Why it might persist (PLAUSIBLE):** capital lock-up and tail-risk aversion, longshot preference, and low maker competition in
   thin long-dated books.
-- **Main reason it might fail:** rare-event risk. The edge is +1.0% per trade against a break-even loss rate of about 1.4%, and the
+- **Main reason it might fail:** rare-event risk. The edge is +1.0% per trade **[corrected by auditor: about +0.5% central, 95%
+  range about 0 to +0.9%]** against a break-even loss rate of about 1.4%, and the
   95% upper bound on the observed loss rate (1.7-1.9%) exceeds break-even. Bucketed numeric markets (weather, counts, macro prints)
   supply the 98-99c losers. Validation in W was negative.
 - **Forward test needed:** paper-trade E2 and H99_6h on live asks (not mids) for 3+ months, logging every fill, loss and settlement
   delay.
   - Kill E2 if the cumulative loss rate exceeds 1.4% after 300 trades.
+    - **[corrected by auditor]** A price-mix-robust form of this rule is better: kill E2 if realised losses exceed 0.75 x the
+      price-implied losses, sum(1 - fill price), once that sum reaches 5. Exclude or separately track exact-score markets.
   - Kill H99_6h if it exceeds 0.35% after 500 trades.
 
 ## 9. Deviations, clarifications and post-hoc work (declared)
@@ -348,3 +373,91 @@ the reruns.
 **Not modelled:** maker execution (it would avoid the half-spread, but carries fill risk and adverse selection on favourites near
 resolution); taker rebates; tick-size changes near the extremes. `orderPriceMinTickSize` is the post-resolution value, and a 0.01-tick
 book cannot quote 0.995. Only token-0 series were pulled; token-1 prices are 1 - p0 (books mirrored, VERIFIED in panel.md).
+
+## Audit (independent adversarial review, 2026-10-18 ~06:15 UTC; auditor did not write sections 0-9)
+
+Scripts are in `analyses/audit/`:
+- `flb_a01_recompute.py`: independent re-implementation from `flb_entries.parquet` and the two cost tables.
+- `flb_a02_tape_exec.py`: panel-tape fills.
+- `flb_a03_onchain.py`: CTF payouts.
+- `flb_a04_weights.py`.
+- `flb_a05_pull_trades.py` + `flb_a09_exec_wide.py` + `flb_a11_exec_summary.py`: fills in all trade markets.
+- `flb_a06_stale.py`.
+- `flb_a07_price_check.py`: fresh `/prices-history` re-pull.
+- `flb_a08_lossmodel.py`.
+- `flb_a10_subsets.py`.
+
+Outputs are in `analyses/audit/out/flb_a*.json`. New derived data: `data/derived/audit_flb_trades/` (15 MB of taker tapes for the 2,104
+E2/H99_6h markets outside the panel tape set; 4 tapes truncated at 15k rows). Corrections made above are marked **[corrected by auditor]**.
+Everything in this section is post hoc and was not pre-registered.
+
+**Audited verdict.** The family stays **marginal**, on E2 alone. H99_6h is downgraded from marginal to **no demonstrated edge**.
+E1, H90_24h and H90_1h stay rejected, and the other 10 rules stay at no demonstrated edge.
+
+What was attacked and the result:
+1. **Pre-registration integrity (VERIFIED, git).** Section 0 is byte-identical to the version in commit `fd8f386` (2026-10-18 04:55
+   UTC). That commit contains `01`-`03` but no `04_analyze.py` and no results.
+2. **Re-run with independent code (VERIFIED).** All 15 rules' P TEST point estimates reproduce to 4 dp: E2 +1.006%, H99_6h +0.281%,
+   E1 -6.50%, H90_24h -2.28%. Cluster and week CIs agree within bootstrap noise; for example, E2 cluster [+0.18, +1.61].
+3. **Horizon-price look-ahead (VERIFIED, none found).** I re-pulled fidelity-1 `/prices-history` around h for 170 TEST trades (every loss
+   plus 40 seeded winners per rule x sample).
+   - The stored price equals the last fresh point at or before h in 130 / 170.
+   - The rest differ by the hourly-snapshot staleness of P's h60 series at A-7d (median difference 0, max 0.8c) or by W's 5-minute
+     grid (max 2.3c).
+   - Only 1 of 170 equals the first point after h. There is no evidence of post-decision information in the entry price.
+4. **Payout labels and survivorship (VERIFIED).**
+   - On-chain CTF `payoutNumerators` (Polygon RPC) match `y0` for 354 / 354 markets: every loss and every 50-50 in E2 and in all
+     H98/H99 rules (all splits, both samples), plus 300 seeded TEST winners.
+   - Excluded resolution classes total about 49 of 4.15M universe markets. 50-50 outcomes (paid 0.5) and disputed markets are kept.
+5. **Clock definitions (PLAUSIBLE).** The anchor is the scheduled endDate or gameStartTime. In 45 random E2 P TEST markets the endDate
+   matches the deadline in the question text, so there is no sign of endDates edited to the realised close. The realised-close
+   (`res`) clock is correctly kept out of the primary tests.
+6. **Executability (VERIFIED where prints exist).** I compared the first taker BUY of the favourite after h with the modelled fill
+   f = m + bucket half-spread.
+   - **E2 P TEST.** 73% have a buy within 24 h. Takers paid median +0.15c and mean +0.25c over the series price, against +0.28c
+     modelled. Net at those prints is +0.56%, against the model's +0.53% on the same trades.
+   - **E2 W TEST.** 53% have a buy within 24 h. Takers paid +0.73c (median +0.45c), against +1.08c conservative. The conservative
+     model is not optimistic.
+   - **Round 0.5c-grid series prices.** I suspected these were mids between wide 1c-tick quotes, which would put the edge in
+     unexecutable quotes. They pay about the model: E2 P grid +0.34c, W +0.79c.
+   - **H99_6h P TEST.** 57% have a buy within 2 h. Takers paid +0.21c over the series price, against the 0.10c base half-spread. The
+     base cost is about 0.1c too optimistic. Net at prints is +0.31% (2 h) or +0.18% (24 h), against the model's +0.39% / +0.28%.
+   - **Caveats.** Prints are selected (someone accepted that price), and 27-47% of trades have no print to compare.
+7. **Spread statistic (CORRECTED).** Costs use bucket medians, but the expected cost of trading every qualifying market is the mean.
+   - E2: +0.78% at mean half-spreads, +0.50% at p75.
+   - H99_6h: +0.09% at mean half-spreads, -0.05% at p75.
+8. **Weights, composition, fragility (CORRECTED; section 3).**
+   - E2 unweighted is +0.57% [-0.49, +1.34]. Kish n_eff is 165.
+   - One extra loss on the top-weight trade flips E2 to -0.75%.
+   - E2 is +0.77% [-0.13, +1.42] without the TEST-only soccer exact-score markets.
+   - The E2 edge also concentrates in decision-time-stale and 0.5c-grid prices:
+     - P off-grid +0.58%, grid +2.99%.
+     - W non-stale +0.85% (unweighted -0.06%), stale +1.58%.
+   - These are knowable ex ante. They are hypotheses, not rules.
+9. **Dependence (VERIFIED).**
+   - Entry-day bootstrap: E2 P [+0.10, +1.63]; H99_6h P [+0.04, +0.40].
+   - A conservative two-way (event x entry-day) pigeonhole bootstrap: E2 P [-0.82, +1.87]; H99_6h P [-0.17, +0.43];
+     E2 W [+0.50, +1.56].
+10. **Rare-loss calibration model (new).** Losses are modelled as Poisson(k x sum(1 - m)), with a Jeffreys prior.
+    - E2 pooled over all splits and both samples: k = 0.54 [0.36, 0.78] (25 losses vs 46.3 implied). The 7-day favourite underpricing
+      is real (VERIFIED).
+    - Break-even k is 0.79 at P base cost, 0.67 at mean spreads, and 0.51 at W conservative cost.
+    - Expected TEST-portfolio net at pooled k:
+      - P: +0.49% (95% over k: +0.00% to +0.86%); +0.27% [-0.22, +0.63] at mean half-spreads.
+      - W: -0.09% [-0.77, +0.41].
+    - So the +1.0% realised in P TEST is a favourable draw: 3 losses against about 3.5 expected at k = 0.54.
+    - H99_6h: k = 0.46 [0.18, 1.00] from 5 losses. Break-even is 0.76 at the median and 0.37 at the mean half-spread, so the posterior
+      probability of a positive edge is about 0.3 at mean spreads.
+11. **Volume-screen look-ahead.** I confirm the authors' finding without a new test. E1's rejection is not only a P-screen artefact:
+    W (no screen) at its primary conservative cost gives -3.36% [-5.17, -1.65].
+12. **Multiple testing and peeking.**
+    - With 15 correlated rules, one nominal 95% CI excluding 0 is not unusual by chance. Bonferroni fails for all rules, as reported.
+    - The stronger support for E2 is the separate calibration result in item 10.
+    - E1X was selected on train+validation only.
+    - I found no sign of TEST-driven changes to definitions. The deviations in section 9 are declared.
+13. **Not re-checked.** The W sampling weights, the capacity slippage tables, and `05_posthoc.py` beyond the items above.
+
+**Audited bottom line for a retail trader.** E2 is the only candidate: buy the >= 95c side 7 days before the scheduled end, small
+size, many events. Its realistic expectation is about +0.5% per roughly 8-day trade in liquid markets, with a lower bound near 0 and a
+-100% tail on each trade. In thin markets at conservative cost it is about 0. It deserves only the forward paper test on live asks
+(section 8), with the k-based kill rule.
