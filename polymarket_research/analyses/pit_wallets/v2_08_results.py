@@ -40,7 +40,25 @@ def est_vectors(s: pd.DataFrame, roi_col: str, wcol: str | None) -> dict:
     wi = np.where(ok, 1.0 / np.where(np.isfinite(fr) & (fr > 0), fr, 1.0), 0.0)
     ww = s[wcol].to_numpy() if wcol else np.ones(len(s))
     lose_unf = feas & ~ok & ~p1
-    return {"drop": (ww * roi * ok, ww * ok), "ipw": (ww * roi * wi, ww * wi),
+    # ipw2 = stage-2 A12 repair: every feasible loser counts at the mean ROI of filled losers (-1 if none filled);
+    # filled winners are reweighted by own-price bucket; winners in buckets with no filled winner are spread over the
+    # represented buckets (outcome-level fallback).
+    fl = ok & ~p1
+    lbar = float(np.average(roi[fl], weights=ww[fl])) if fl.any() else -1.0
+    fw, okw = feas & p1, ok & p1
+    w2 = np.zeros(len(s))
+    if okw.any():
+        bk = pd.Series(ob)
+        nfe_b = bk[fw].value_counts()
+        nok_b = bk[okw].value_counts()
+        rep = nok_b.index
+        scale = fw.sum() / max(1, nfe_b.reindex(rep).fillna(0).sum())
+        wb = (nfe_b.reindex(rep) / nok_b).fillna(0) * scale
+        w2 = np.where(okw, bk.map(wb).fillna(0).to_numpy(), 0.0)
+    loser_feas = feas & ~p1
+    ipw2_pnl = ww * (roi * w2 + lbar * loser_feas)
+    ipw2_cost = ww * (w2 + loser_feas)
+    return {"drop": (ww * roi * ok, ww * ok), "ipw": (ww * roi * wi, ww * wi), "ipw2": (ipw2_pnl, ipw2_cost),
             "adv": (ww * (roi * ok - lose_unf), ww * (ok | lose_unf)),
             "_fill_win": float(ok[feas & p1].mean()) if (feas & p1).any() else np.nan,
             "_fill_lose": float(ok[feas & ~p1].mean()) if (feas & ~p1).any() else np.nan,
@@ -157,7 +175,7 @@ def main() -> None:
             okm = e["drop"][1] > 0
             res = {"group": g, "wt": tag, "n_sig": len(s), "n_wallet": s["wallet"].nunique(), "n_feas": e["_n_feas"],
                    "n_filled": e["_n_ok"], "fill_win": e["_fill_win"], "fill_lose": e["_fill_lose"]}
-            for est in ["drop", "ipw", "adv"]:
+            for est in ["drop", "ipw", "ipw2", "adv"]:
                 r = ci(s["ue"], *e[est])
                 res.update({f"{est}_{k}": v for k, v in r.items()})
             d = s[okm]
@@ -186,7 +204,7 @@ def main() -> None:
     mt["p_holm"] = np.where(mt["wt"] == "u", mt["group"].map(holm(pv)), np.nan)
     mt.to_parquet(V2 / "results_main.parquet", index=False)
     c1 = ["group", "wt", "n_sig", "n_filled", "drop_n_ue", "n_wallet", "fill_win", "fill_lose", "avg_px", "hit",
-          "made_money_share", "drop_roi", "drop_lo", "drop_hi", "ipw_roi", "ipw_lo", "ipw_hi", "adv_roi", "adv_hi"]
+          "made_money_share", "drop_roi", "drop_lo", "drop_hi", "ipw_roi", "ipw2_roi", "ipw2_lo", "ipw2_hi", "adv_roi", "adv_hi"]
     c2 = ["group", "wt", "nofee_roi", "own_roi", "R_diff", "R_lo", "R_hi", "p_vs_R", "R1_diff", "p_vs_R1", "FAV_diff",
           "p_vs_FAV", "p_vs_B1",
           "p_vs_B1_ipw", "p_holm", "top1pct_share", "top_event_share", "cap_share_1k"]
@@ -203,13 +221,14 @@ def main() -> None:
                         continue
                     r = {"group": g, "delay": dn, "model": col, "wt": "w" if wcol else "u", "n_ok": e["_n_ok"],
                          "n_feas": e["_n_feas"]}
-                    for est in ["drop", "ipw", "adv"]:
+                    for est in ["drop", "ipw", "ipw2", "adv"]:
                         q = ci(s["ue"], *e[est]) if est == "drop" else {"roi": (e[est][0].sum() / max(1e-9, e[est][1].sum()))}
                         r.update({f"{est}_{k}": v for k, v in q.items()})
                     dr.append(r)
     dt = pd.DataFrame(dr)
     dt.to_parquet(V2 / "results_delay.parquet", index=False)
-    for col, est in [("m1_roi", "drop"), ("m1_roi", "adv"), ("m2_2500_roi", "drop"), ("m2_2500_roi", "ipw")]:
+    for col, est in [("m1_roi", "drop"), ("m1_roi", "ipw2"), ("m1_roi", "adv"), ("m2_2500_roi", "drop"),
+                     ("m2_2500_roi", "ipw2"), ("m2_100_roi", "ipw2")]:
         piv = dt[(dt["model"] == col) & (dt["wt"] == "u")].pivot(index="group", columns="delay", values=f"{est}_roi")
         lines.append(f"{col} {est} net ROI by delay (unweighted):\n" + piv[[c for c in DELAYS if c in piv]].round(4).to_string())
     # World Cup / period / category splits at the primary model
@@ -231,7 +250,7 @@ def main() -> None:
                 continue
             e = est_vectors(s, "m1_roi", None)
             r = {"split": nm, "group": g, "n_sig": len(s), "n_ok": e["_n_ok"], "n_wallet": s["wallet"].nunique()}
-            for est in ["drop", "ipw", "adv"]:
+            for est in ["drop", "ipw", "ipw2", "adv"]:
                 q = ci(s["ue"], *e[est])
                 r.update({f"{est}_{k}": v for k, v in q.items()})
             okm = e["drop"][1] > 0
@@ -242,7 +261,7 @@ def main() -> None:
     spt = pd.DataFrame(sp)
     spt.to_parquet(V2 / "results_splits.parquet", index=False)
     lines.append("Splits (M1 2m, unweighted):\n" + spt[[c for c in ["split", "group", "n_sig", "n_ok", "drop_n_ue", "n_wallet",
-                 "drop_roi", "drop_lo", "drop_hi", "ipw_roi", "adv_roi", "R_diff", "p_vs_R"] if c in spt]].round(4).to_string(index=False))
+                 "drop_roi", "drop_lo", "drop_hi", "ipw2_roi", "adv_roi", "R_diff", "p_vs_R"] if c in spt]].round(4).to_string(index=False))
     conc = []
     for g in GROUPS:
         d = a2[a2[g] & a2["m1_raw"].notna()]
