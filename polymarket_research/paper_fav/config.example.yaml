@@ -1,0 +1,24 @@
+# Paper trader for the 'favourite >= 0.95 at T-7d' rule. Read-only: no wallet, no keys, no orders.
+rule:
+  horizon_days: 7               # decision time D = anchor - 7 days (anchor = gameStartTime, else endDate)
+  decision_tolerance_hours: 3   # decide only inside [D, D + 3 h]; later sightings are recorded as 'missed'
+  min_side_mid: 0.95            # favourite = side whose book midpoint is >= 0.95 at decision time
+  max_all_in: 0.999             # tested rule: ask VWAP + taker fee per share must be <= 0.999
+  stake_usd: 20                 # paper stake per signal (about what a $5k account would use)
+  capacity_sizes_usd: [100, 500, 2500]   # also record the all-in price at these sizes
+  liquid_volume_usd: 10000      # 'liquid' tag: Gamma volumeNum >= this OR liquidityNum >= the next value
+  liquid_liquidity_usd: 5000
+  tight_spread_max: 0.02         # 'tight' tag: best ask - best bid <= 2c. 'core' = liquid AND tight, the version
+                                # comparable to the backtest's liquid sample (base half-spread ~0.7c)
+kill:
+  ratio: 0.75                   # stop if realised losses > 0.75 x price-implied losses ...
+  min_implied_losses: 5         # ... once the price-implied loss sum reaches 5
+  max_median_slippage_cents: 0.5
+db: data/derived/paper_fav/paper_fav.sqlite
+notifications:
+  console: true
+  file: data/derived/paper_fav/notices.ndjson   # set to null to disable
+  telegram: false               # needs PM_ALERT_TELEGRAM_BOT and PM_ALERT_TELEGRAM_CHAT in the environment
+  email: false                  # needs PM_ALERT_SMTP_HOST, PM_ALERT_SMTP_FROM, PM_ALERT_SMTP_TO (+ user/password)
+  notify_each_signal: true
+  daily_scorecard_utc_hour: 8
