@@ -7,7 +7,7 @@ Independent of 06_count_sets.py / 03b_snapshot_cnt.py:
     asks (not only via the 1 - YES-bid mirror), with a mirror-consistency check and book-timestamp age;
   * own depth walk: equal q shares on every leg, each leg pays rate*(p(1-p))^exponent per share (feeSchedule),
     stop when the marginal set cost >= payoff (n_buyable - k); per-leg min size and $1 notional enforced.
-Run from polymarket_research/:  PMR_RATE_SCALE=1 python -m analyses.audit.la_a01_countsets_live <n> <interval_s>
+Run from polymarket_research/:  PMR_RATE_SCALE=1 python -m analyses.audit_live.la_a01_countsets_live <n> <interval_s>
 Output: data/derived/audit_la/cnt_live_<UTC>.parquet (one row per set x snapshot) + legs_<UTC>.parquet (top-of-book
 per leg) + meta_<UTC>.json (rules-template check).
 """

@@ -191,16 +191,16 @@ rewardsMaxSpread; inventory cap 2N; markouts on the YES mid. 218 quoted market-w
 
 - Scale: at $500/market, trading MTM ≈ −$2.1 per market-hour vs central rewards ≈ +$0.87 per market-hour (gross reward yield ≈ 4%/day of
   quoted capital in this active sample, but the trading leg loses ≈ 2.5× that). Trading losses scale ~linearly with size, rewards
-  sub-linearly ($81 → $140 → $214), so **bigger quotes are strictly worse**.
+  sub-linearly ($81 → $140 → $214), so **bigger quotes are strictly worse**. **[corrected by auditor 2026-10-18: this holds only under the pre-registered rule that a trade-through fills the whole virtual order. Under tt_capped (fill ≤ printed size) the totals are MTM −$95 / −$210 / −$329 and net −$14 / −$70 / −$115 at $500 / $2,500 / $10,000 (recomputed from `sim_summary.parquet`), so losses also grow sub-linearly. The size claim is a fill-rule artefact: PLAUSIBLE at best, not VERIFIED.]**
 - By category ($500, conservative): sports −$110.6 MTM vs +$15.7 rewards (21 of 50 fills); weather −$41.7 vs +$29.3; politics −$4.3 vs
   +$6.0 (5 fills in 26.6 market-hours: deep queues, almost never filled, small reward share); culture +$15.0 vs +$19.5 (7 fills; small n).
   By window: net_r3 w1 −54, w2 −92, w3 +20.5, w4 (the fresh 55-min window) +7.0 on 6 fills, all negative after liquidation.
-- **R2 (adverse selection): REJECTED.** 47 conservative fills with a 60 s horizon in 27 markets: markout **−0.63c/share (90% CI −1.44, −0.10)**
+- **R2 (adverse selection): REJECTED.** 47 conservative fills with a 60 s horizon in 27 markets: markout **−0.63c/share (90% CI −1.44, −0.10)** **[corrected by auditor 2026-10-18: −0.63c is quantity-weighted (Σ$ / Σshares; auditor reproduced −0.628c, market-bootstrap CI90 −1.40, −0.10). Weighting each fill equally gives −0.31c, CI90 −0.74, +0.02, which includes 0. R2 is still triggered, because the pre-registered test is a mean ≤ 0, but the significance depends on the weighting.]**
   = spread capture +0.05c + adverse selection −0.67c. Back-of-queue passive fills lose money at 60 s.
 - **R3 (combined): FAILED** for every size and every fill rule: net_r3 < 0 and the CI lower bound < 0 (upper bound > 0 only at $500).
 - **R4**: 50 conservative fills ≥ 30, so the result counts by the pre-registered rule, though it rests on 27 markets and < 2 hours per window.
 - **R5**: top 5-minute window = 45% / 36% / 36% of |fill MTM| ($500 / $2,500 / $10,000); top market ≤ ~20% of |net|: below the 50% flag, but
-  close at $500.
+  close at $500. **[corrected by auditor 2026-10-18: the ~20% uses Σ|net| over market-windows as the denominator. Against net P&L, as pre-registered, the worst market-window is 45% of the $500 conservative net (−$53.8 of −$118.4), just under the 50% flag. The three worst market-windows (4 whole-quote fills) are 99% of it: the other 216 market-windows net −$1.2. R5 is not formally triggered, but the negative result is concentrated, not broad.]**
 - **R6**: not reached (net is negative even with rewards). The only near-zero variants are post-hoc and still negative after liquidation.
 
 ## 6. Capacity ($5k / $25k / $100k)
@@ -259,3 +259,28 @@ quoter, so net P&L (MTM + central rewards) is negative at every size under every
   keeps running, but inventory MTM (also negative) is shown separately. The rebate is an upper bound.
 - Rewards use the visible aggregated book; hidden per-maker structure, the unknown sampling minute and the unknown "required duration"
   make the share PLAUSIBLE at best. Actual payouts were not observed.
+
+## Audit (adversarial review, 2026-10-18 ~06:20-06:50 UTC, auditor; read-only)
+
+Scope: notes, `lp.py`, `06_ws_replay.py`, `08_sim.py`, the derived parquets (`trades_w*`, `sim_fills`, `sim_summary`,
+`sim_per_market_cap*`, `rewards_t*`), plus one fresh reward-config pull (`rewards_audit_t3.parquet`, 06:30 UTC,
+written by the study's own `01_rewards_pull.py`). Corrections in place above are marked **[corrected by auditor]**.
+
+| attack | finding | label |
+|---|---|---|
+| Fills assumed from touches | They are not. Under the conservative rule, queue-ahead falls only with prints at our price on our side. We fill only with the excess over the queue, or on a trade-through. Cancels never advance us. Of 423 at-price prints, only 11 exceeded the queue. | VERIFIED (code + counts) |
+| Wrong trade side (the fill rule needs the taker side) | The websocket `side` is the taker's: 89.3% of BUY prints sit at or above the best ask and 86.1% of SELL prints at or below the best bid (n=551). | VERIFIED |
+| Double counting (bug fixed by the study) | 0 duplicate (market, t, side, price) fills among the 50 conservative $500 fills. | VERIFIED |
+| Markout weighting | The −0.63c/share headline is quantity-weighted. The equal-weight per-fill mean is −0.31c (CI90 −0.74, +0.02). R2 is still triggered (mean ≤ 0), but significance depends on the weighting. | corrected above |
+| Concentration (R5) | Three market-windows (four whole-quote fills of 505-1,000 shares, **all four trade-throughs**, all on the ask side) make up 99% of the $500 conservative net (−$117.2 of −$118.4). The worst single one is 45%. The other 216 market-windows net −$1.2 (rewards about +$80 against small MTM losses). | corrected above |
+| "Bigger quotes are strictly worse" | This is an artefact of the pre-registered full-order trade-through fill. Under tt_capped, net is −$14 / −$70 / −$115 at $500 / $2.5k / $10k (MTM −$95 / −$210 / −$329, rewards +$81 / +$140 / +$214). | corrected above (PLAUSIBLE) |
+| Reward formula | The code matches the docs as quoted: S = ((v−s)/v)², Q_min = max(min(Q1,Q2), max(Q1,Q2)/3) in the [0.10, 0.90] band, otherwise min. The share is computed against the visible aggregated book, and no payout was observed. | formula VERIFIED, share PLAUSIBLE |
+| Allocation persistence (fresh pull) | The total fell from $189.8k/day (t0, 23:05) through $179.3k (t2, 05:52) to **$173.4k/day (t3, 06:30)**. In the 38 minutes from t2 to t3, 515 configs were dropped, 468 added and 1,764 of 13,841 common markets changed rate. All 20 w4 markets are still allocated. This supports the "discretionary, fast-changing" caveat. | VERIFIED |
+| Midpoints used as execution prices | Mid is used for markouts and inventory MTM only. Fills are at our posted price, and a separate liquidation line charges half the spread plus the taker fee. | OK |
+| Capital lock-up | The quoted capital N·pb + N·(1−pa) is the denominator of every yield. Inventory is capped at 2× the quote. | OK |
+
+**Audited conclusion: `no_demonstrated_edge` stands.** R3 fails under every fill rule, and no variant has a CI lower bound
+above 0. The best, tt_capped at $500, is −$14 (CI −83, +45). The negative result is **weaker than the notes' wording
+suggested**: it rests on a handful of large adverse fills, and the size-scaling claim depends on the fill rule. The
+honest reading is "not demonstrated, and the sample cannot rule out a small positive or a small negative net". The
+rewards-only capacity figures ignore fills and competitor reaction, so they are not P&L. Never risk-free.

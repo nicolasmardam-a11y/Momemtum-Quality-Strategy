@@ -336,3 +336,28 @@ How the upper bound was built:
   - Websocket: `complete_set_arb_ws_bursts{,_w1,_w2}.parquet`, `complete_set_arb_ws_replay.parquet`.
   - Extra checks: `complete_set_arb_fee_sensitivity_{w1,w2,all}.parquet`, `complete_set_arb_qcount.parquet`,
     `complete_set_arb_onchain_converts.parquet`, `complete_set_arb_converts_d1017.parquet`, `complete_set_arb_converter_edges_d1017.parquet`.
+
+## Audit (adversarial review, 2026-10-18 ~06:20-06:50 UTC, auditor; read-only)
+
+Scope: notes, `csa.py` (fees, segment walking, (c)/(d)/(e) value functions), the scan and universe parquets, and a fresh
+independent re-check. `analyses/audit_live/csa_a01_recheck.py` is separate code. It re-pulls Gamma membership and
+`feeSchedule` and fetches both token books per member. It re-checked **every neg-risk group the study ever flagged**:
+the 103 gross violators plus the net-positive (c exhaustive)/(d)/(e) groups, 116 groups in all, of which 109 still
+trade. Four rounds ran 5 min apart, 06:23-06:38 UTC, about 8 h after the study's last scan. Output:
+`data/derived/audit_csa/recheck_20261018T062312.parquet` (targets: `data/derived/audit_csa/targets.parquet`, built from the study's `scan_*_groups.parquet`).
+
+| attack | finding | label |
+|---|---|---|
+| Fee omitted or wrong rate | `csa.market_fee_rate` uses the market's `feeSchedule` first. In the latest universe (`universe_v105`), 134,181 of 134,653 neg-risk members have a `feeSchedule` (rates 0.03/0.04/0.05/0.07, exponent 1 throughout). The other 472 have `feesEnabled=False`, which gives rate 0. Every leg of (c)/(d)/(e) pays rate·p(1−p) at its own fill price, depth-walked. Today's Gamma rate is the charged rate for live markets (fees_incentives.md: legacy `sports_fees_v2` back at 0.03 since 08-25). If it were higher, the result would only be more negative. | VERIFIED |
+| Midpoints or last trades | All values come from book levels: (e) uses NO-token asks, (d) YES bids, (c) YES asks. No mid, last trade or `outcomePrices` enters a P&L. | VERIFIED (code) |
+| Wrong (e) payoff | (e) = Σ_S(1 − askN_i − fee_i) − 1 on the subset S of members with positive terms. A convert of S returns \|S\|−1 pUSD, with the YES of the rest valued at 0, which is conservative. | VERIFIED |
+| Fresh re-check of (d)/(e) | **0 net-positive (e)/(d) in 436 group-rounds.** The best was −0.49% (FL-21 House). 25 distinct groups (87 group-rounds) are gross violators (Σ bidYES > 1, median +0.6%). Their median net after fees is −1.84%, which matches the study's −1.56% fee band. No in-play groups, no crossed books. | VERIFIED |
+| Fresh re-check of (c) | The World Cup 2030 "location of final" basket (the study's only relaxed survivor) is **out of the money in all 4 rounds** (Σ askYES 1.008, net −3.9% per set). Only two (c) baskets were positive, each at +0.22% per set at the top: BTC vs Gold vs S&P 2026 (depth 59 sets, about $0.13, lock to 2027-01-01) and the 3-way "Hormuz Agreement / Senate" event (depth 147 sets, about $0.32). Both fail the $1 floor (R1), and the Hormuz set's exhaustiveness in edge states (tied Senate) was not checked. | VERIFIED |
+| Single-snapshot artefacts and persistence | Persistence was pre-registered (40-s rescans) and measured. Episodes are counted as distinct (id, type) events. The replay shows median in-play bursts of 2.2 s. | OK |
+| Capital lock-up | (c) is annualised on locked capital (≤ 1.1%/yr). (e) recycles at once after the convert. | OK |
+| Min size and tick | Entry requires Q* ≥ 5 shares per leg and ≥ $1 profit. Ticks are inherent in the book levels. | OK |
+| Not re-verified | The on-chain getQuestionCount match (396/396) and the converter-wallet maker/taker split were not re-run. Both stay as labelled (VERIFIED by the study; PLAUSIBLE respectively). | — |
+
+**Audited conclusion: unchanged, `no_demonstrated_edge`.** Fresh books eight hours later reproduce the fee band:
+groups with gross Σ bidYES > 1 exist all the time, but none clears the per-leg taker fees. The one standing (c)
+basket has disappeared. Nothing needed correcting in place. Never risk-free.

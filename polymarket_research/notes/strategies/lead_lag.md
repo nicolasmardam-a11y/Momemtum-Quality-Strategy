@@ -373,3 +373,25 @@ pages, not independently tested here.
   `03_live_analyze.py`, `05_live_lag.py`, `08_combine.py`, `09_latency_pool.py`, `10_series_vs_book.py`, `06_xvenue_pm_side.py`, `sports_collect.py`, `07a_sports_rebuild.py`, `07_sports_analyze.py`.
 * Derived: `data/derived/lead_lag/` (`hist_*`, `hist5m_*`, `live_L{2,3,4}_*`, `live_pooled_summary.json`, `live_latency_pool.json`, `series_vs_book_L4.json`, `xvenue_pm_side.json`, `sports_S1_*`).
 * Raw: `data/raw/lead_lag_live/2026101{7,8}/` (live frames), `data/raw/lead_lag_docs/cftc_ptc040523303.{pdf,txt}` (Kalshi Fed-meeting contract filing).
+
+## Audit (adversarial review, 2026-10-18 ~06:20-06:50 UTC, auditor; read-only)
+
+Scope: notes, `03_live_analyze.py`, `05_live_lag.py`, `09_latency_pool.py`, `10_series_vs_book.py`, the derived JSONs
+and the live market metadata (`live_L{2,3,4}_markets.json`), plus a fresh Gamma check. No study rule was changed.
+
+| attack | finding | label |
+|---|---|---|
+| Fees missing or at the wrong rate | All 196 market entries recorded in L2/L3/L4 (84 + 61 + 51) (5m/15m/1h/4h/above-K) carry `feeSchedule` rate 0.07, exponent 1, takerOnly. `03_live_analyze.py` reads the per-market rate. `05_live_lag.py` hard-codes 0.07, which matches. A fresh Gamma pull at 06:31 UTC (current BTC 5m, 15m, 4h and 3am-ET hourly markets) shows the same `crypto_fees_v2` {0.07, 1, takerOnly, rebateRate 0.2}. | VERIFIED |
+| Midpoints or last trades used as execution prices | H2 enters at the best ask of the side's own token (Down uses the Down token's book) and charges the entry fee. Markouts at the bid also charge the exit fee. Mid is used only for the labelled mid-markouts, R3 log-loss and the H1 response curve. The event-study round trip enters at the ask (Up) or 1 − bid (Down, via the mirror) and exits at the bid or 1 − ask, with both fees. | VERIFIED (code) |
+| Depth ignored | The H2 signal requires best-ask depth ≥ `orderMinSize`. P&L is per share at the touch, with a median of 59 shares available. The event study ignores depth, but it is per share and already negative after 0.2 s. | acceptable |
+| Settlement source | A fresh Gamma pull confirms that 5m/15m/4h markets resolve on the Chainlink BTC/USD TWAP-60s stream and hourly markets on Binance BTC/USDT, as the notes say. | VERIFIED |
+| `/prices-history` staleness (the reason the historical lag is rejected) | `series_vs_book_L4.json` reproduces the notes: mean absolute error 3.5c at lag 0, minimised at 17-18 s (0.9c), n=370 points in 30 markets. Not recomputed from the raw frames. | VERIFIED (derived) |
+| Cherry-pickable subgroups | `pnl_by_kind_delayed` has positive point estimates for **above-K (+19.4c, n=10 episodes in 2 markets)** and **1h (+3.5c, n=37, 3 markets, CI −52c..+18c)**. Both are below the R5 sample minimum (above-K) or have a CI spanning 0. They are not evidence of edge and must not be quoted as such. | note added |
+| R3 margin | 0.360 vs 0.355 log-loss, with no CI. The pre-registered test is "not better", and R2 (negative markouts in every window) points the same way, so the verdict does not hinge on it. | OK |
+| Single-snapshot artefacts | Episodes are merged runs of 1-s snapshots, counted as distinct events, with persistence measured (R1). | OK |
+| Capital lock-up | Holding periods run from seconds to 4 h. Not material. | OK |
+
+**Audited conclusion: unchanged, `no_demonstrated_edge` for crypto lead-lag.** The rejection is robust because it comes
+from executable prices and the correct fees, and from three independent angles (hold P&L, markouts, latency curve).
+Cross-venue and sports stay `inconclusive_data` by construction (no Kalshi data; n=6 sports events). Nothing here is
+risk-free. Nothing needed correcting in place.

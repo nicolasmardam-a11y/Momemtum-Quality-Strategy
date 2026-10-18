@@ -12,7 +12,7 @@ CORRELATED. One sub-family does pass every pre-registered test: **k-of-n count c
 Oscars 2027 Best Actor nominations (19 listed actors, at most 5 nominations) and the CFP national-title-game set
 (50 teams, 2 play) were profitable after fees at executable prices in **every** snapshot of both windows,
 6.5 h apart. They hold about **$520 of depth-limited net profit on about $15k of capital, 3.4-3.6% over
-~95-100 days (~12-14%/yr simple)**. Verdict: `promising_test_further`, with a thin R4 margin. It is a
+~95-100 days (~12-14%/yr simple)**. Verdict: `promising_test_further`, with a thin R4 margin. **[corrected by auditor 2026-10-18: audited verdict `marginal`. The R4 10%/yr clause fails in window 1 (9.4%/yr capital-weighted, not shown in section 6). It passes in window 2 (11.6%) and in an auditor window on 2026-10-18 06:19-06:47 UTC (12.1%, but on only $9.9k and $314, down from $18.3k and $546). Pooled, it is 10.75%. See Audit.]** It is a
 capacity-limited standing stock, not a demonstrated recurring flow, and it is never risk-free: 19-50 separate
 oracle resolutions, rule-change risk and execution leg risk all remain.
 
@@ -134,7 +134,7 @@ labelled.
 
 | relation / set | what the rules say (abridged) | class |
 |---|---|---|
-| **Oscars 2027 Best Actor nominations, ALL_NO on 19 listed actors** | each: Yes "if the listed actor is nominated for the 99th Academy Award for Best Actor"; No at the announcement (scheduled 2027-01-21) otherwise; No if no nominations by 2027-03-14. All 19 rules texts are identical apart from the name. Academy 99th rules, Rule Five section 6: "Not more than five nominations shall be made for each award, except for the Best Picture award, which shall have ten"; section 7: an ineligible nominee "shall not be replaced" (VERIFIED on a third-party mirror of the official PDF, centrodecine.go.cr; not fetched from oscars.org). The 2027 change letting one actor take two slots in a category (secondary press) only lowers the number of distinct Yes persons. | **TRUE DOMINANCE** per written rules (<= 5 of 19 Yes). Residual: 19 separate UMA resolutions; an Academy rule change before 2027-01-21. |
+| **Oscars 2027 Best Actor nominations, ALL_NO on 19 listed actors** | each: Yes "if the listed actor is nominated for the 99th Academy Award for Best Actor"; No at the announcement (scheduled 2027-01-21) otherwise; No if no nominations by 2027-03-14. All 19 rules texts are identical apart from the name. Academy 99th rules, Rule Five section 6: "Not more than five nominations shall be made for each award, except for the Best Picture award, which shall have ten"; section 7: an ineligible nominee "shall not be replaced" (VERIFIED on a third-party mirror of the official PDF, centrodecine.go.cr; not fetched from oscars.org). **[corrected by auditor 2026-10-18: now VERIFIED on the official oscars.org PDF (`99th_oscars_complete_rules.pdf`, linked from oscars.org/rules, sha256 961ba49e…088e). Rule Five §6: "Not more than five nominations shall be made for each award, except for the Best Picture award, which shall have ten nominations." Rule Six §2: "The five acting achievements in each category receiving the highest number of votes shall become the nominations". Rule Five §7: an ineligible nominee "shall not be replaced". The Academy press release (press.oscars.org) confirms that one actor's multiple performances can each be nominated only "if those performances place in the top five votes", which can only lower the number of distinct Yes persons.]** The 2027 change letting one actor take two slots in a category (secondary press) only lowers the number of distinct Yes persons. | **TRUE DOMINANCE** per written rules (<= 5 of 19 Yes). Residual: 19 separate UMA resolutions; an Academy rule change before 2027-01-21. |
 | Oscars Actress (26 listed), Supporting Actor (26) | same template and same cap | TRUE (sub-scale, see section 4) |
 | Oscars Best Director (29 listed) | the list includes two co-directing duos as separate persons (Javier Calvo + Javier Ambrossi; Phil Lord + Christopher Miller); one nomination can make two listed names Yes | NOT an arbitrage at k=5. With k_max=7 the set is not in the money: Σbid 6.56 < 7. This is the classic **CORRELATED-looking-like-arb** trap. |
 | **CFP national title game, ALL_NO on 50 listed teams** | each: Yes "if the listed team plays in the 2027 CFP National Championship Game ... A team counts as making the game if it is one of the two teams that competes in it"; canceled / not played by 2027-02-08 -> No. 50 identical rules texts, 50 distinct teams. | **TRUE DOMINANCE** (<= 2 of 50 Yes) |
@@ -234,10 +234,10 @@ not tradable, so this is PLAUSIBLE support for persistence, not proof of executa
 | R1 net edge > 0, TRUE/NEAR, >= 2 consecutive snapshots >= 4 min apart | yes, but cents | **yes**: Best Actor and CFP in 26/26 snapshots across both windows |
 | R2 persistence | 43-54 persistent, mostly standing tiny edges | standing for >= 6.5 h live; mid-sum proxy says days to weeks |
 | R3 rules | most of the in-money pairs are NEAR or CORRELATED; TRUE pairs are tiny | Best Actor and CFP TRUE per the written rules (section 3) |
-| R4 >= $25/h observed **and** >= 10%/yr capital-weighted | fails ($0.7-1.6 TRUE per window) | about $546 of standing TRUE profit in a ~1 h window; capital-weighted simple return ~11.6%/yr on ~$18.2k (Best Actor 13.6%, CFP 12.6%, Actress 2.7%, Supp. Actor 2.3%, WCF 2.5%) -> **passes, thinly**. Adding NEAR sets gives ~17%/yr. |
+| R4 >= $25/h observed **and** >= 10%/yr capital-weighted | fails ($0.7-1.6 TRUE per window) | about $546 of standing TRUE profit in a ~1 h window; capital-weighted simple return ~11.6%/yr on ~$18.2k **[corrected by auditor: that is window 2 only. Window 1 = 9.4%/yr on $21.8k (Best Actor 9.3%), which FAILS. Auditor window = 12.1%/yr on $9.9k. Pooled = 10.75%]** (Best Actor 13.6%, CFP 12.6%, Actress 2.7%, Supp. Actor 2.3%, WCF 2.5%) -> **passes, thinly**. Adding NEAR sets gives ~17%/yr. |
 | R5 edge >= 0.5% | fails for almost all | Best Actor 3.6%, CFP 3.4% pass; Actress 0.71% and Supp. Actor 0.60% just pass |
 
-**Verdict: `promising_test_further`**, for the k-of-n sub-family only. Two-leg logical arbitrage:
+**Verdict: `promising_test_further`**, for the k-of-n sub-family only. **[corrected by auditor 2026-10-18: `marginal`; R4 passes in 2 of 3 windows, see Audit]** Two-leg logical arbitrage:
 `no_demonstrated_edge`. Caveats on the positive verdict: (a) the R4 annualised margin is 1.6 points, and 76% of
 the capital is one set; (b) it is one standing stock (~$520 TRUE in total), seen twice, not a flow; (c) nothing
 was executed, so fill quality, leg risk on 19-50 orders, and whether the bids survive the first leg are untested;
@@ -267,7 +267,7 @@ was executed, so fill quality, leg risk on 19-50 orders, and whether the bids su
 - **Main reason it might fail**: it is a small, capacity-limited stock. Once one trader sells into the bids it is
   gone, and a recurrence rate has not been measured. Beyond that, a single wrong oracle resolution or an
   unexpected extra Yes (rule change, tie, administrative decision) can wipe out the edge, and the 10%/yr
-  hurdle is cleared by only ~1.6 points.
+  hurdle is cleared by only ~1.6 points. **[corrected by auditor: in window 1 it is missed by 0.6 points (9.4%/yr)]**
 
 ## 8. Capacity (`09_capacity`, median over snapshots, single opportunity, ignores competition and leg risk)
 
@@ -302,3 +302,60 @@ Derived (`data/derived/`): `la_markets_2026-10-17{,w2}.parquet`, `la_relations*_
 `la_capacity_2026-10-17w2_la_books_{cnt,bdo}.parquet`, `la_hist_proxy_{531533,801515}.parquet`; logs in `la_logs/`.
 Superseded: `la_opps_2026-10-17_run1.parquet` and `run1b` (buggy relations; kept for provenance).
 Raw responses: `data/raw/{gamma,clob}/live/20261017/` via `pmr.http`.
+
+## Audit (adversarial review, 2026-10-18 ~06:15-06:50 UTC, auditor; read-only)
+
+Scope: notes, `06_count_sets.py`, `03b_snapshot_cnt.py`, `04_evaluate.py` (price and fee handling), the count-set
+summaries, the official Academy rules, and a fresh independent live re-check.
+`analyses/audit_live/la_a01_countsets_live.py` is separate code. It re-pulls Gamma `/events/{id}` (membership,
+acceptingOrders, negRisk, feeSchedule, min size, tick, rules text). It prices each NO leg on the **NO token's own
+asks** and also via the 1−YES-bid mirror, enforces 5 shares and $1 per leg, and runs an independent equal-share
+depth walk. 8 snapshots, 4 min apart, 06:19:36-06:47:36 UTC, about 8 h after window 2. Output:
+`data/derived/audit_la/cnt_live_20261018T061936.parquet`, `legs_…`, `meta_…json`. Corrections in place are marked
+**[corrected by auditor]**.
+
+### What survived the attack (VERIFIED)
+- **Rules, the critical point.** The 5-slot cap now comes from the official oscars.org PDF (Rule Five §6 and Rule Six §2,
+  quoted in section 3; copy at `data/raw/audit_docs/99th_oscars_complete_rules_oscars.org_20261018.pdf`). The 2027
+  multiple-performance rule only lowers the count of distinct Yes persons. The live Gamma rules texts of all 19 Best
+  Actor legs and all 50 CFP legs reduce to **one identical template** once the name is masked (md5 check). None changed
+  since window 2, and no market was added or removed. The 19 actor names and 50 team names are all distinct (no
+  duo-style double counting as in Best Director). TRUE dominance per the written rules holds.
+- **Executable prices.** NO-token asks equal 1 − YES bid on every leg in every snapshot (0 mismatches), and there are
+  0 crossed books. The walk uses ask ladders only, never mid or last trade. `04_evaluate.py` also uses only ladders.
+- **Fees.** Every leg's live `feeSchedule` is {rate 0.05, exponent 1, takerOnly}: `culture_fees` for the Oscars,
+  `sports_fees_v3` for CFP, Ballon d'Or and LaLiga. This matches what the study charged. All legs have
+  `acceptingOrders=True`, `negRisk=False`, `orderMinSize` 5, and `holdingRewardsEnabled=False` (no extra yield).
+- **Persistence.** All four TRUE sets were in the money in **8/8** auditor snapshots. Best Actor and CFP have now been in the
+  money in 34/34 snapshots across three windows spanning 15.4 h (12/12, 14/14, 8/8). That rules out a single-snapshot or stale artefact. Book timestamps are often 15 min to
+  12 h old: these books change rarely, so legging risk over seconds is low (PLAUSIBLE).
+
+| set (auditor window, median of 8) | Σ best YES bid vs k | net profit | capital | edge | simple ann. | vs window 2 |
+|---|---|---|---|---|---|---|
+| Oscars Best Actor, NO x19 (TRUE) | 5.652 vs 5 | **$237** | $6.34k | 3.7% | 14.4%/yr | $483 on $13.8k: depth halved (≈470 sets vs ≈1,000) |
+| CFP title game, NO x50 (TRUE) | 3.581 vs 2 | $35 | $1.16k | 3.0% | 11.1%/yr | $40 |
+| Oscars Supp. Actor, NO x26 (TRUE) | 5.541 vs 5 | $42 | $2.43k | 1.7% | 6.5%/yr | $5 |
+| Oscars Best Actress, NO x26 (TRUE) | 5.230 vs 5 | $4.5 | $1.47k | 0.3%: sub-threshold (R5) | — | $17 |
+| Ballon d'Or Top 5 / Top 3 (NEAR) | 5.26 / 3.23 | $48 / $41 | $4.5k / $4.4k | 1.1% / 0.9% | ~44-50%/yr (8 days) | $40 / $22 |
+
+### What broke (corrected in place)
+1. **R4 depends on the window.** The 10%/yr capital-weighted clause (TRUE sets with edge ≥ 0.5%) gives **9.4%/yr in
+   window 1 (FAIL)**, 11.6% in window 2, and **12.1% in the auditor window**. Pooled, it is 10.75%. Section 6 showed
+   only window 2. The return also depends on size: about 15%/yr at the top of book, about 9-14%/yr at the
+   profit-maximising depth. The $25/h clause passes under any reading, since even $546 spread over the full 15.4 h
+   is $35/h.
+2. **The stock is shrinking.** Standing TRUE profit went $527 (W1) → $546 (W2) → **$314** (auditor window). The capital
+   that clears R5 fell from $18-22k to $9.9k. Capacity for a $25k or $100k account is now about $10k deployable for
+   about $300, once.
+3. Minor: the "third-party mirror" caveat is resolved (official source now VERIFIED).
+
+### Not re-checked
+The two-leg relations (verdict `no_demonstrated_edge`, cents of profit) were not re-sampled live. That verdict
+needs no live confirmation to stand.
+
+**Audited conclusion: two-leg relations `no_demonstrated_edge` (unchanged). k-of-n count sets: a real, rule-verified,
+persistent TRUE dominance, but economically `marginal`.** It clears the pre-registered 10%/yr hurdle in 2 of 3
+windows, 10.75% pooled. It is a single ~$250-550 stock that is shrinking, with the capital locked about 95-100 days.
+Risks remain: 19-50 separate UMA resolutions (one wrong Yes costs 1 per set against about 0.5 per set of edge), a
+mid-season rule change, and leg risk across 19-50 taker orders. A forward test (weekly snapshots to 2027-01-21, plus
+other award and playoff sets) is still the right next step. It is never risk-free.
