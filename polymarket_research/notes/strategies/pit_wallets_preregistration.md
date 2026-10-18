@@ -290,3 +290,36 @@ return or evaluation-window statistic existed.
     executed at the 2-minute-delay VWAP for $100 / $500 / $2,500; at most 5% of the account per underlying event;
     at most 100% deployed; signals in time order; a signal without free cash is skipped (counted); capital is locked
     until t_res; run on the sampled signal stream (so it is "follow a random subset of signals"); no annualisation.
+
+- **A11 (2026-10-18T05:25Z, stage 2, written AFTER the confirmatory test results and a first exploratory grid were
+  seen) post-hoc diagnostic: outcome-dependent fills in the print-based proxy.** This addendum changes no rule of
+  sections 7-11 or A10. The 28 confirmatory verdicts are those computed under the pre-registered rule (unfilled
+  signals dropped). What follows is a labelled post-hoc robustness analysis, and it can only weaken a claim, not create
+  one.
+  - Finding that triggered it: a signal counts as filled only if other wallets' taker BUY prints follow it. Whether
+    they do depends on how the market moves next. In the test split, at the 2-minute delay, $2,500 VWAP fills happen
+    for 39% of winning S4-crypto decisions and 20% of losing ones. Even B1 (random eligible wallets) then shows +17%
+    ROI at that size, and the first-print model on the VWAP-filled subset goes from -5% to +33%. For first-print fills
+    the bias runs the other way in several screens: losers fill more often, 0.80-0.87 against 0.67-0.72.
+  - So every result is also reported under two more estimators (`evalib.est_vectors`).
+    - *ipw*: the outcome-neutral "always filled" estimate. Each filled signal is weighted by 1 / fill rate of its
+      class, where class = signal set x outcome x the followed wallet's own first-fill price bucket (<0.2, 0.2-0.5,
+      0.5-0.8, 0.8-0.95, >=0.95), all known at signal time apart from the outcome.
+    - *adv*: the adverse-fill bound. Every feasible unfilled loser is assumed filled and loses its stake. Unfilled
+      winners are not filled. Feasible means detection happens before t_res.
+  - Exploratory grid inference: with 1,000 bootstrap draws the smallest bootstrap p-value is 0.001. Holm over about
+    10,000 variants can never reject at that resolution, so Holm uses a normal p-value from the bootstrap SE,
+    1 - Phi(ROI / SE). Bootstrap p-values are reported too. The reality check is run separately for each estimator.
+  - Portfolio: the pre-registered fill rule (drop) and the adverse-fill bound (adv) are both simulated.
+
+- **V2-A1 (2026-10-18T05:14Z, stage 3; labelled V2-A* so it does not collide with stage-2 addenda) 2026 recent-regime holdout, a pointer only.** The protocol is in
+  `pit_wallets_v2_holdout.md` section 1. It was written before any fill, price or outcome after 2026-06-01 was pulled.
+  - The rules of sections 3-7 and 9-11 above are reused unchanged, with these differences:
+    - fills come from Data API v2 instead of CryptoHouse;
+    - one selection date, D = 2026-06-01;
+    - the evaluation window is 2026-06-01 .. 2026-09-30, on markets resolved before 2026-10-15;
+    - screens S1, S2, S3 and S5 only;
+    - wallets come from a documented, outcome-blind candidate pool with inclusion weights;
+    - delays follow A10;
+    - fees use each market's current feeSchedule.
+  - Nothing above this line was changed.

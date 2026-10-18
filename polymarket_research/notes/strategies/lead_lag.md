@@ -141,3 +141,118 @@ Reading:
   hold to resolution, entry at the stale series price) gives +2.7 c/share for 15m (bootstrap CI 0.1 to 5.2 c, n = 1,340). By time split it is
   **+5.3 c in the first 4 days and −0.8 c in the last 3 days**. For 1h it is +3.8 c (CI −1.5 to 9.4 c, n = 336). Entering at a price that is ~15 s stale, while the fair value uses spot up to t, is a
   look-ahead advantage, so these numbers are an **upper bound**, not evidence of edge. The live test is the binding one.
+
+<!-- SECTIONS 3-4 (live crypto) are inserted here -->
+
+## 5. Cross-venue: Kalshi vs Polymarket (written 2026-10-18 ~05:10 UTC)
+
+**Data-access decision (pre-registered in 0.2, unchanged):** no Kalshi market data (markets, orderbooks, candles, trades) was pulled.
+The reasons are Kalshi's Developer Agreement (API use limited to a member's own trading; no storing or aggregating) and its Data Terms
+(no systematic retrieval, no AI/ML use). See `notes/platform/geography_legal.md` §1, §4. **Verdict for both (a) arbitrage and (b) lead–lag:
+`inconclusive_data` by construction.** What follows is what could be established without Kalshi data.
+
+### 5.1 API and fee facts (Kalshi public documentation only)
+* Public REST market-data endpoints (`/markets`, `/events`, `/series`, `/markets/{ticker}/orderbook`, candlesticks, trades) need **no
+  authentication**. The OpenAPI pages declare `security: []`. The production base is `external-api.kalshi.com/trade-api/v2`, and the legacy
+  `api.elections.kalshi.com` answered `/exchange/status` (geography_legal.md §4). The WebSocket needs authentication even for public channels. VERIFIED (docs).
+  So an unauthenticated public API exists. **Using it is still not permitted for this project (above).**
+* **Fee formula.** The series object has `fee_type` ∈ {`quadratic`, `quadratic_with_maker_fees`, `quadratic_with_combo_maker_fees`, `flat`} and a
+  `fee_multiplier`. Docs: "quadratic is described by the General Trading Fees Table" in kalshi.com/docs/kalshi-fee-schedule.pdf. VERIFIED, docs.kalshi.com get-series.
+  The General Trading Fees Table is **taker fee = roundup(0.07 × C × P × (1−P))**: 1.75 c per contract at P = 0.5 and 0.63 c at 0.1/0.9. Some series charge a
+  **maker fee of roundup(0.0175 × C × P × (1−P))**, and S&P/Nasdaq series have their own multiplier. PLAUSIBLE-high: the schedule effective 2026-02-05 as indexed by
+  search plus secondary sources. The live PDF returned **HTTP 429** to this sandbox.
+* **Rounding.** Fees are computed per order and accumulate across its fills (`trade_fee = ceil_6dp(model_fee)`). Non-direct members' balances align to
+  $0.01, so the rounding is a few tenths of a cent per small order. VERIFIED, docs.kalshi.com/getting_started/fee_rounding.md.
+* So Kalshi's taker fee has the **same shape and rate as Polymarket's crypto fee (0.07·p(1−p))**. It is higher than Polymarket's politics (0.04) and
+  economics (0.05) rates, which come from each market's `feeSchedule`.
+
+### 5.2 Contract matching with rule checks (Polymarket side read live; Kalshi side from public CFTC filings)
+| Underlying | Polymarket market (feeSchedule; executable top of book 2026-10-17 23:12 UTC) | Polymarket rule | Kalshi rule (source) | Match? |
+|---|---|---|---|---|
+| Oct 27–28 2026 FOMC, "no change" | `fed-decision-in-october-…` (economics_fees, rate 0.05). Bid 0.86 / ask 0.87, $1.66M of ask depth within 3 c | Change in the **upper bound** of the target range vs the pre-meeting level. Source: the FOMC statement. Non-25-bp moves round **up** to the next 25 bp bracket | "Will the Federal Reserve do <action> at <meeting>?" Underlying: FOMC decisions to change the target range. Source Agency: Federal Reserve System. Expiration at the first 2:05 PM ET after the decision. Later revisions ignored (CFTC 40.2 filing, 2023-04-05, `data/raw/lead_lag_docs/cftc_ptc040523303.pdf`) | **PLAUSIBLE match** on the main outcome. The bracket definitions for odd-size or inter-meeting moves were not compared, because the current KXFED market rules sit on kalshi.com (429) |
+| 2026 House control (D) | `which-party-will-win-the-house-in-2026` (politics_fees, rate 0.04). Bid 0.90 / ask 0.91 | A majority of voting seats. Otherwise the party of the first elected Speaker. Runoffs count | Not read (kalshi.com 429; no CFTC filing located for the current contract) | **UNSUPPORTED** |
+| 2026 Senate control (D) | `which-party-will-win-the-senate-in-2026` (politics_fees, 0.04). Bid 0.64 / ask 0.65 | Analogous chamber-control rule (VP tie-break wording not compared) | Not read | **UNSUPPORTED** |
+| BTC hourly / daily strikes | Binance BTC/USDT 1h candle close (hourly) or the 12:00 ET 1m candle (daily) | (section 1) | Kalshi BTC contracts settle on CF Benchmarks' BRTI (USD) averages (PLAUSIBLE, not re-read) | **Mismatch by construction**: USDT vs USD (about +13 bp basis measured in section 1), a different index and different averaging windows. Basis risk at the strike, not an arb |
+
+### 5.3 Arbitrage hurdle (my calculation from the two fee formulas)
+A two-venue lock needs `ask_YES(A) + ask_NO(B) + fee_A + fee_B < 0.99` (pre-registered 1 c margin). With one-tick spreads on both venues (two half-spreads = 1 c),
+the **mid-price gap needed between venues** is:
+
+| p | PM politics (0.04) + Kalshi | PM economics (0.05) + Kalshi |
+|---|---|---|
+| 0.10 / 0.90 | 3.0 c | 3.1 c |
+| 0.30 / 0.70 | 4.3 c | 4.5 c |
+| 0.50 | 4.75 c | 5.0 c |
+| 0.865 (Fed "no change" today) | 3.3 c | 3.4 c |
+
+The only executable-quote, pre-registered cross-venue study found (Moulinier 2026, SSRN, **abstract only**, see
+`notes/literature/sweep_microstructure-leadlag.md` §3.5) reports a **median aligned divergence of 0.60 c** on MLB moneylines and Fed contracts. Only 7% of
+aligned minutes clear the fees, with a median life of one minute and 0.00% pre-game. That is ~5–8× below the hurdle above. Non-price costs are not in the
+hurdle: capital is locked on two venues until resolution (Fed: 10 days; House: at least 3 weeks, more if the result is contested), USD vs USDC funding
+and withdrawal, and rule-mismatch tail risk (a lock that resolves YES on one venue and NO on the other loses ~100%).
+
+### 5.4 Who leads? (published evidence only; content PLAUSIBLE, abstracts)
+* Ng, Peng, Tao & Zhou (SSRN 5331995): **Polymarket led Kalshi** before the 2024 US election, more so when liquidity was high.
+* Adamczewski (SSRN 7194218): 281 UFC fights. **No lead–lag distinguishable from zero** at any horizon, and gaps close within ~30 min.
+* Moulinier: apparent edges grow from 7% to 24–41% of minutes when one venue's timestamps are shifted. Mistimed data creates "lead–lag" and "arb".
+* So the evidence is mixed and depends on the event. Neither venue is shown to lead in the sports and macro markets a retail trader could use.
+
+### 5.5 Who could even trade it (geography_legal.md)
+Polymarket international excludes US persons. Kalshi excludes the UK, France, Poland, Singapore, Taiwan, Thailand, Australia, Canada, Russia and (reportedly) India.
+The feasible pairs are **Kalshi ↔ Polymarket US for US persons** (outside the states that block either venue), or a small set of non-US persons eligible on both.
+Using Kalshi prices only as a signal for Polymarket trading is outside the Developer Agreement's permitted use (PLAUSIBLE reading). The whole cross-venue
+family is therefore **eligibility-limited before it is edge-limited**.
+
+### 5.6 Forward test that would settle it (for an eligible Kalshi member trading their own account)
+1. Pre-register the matched pairs with both venues' full rule texts. Drop any pair whose source, cut-off or edge-case rules differ unless the mismatch is bounded.
+2. Record synchronised books from Kalshi (authenticated WS, own account) and the Polymarket CLOB WS. Use exchange timestamps plus local receive time, and NTP-check the clock.
+   Record ≥ 4 weeks, so that several Fed/CPI releases and ≥ 200 sports games are covered.
+3. Signal: the executable lock inequality with ≥ $100 of depth on both legs, persisting ≥ 2 consecutive 1-s snapshots. Lead–lag: Hasbrouck information
+   shares / Hayashi–Yoshida cross-correlations on mid changes, using exchange timestamps only.
+4. Reject if fewer than 20 distinct locks occur, if the median life is under your measured round-trip latency to both venues, or if P&L net of fees, funding
+   costs and capital lock-up (at the T-bill rate) has a CI that includes 0.
+
+## 6. Sports and other public information (written 2026-10-18 ~05:10 UTC)
+
+### 6.1 Mini forward test S1 (pre-registered in 0.4): ESPN public scoreboard vs Polymarket moneylines
+* Collection 2026-10-17 23:17–23:38 UTC (21 min; the collector was killed by the session interruption). Scripts: `sports_collect.py`. Raw frames are in
+  `data/raw/lead_lag_live/20261017/{espn,clobS}_S1.tsv.gz`. Derived tables were rebuilt from raw with `07a_sports_rebuild.py`, and the analysis is `07_sports_analyze.py`
+  (`data/derived/lead_lag/sports_S1_{espn,tob,events}.parquet`, `sports_S1_summary.json`).
+* 26 moneyline markets (52 tokens), 30 ESPN games, of which 10 were in play. **9 ESPN scoring events, 6 matched to a Polymarket token** (5 NHL goals, 1 CFB point-after).
+* Median pre-detection share of the move = **0.96** (n = 5 with a move ≥ 0.5 c). In 4 of 5 NHL goals, Polymarket had moved ~13 c **before** ESPN showed the score.
+  Median |move| after detection (t_E−1 → t_E+30) = **0.75 c**, against a median hurdle (taker fee at the sports rate + half-spread) of **1.6 c**. Only 1 of 6 events cleared the hurdle.
+* **Verdict: inconclusive data (n = 6 < 10, the pre-registered minimum).** The direction is unambiguous, though. Both pre-registered rejection conditions would
+  trigger (pre-share ≥ 0.5; post move ≤ hurdle). **A 4-s-polled free ESPN feed lags Polymarket.** It is a lagging, not a leading, signal (PLAUSIBLE; small sample).
+* The Polymarket sports WebSocket (`sports-api.polymarket.com/ws`) delivered **0 frames** in S1. Its subscription protocol was not established, so "ESPN minus
+  Polymarket-sports-feed" latency is unmeasured.
+* Execution: sports moneylines carry `secondsDelay = 1` (all 6 matched markets). A taker order placed at t_E matches no earlier than ~t_E + 1 s plus latency,
+  and makers can cancel during the delay. This removes most of the value of a feed that is a few seconds early.
+
+### 6.2 Which public sources could lead Polymarket sports prices
+| Source | Access / cost | Latency vs the field (typical) | Timestamp quality | Notes |
+|---|---|---|---|---|
+| Watching the broadcast / stream | Free-to-paid | Broadcast delay 5–30 s behind the field; streams worse | None (human) | Bettors at the venue or on low-latency feeds are ahead. That is "courtsiding" (banned by venues and some leagues) |
+| ESPN site API (`site.api.espn.com`, unofficial) | Free, no key, unofficial (no ToS for automated use) | Seconds to tens of seconds; S1 showed it **behind** Polymarket | Poll receive time only; no event timestamp in the scoreboard | Used in S1 |
+| League feeds: NHL `api-web.nhle.com`, MLB `statsapi.mlb.com`, NBA `cdn.nba.com` liveData (unofficial public endpoints) | Free, unofficial, terms vary | Usually seconds; play-by-play has event clock and wall-clock fields | Better (per-play `dateTime` in MLB/NHL) | The best free candidate for a forward test (UNSUPPORTED: not measured here) |
+| Official data distributors (Sportradar, Genius Sports, Stats Perform) | Paid, enterprise contracts (typically thousands/month and up) | ~1–3 s from in-venue scouts | Good (per event) | The likely source for professional in-play bots |
+| Bookmaker odds: The Odds API | Key required; free tier 500 **credits**/month | Live odds refreshed ~**every 40 s** (vendor page) | Poll time | Too slow and too small for in-play; usable for pre-game reference |
+| Betfair Exchange API | Account + app key. The delayed key is free but delayed 1–60 or 1–180 s (docs conflict). Live key: one-off **£299** after KYC | Live stream ~sub-second | Exchange timestamps | Not available to US persons; jurisdiction-limited |
+| Pinnacle | Public API closed to new users since 2025 (PLAUSIBLE) | — | — | The sharpest pre-game line historically |
+| Paid odds aggregators (OpticOdds, OddsJam, SharpAPI, …) | Paid (hundreds to thousands/month) | Seconds | Vendor timestamps | Would be needed for a serious pre-game "sharp line leads Polymarket" test |
+
+Sources for vendor terms: the-odds-api.com/sports-odds-data/update-intervals.html; betfair-developer-docs.atlassian.net (application keys). PLAUSIBLE: vendor
+pages, not independently tested here.
+
+### 6.3 Forward test that would be needed (not run here)
+1. **Hypothesis A (in-play news):** a scoring event observed in a low-latency source moves the Polymarket moneyline after the source's timestamp by more than
+   fee + half-spread + the 1-s `secondsDelay` drift. Data: a feed with per-event wall-clock timestamps (league play-by-play, or a paid official feed), the Polymarket CLOB WS
+   (book + trades), and the ESPN poll as a control. Measure the source's latency against the exchange's first price move on ≥ 200 events per league. Reject if the median
+   pre-source share is ≥ 0.5 or the post-source move net of fee + half-spread + delay drift is ≤ 0.
+2. **Hypothesis B (pre-game sharp line):** a de-vigged sharp-book line (Pinnacle/Betfair/consensus) leads Polymarket pre-game prices. Data: odds snapshots every ≤ 10 s
+   from a paid aggregator, plus Polymarket books. Test: does the gap (sharp fair − Polymarket executable) predict the Polymarket closing price and the outcome, net of fees?
+   Bootstrap by game.
+3. **Settlement differences to check per league:** Polymarket NHL/NBA moneylines include OT/shootout per their rules; some books grade "regulation" lines separately. Postponement
+   and abandonment rules, and the void window, differ across venues. CFB/NFL markets carry their own feeSchedule (sports_fees v3 0.05; NFL/CFB 0.03 per platform notes;
+   always read the market).
+4. **Costs:** paid feed ($ hundreds–thousands/month) and a server near the Polymarket matching engine. The 1-s taker delay and maker cancellation during it mean a retail
+   edge needs a *multi-second* information advantage, not a sub-second one.

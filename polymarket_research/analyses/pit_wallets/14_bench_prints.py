@@ -24,7 +24,7 @@ OUT = ROOT / "data" / "derived" / "pit_wallets"
 EXCH = "('0x4bfb41d5b3570defd03c39a9a4d8de6bd8b8982e', '0xc5d563a36ae78145c45a50134d48a1215220f80a')"
 T0, T1 = 1704067200, 1767657600   # 2024-01-01 .. 2026-01-06
 TARGET = 12000
-PER_QUERY = 48000
+PER_QUERY = 34000   # keeps each result under the 1,000,000-byte max_result_bytes
 
 COUNT = f"""
 SELECT toYYYYMM(timestamp) AS ym, count() AS n FROM polymarket.orders_filled
@@ -51,8 +51,10 @@ def main():
     else:
         cnt = pd.DataFrame(ch.rows(COUNT)).astype({"ym": int, "n": int})
         cnt["M"] = np.maximum(1, np.round(cnt.n / TARGET)).astype(int)
-        cnt["start"] = pd.to_datetime(cnt.ym.astype(str) + "01", format="%Y%m%d", utc=True).astype("int64") // 10 ** 9
         cnt.to_parquet(cnt_p, index=False)
+    # month start in epoch seconds (pandas 3 datetimes may be in us, so do not rely on astype(int64))
+    cnt["start"] = [int(pd.Timestamp(f"{str(int(y))[:4]}-{str(int(y))[4:]}-01", tz="UTC").timestamp())
+                    for y in cnt.ym]
     cnt["exp"] = cnt.n / cnt.M
     print(cnt.to_string())
     cdir = OUT / "bench_chunks"; cdir.mkdir(exist_ok=True)

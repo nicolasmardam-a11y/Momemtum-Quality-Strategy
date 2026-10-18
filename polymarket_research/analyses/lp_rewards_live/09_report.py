@@ -243,6 +243,8 @@ def capacity(res):
     d = pd.read_parquet(OUT / "xsec_reward_est.parquet")
     p = d[(d.variant == "primary") & d.scorable & (d.tag == d.tag.min())]
     n_pop = {"A": (p.stratum == "A").sum(), "B": 13238, "C": 60}
+    rf = sorted(OUT.glob("rewards_t*.parquet"))
+    alive = set(pd.read_parquet(rf[-1], columns=["condition_id"]).condition_id)  # R8: config still present at last pull
     out = []
     for acct in (5000, 25000, 100000):
         for size in (500, 2500, 10000):
@@ -251,8 +253,14 @@ def capacity(res):
                 continue
             q = p[p.capital == size].nlargest(int(k), "rew_cen")
             q = q.assign(inband=q.inband.astype(bool))
+            # out-of-sample (added 2026-10-18): same markets re-scored at the LAST snapshot; 0 if unscorable or config gone (R8)
+            last = d[(d.variant == "primary") & (d.tag == d.tag.max()) & (d.capital == size)].set_index("condition_id")
+            oos = q.condition_id.map(last.rew_cen.where(last.scorable.astype(bool), 0.0)).fillna(0.0)
+            oos = oos.where(q.condition_id.isin(alive), 0.0)
             out.append({"account": acct, "per_market": size, "markets": len(q), "rew_cen_day": q.rew_cen.sum(),
                         "rew_con_day": q.rew_con.sum(), "yield_cen_bp_day": q.rew_cen.sum() / acct * 1e4,
+                        "oos_rew_cen_day": float(oos.sum()), "oos_yield_cen_bp_day": float(oos.sum()) / acct * 1e4,
+                        "oos_tag": str(d.tag.max()),
                         "share_from_C": q[q.stratum == "C"].rew_cen.sum() / max(1e-9, q.rew_cen.sum()),
                         "share_outside_band": q[~q.inband].rew_cen.sum() / max(1e-9, q.rew_cen.sum()),
                         "share_sports": q[q.fee_type.fillna("").str.startswith("sports")].rew_cen.sum() / max(1e-9, q.rew_cen.sum())})
@@ -265,6 +273,12 @@ def capacity(res):
     w = q.stratum.map(lambda s: n_pop[s] / max(1, (q.stratum == s).sum()))
     res["r1_pass_popweighted_2500"] = float((q.r1_pass * w).sum() / w.sum())
     print("R1 pass at $2,500, population-weighted:", round(res["r1_pass_popweighted_2500"], 3))
+    for tg in sorted(d.tag.unique()):
+        qq = d[(d.variant == "primary") & d.scorable.astype(bool) & (d.tag == tg) & (d.capital == 2500) & d.condition_id.isin(alive)]
+        ww = qq.stratum.map(lambda s: n_pop[s] / max(1, (qq.stratum == s).sum()))
+        r = float((qq.r1_pass * ww).sum() / ww.sum())
+        res[f"r1_pass_popweighted_2500_R8_{tg}"] = r
+        print(f"R1 pass at $2,500 pop-weighted, R8-persistent markets only, snapshot {tg}: {r:.3f} (n={len(qq)})")
 
 
 def main(labels):

@@ -111,6 +111,7 @@ def build_P():
     hz.loc[hz.null_reason.notna(), ['p0']] = np.nan
     # decision-time volume screen for tape markets
     tp = pd.concat([pd.read_parquet(f, columns=['condition_id', 'price', 'size', 'timestamp']) for f in sorted(glob.glob(str(DER / 'tapes/tape_*.parquet')))])
+    tp = tp.astype({'price': float, 'size': float, 'timestamp': np.int64})
     tp['notional'] = tp.price * tp['size']; tp = tp.sort_values(['condition_id', 'timestamp'])
     tp['cum'] = tp.groupby('condition_id').notional.cumsum()
     tot = tp.groupby('condition_id').notional.sum()
@@ -138,7 +139,7 @@ def build_W():
     w = w[w.condition_id.isin(meta.condition_id)]
     # add artificial gap between req 0 and req 1
     two = meta[meta.req == 1].merge(meta[meta.req == 0][['condition_id', 'last_t']], on='condition_id', suffixes=('', '_0'))
-    two = two[two.first_t.notna()]
+    two = two[two.first_t.notna() & two.last_t_0.notna()]
     gaps = pd.concat([gaps, pd.DataFrame({'condition_id': two.condition_id, 'req': 1, 'gap_start': two.last_t_0.astype(np.int64),
                                           'gap_end': two.first_t.astype(np.int64)})])
     cp = cp.sort_values(['condition_id', 't']).drop_duplicates(['condition_id', 't'], keep='last')

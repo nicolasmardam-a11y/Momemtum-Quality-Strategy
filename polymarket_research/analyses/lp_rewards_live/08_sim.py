@@ -70,6 +70,7 @@ def sim_market(c, m, tr, tb, lv, cap, rule="conservative"):
     optimistic = rule == "optimistic"
     keep = rule == "keep_queue"   # SENSITIVITY (added after pre-registration): keep queue place if the touch price is unchanged
     reactive = rule == "reactive"  # SENSITIVITY (added after pre-registration): cancel 1 s after our price level empties publicly
+    ttcap = rule == "tt_capped"    # SENSITIVITY (added 2026-10-18 after w1-w3 results): a trade-through fills at most the printed size
     prev = {}
     tb = tb.sort_values("t")
     tb = tb[tb.bb.notna() & tb.ba.notna()]
@@ -88,6 +89,7 @@ def sim_market(c, m, tr, tb, lv, cap, rule="conservative"):
         return (bb[i], ba[i], bsz[i], asz[i]) if i >= 0 else (np.nan,) * 4
 
     inv, cash = 0.0, 0.0
+    cnt = {"touch_prints": 0, "touch_prints_filled": 0, "touch_vol": 0.0, "tt_prints": 0}  # instrumentation only
     fills, posts = [], []
     tq = t0
     tr_t, tr_p, tr_s, tr_side = tr.t.to_numpy(), tr.price.to_numpy(), tr["size"].to_numpy(), tr.taker_side.to_numpy()
@@ -130,8 +132,11 @@ def sim_market(c, m, tr, tb, lv, cap, rule="conservative"):
                         same = abs(p - o["p"]) < 1e-9
                         q = 0.0
                         if better:
-                            q = o["rem"]
+                            cnt["tt_prints"] += 1
+                            q = min(o["rem"], s) if ttcap else o["rem"]
                         elif same:
+                            cnt["touch_prints"] += 1; cnt["touch_vol"] += s
+                            cnt["touch_prints_filled"] += int(s - o["qa"] > 0)
                             excess = s - o["qa"]
                             o["qa"] = max(0.0, o["qa"] - s)
                             q = min(o["rem"], max(0.0, excess))
@@ -166,7 +171,7 @@ def sim_market(c, m, tr, tb, lv, cap, rule="conservative"):
     liq = abs(inv) * ((a - b) / 2 + fee * mid_end * (1 - mid_end)) if inv else 0.0
     end = {"condition_id": c, "cap": cap, "rule": rule, "inv_end": inv, "cash": cash, "mid_end": mid_end,
            "mtm_pnl": cash + inv * mid_end, "liq_cost": liq, "fee_rate": fee, "rebate_rate": reb, "n_posts": len(posts),
-           "hours": (t1 - t0) / 3600}
+           "hours": (t1 - t0) / 3600, **cnt}
     return fills, posts, end
 
 
@@ -177,7 +182,7 @@ def main(labels):
         for m in ws.itertuples():
             c = m.condition_id
             for cap in CAPS:
-                for opt in ("conservative", "optimistic", "keep_queue", "reactive"):
+                for opt in ("conservative", "optimistic", "keep_queue", "reactive", "tt_capped"):
                     f, posts, end = sim_market(c, m, tr[tr.condition_id == c], tb[tb.condition_id == c], lv[lv.condition_id == c], cap, opt)
                     if end is None:
                         continue

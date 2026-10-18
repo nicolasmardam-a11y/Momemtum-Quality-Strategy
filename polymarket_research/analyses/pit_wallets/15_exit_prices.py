@@ -36,7 +36,7 @@ SELECT groupArray(sid), groupArray(tsell), groupArray(nsell) FROM (
     SELECT maker AS w, toUInt64OrZero(right(maker_asset_id, 18)) AS k, toUInt32(timestamp) AS ts
     FROM polymarket.orders_filled
     WHERE is_deleted = 0 AND taker_asset_id = '0' AND timestamp >= {T0} AND timestamp < {T1}
-      AND maker IN (SELECT w FROM sg)
+      AND maker IN (SELECT w FROM sg) AND toUInt64OrZero(right(maker_asset_id, 18)) IN (SELECT k FROM sg)
   ) AS f ON s.w = f.w AND s.k = f.k
   WHERE f.ts > s.te AND f.ts < s.tr
   GROUP BY sid)
@@ -44,10 +44,10 @@ SELECT groupArray(sid), groupArray(tsell), groupArray(nsell) FROM (
 SELL_STRUCT = "sid UInt32, k UInt64, w String, te UInt32, tr UInt32"
 
 VW = ",\n".join(
-    f"toUInt16(if(arrayFirstIndex(c -> c >= q{i}, cs) = 0, 0, least(10000, round(10000 * ("
+    f"toUInt16(if(q{i} <= 0 OR arrayFirstIndex(c -> c >= q{i}, cs) = 0, 0, least(10000, round(10000 * ("
     f"if(arrayFirstIndex(c -> c >= q{i}, cs) > 1, cu[arrayFirstIndex(c -> c >= q{i}, cs) - 1], 0) + (q{i} - "
     f"if(arrayFirstIndex(c -> c >= q{i}, cs) > 1, cs[arrayFirstIndex(c -> c >= q{i}, cs) - 1], 0)) * "
-    f"w30[arrayFirstIndex(c -> c >= q{i}, cs)].2) / q{i}))))" for i in range(len(SIZES)))
+    f"w30[arrayFirstIndex(c -> c >= q{i}, cs)].2) / greatest(q{i}, 1e-9)))))" for i in range(len(SIZES)))
 
 PX_SQL = """
 WITH
