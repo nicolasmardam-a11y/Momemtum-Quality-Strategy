@@ -191,22 +191,27 @@ def main(labels):
                     end.update(label=lab, cls=getattr(m, "cls", None), rate=m.total_daily_rate, rew_cen=cen, rew_con=con,
                                rew_samples=k, rest_samples=nsamp, question=str(m.question)[:60])
                     ends.append(end)
-                    allf += f
+                    allf += [dict(x, label=lab) for x in f]  # FIX 2026-10-18: window label (markets overlap across windows)
     F = pd.DataFrame(allf)
     E = pd.DataFrame(ends)
     if len(F):
-        tbs = pd.concat([pd.read_parquet(OUT / f"tob_{lab}.parquet") for lab in labels])
         sys.path.insert(0, str(Path(__file__).parent))
         from importlib import import_module
         Mid = import_module("07_microstructure").Mid
-        mid = Mid(tbs)
         sg = np.where(F.side == "bid", 1.0, -1.0)
         F["spread_cap"] = sg * (F.mid_fill - F.price) * F.qty
         for h in (5, 60, 300):
-            mh = np.array([np.mean(mid.at(c, t + h)) for c, t in zip(F.condition_id, F.t)])
-            ok = np.array([t + h <= mid.end(c) for c, t in zip(F.condition_id, F.t)])
-            F[f"as{h}"] = np.where(ok, sg * (mh - F.mid_fill) * F.qty, np.nan)
-        F = F.merge(E[["condition_id", "cap", "rule", "fee_rate", "rebate_rate"]], on=["condition_id", "cap", "rule"], how="left")
+            F[f"as{h}"] = np.nan
+        for lab, idx in F.groupby("label").groups.items():   # FIX 2026-10-18: mids from the fill's own window only
+            mid = Mid(pd.read_parquet(OUT / f"tob_{lab}.parquet"))
+            G = F.loc[idx]
+            g_sg = np.where(G.side == "bid", 1.0, -1.0)
+            for h in (5, 60, 300):
+                mh = np.array([np.mean(mid.at(c, t + h)) for c, t in zip(G.condition_id, G.t)])
+                ok = np.array([t + h <= mid.end(c) for c, t in zip(G.condition_id, G.t)])
+                F.loc[idx, f"as{h}"] = np.where(ok, g_sg * (mh - G.mid_fill) * G.qty, np.nan)
+        F = F.merge(E[["label", "condition_id", "cap", "rule", "fee_rate", "rebate_rate"]], on=["label", "condition_id", "cap", "rule"],
+                    how="left")
         F["rebate_ub"] = F.qty * F.fee_rate * F.price * (1 - F.price) * F.rebate_rate
     F.to_parquet(OUT / "sim_fills.parquet", index=False)
     E.to_parquet(OUT / "sim_summary.parquet", index=False)

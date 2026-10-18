@@ -151,8 +151,8 @@ def sim_section(res):
     rows = []
     for (cap, opt), e in E.groupby(["cap", "rule"]):
         f = F[(F.cap == cap) & (F.rule == opt)] if len(F) else F
-        per = e.set_index("condition_id")
-        fm = f.groupby("condition_id").agg(sc=("spread_cap", "sum"), as60=("as60", lambda s: s.fillna(0).sum()),
+        per = e.set_index(["label", "condition_id"])   # FIX 2026-10-18: markets overlap across windows
+        fm = f.groupby(["label", "condition_id"]).agg(sc=("spread_cap", "sum"), as60=("as60", lambda s: s.fillna(0).sum()),
                                            reb=("rebate_ub", "sum"), n=("qty", "size"), qty=("qty", "sum")) if len(f) else pd.DataFrame()
         per = per.join(fm, how="left").fillna({"sc": 0, "as60": 0, "reb": 0, "n": 0, "qty": 0})
         per["resid"] = per.mtm_pnl - per.sc - per.as60          # inventory drift beyond 60 s
@@ -184,8 +184,8 @@ def sim_section(res):
         f["win5"] = (f.t // 300).astype(int)
         res["fills_trade_through_share"] = float(f.trade_through.mean())
         res["fills_per_cap"] = f.groupby("cap").size().to_dict()
-        E0 = E[E.rule == "conservative"].set_index(["condition_id", "cap"]).mid_end
-        f["mid_end"] = [E0.get((c, k), np.nan) for c, k in zip(f.condition_id, f.cap)]
+        E0 = E[E.rule == "conservative"].set_index(["label", "condition_id", "cap"]).mid_end
+        f["mid_end"] = [E0.get((lb, c, k), np.nan) for lb, c, k in zip(f.label, f.condition_id, f.cap)]
         f["contrib"] = np.where(f.side == "bid", 1, -1) * (f.mid_end - f.price) * f.qty
         conc = {}
         for cap in sorted(f.cap.unique()):

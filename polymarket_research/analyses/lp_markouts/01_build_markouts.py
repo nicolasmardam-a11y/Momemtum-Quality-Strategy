@@ -134,8 +134,11 @@ def run_chunk(path: str, meta: pd.DataFrame) -> None:
     tape = pd.read_parquet(path, columns=["condition_id", "outcome_index", "side", "price", "size", "timestamp"])
     cids = tape.condition_id.unique()
     toks = meta.loc[meta.index.intersection(cids), "token_id_0"].dropna().tolist()
-    ser = ds.dataset(f"{D}/price_series_m1.parquet").to_table(
-        filter=ds.field("token_id").isin(toks)).to_pandas().sort_values(["token_id", "t"])
+    if toks:
+        ser = ds.dataset(f"{D}/price_series_m1.parquet").to_table(
+            filter=ds.field("token_id").isin(toks)).to_pandas().sort_values(["token_id", "t"])
+    else:
+        ser = pd.DataFrame({"token_id": pd.Series([], dtype=str), "t": [], "p": []})
     sg = {k: (v.t.to_numpy(np.int64), v.p.to_numpy(float)) for k, v in ser.groupby("token_id")}
     parts = []
     for cid, g in tape.groupby("condition_id", sort=False):

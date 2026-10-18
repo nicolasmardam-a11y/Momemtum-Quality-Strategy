@@ -83,6 +83,10 @@ is **not supported**. Those subsets do worse than multi-taker ("news-like") shoc
 revert. Most of that reversion (2.4-6c of a ~15c shock, measured from the detection print) happens before a 30 s taker entry.
 Some of it is bid-ask bounce. After entry, the remaining 0.3-2.5c (gross, TEST) is not statistically different from zero, and it
 is below the ~2-3c round-trip cost (half-spread both ways plus the current taker fee).
+**[corrected by auditor]** "Not statistically different from zero" holds in cents per share (P1 TEST gross +1.22c, 97.5% cluster
+interval [-0.57, +3.02]). In the pre-registered metric, return per $ committed, the TEST gross is significantly positive: +7.9%,
+97.5% cluster interval [+0.9%, +16.1%], week [+0.4%, +15.6%] (+5.0% after 1% winsorising). There is reversion per $ before costs.
+The edge disappears because of costs, and the verdict is unchanged. See the Audit section.
 
 ## 2. Pipeline and data
 | step | script | output |
@@ -153,6 +157,13 @@ P1 TEST sensitivities: 2 x hs -4.9%; side-aware entry -0.9%; as-traded (historic
 ## 6. Secondary universe (8,000 markets, 1-min display price, last 72 h only; NOT executable; descriptive)
 TEST: 6,218 / 2,753 / 1,551 shocks (5/10/15c), with 1,299 / 990 / 763 clusters.
 - **10c / 120 s / 1 h:** net TEST -1.7%, validation -1.0%, train -0.1%; -1.5c TEST.
+  - **[corrected by auditor]** This universe uses the 72 h before `ref_ts` = min(endDate, closedTime), so for early-closing markets
+    the window is chosen by the future close (look-ahead). 30% of the TEST shocks fall in markets that closed more than 1 h before
+    endDate, and they net -5.5%.
+  - On the ex-ante window (entry >= endDate - 72 h), 10c/120 s/1 h nets TEST -0.2% (gross +1.9c, net -1.2c), validation -0.8% and
+    train +1.4%.
+  - The secondary universe is therefore about zero, not -1.7%. That is still no edge, and "replicates" should read "does not
+    contradict".
 - **Net TEST at 5c and 10c:** <= +1.6% in every cell, and the 99.9% intervals span 0 or lie below it.
 - **Best cell, 15c / 60 s / 6 h:** TEST +4.7% (99.9%: [-4.3%, +15.3%]), +0.2c, drop-top-5 +0.7%.
 - **Excluding the 1,503 tape markets:** the same picture.
@@ -223,3 +234,41 @@ TEST: 6,218 / 2,753 / 1,551 shocks (5/10/15c), with 1,299 / 990 / 763 clusters.
   Exit: first point >= entry + h. If that is beyond the series end or the close, use the resolution payout. Also hold to resolution.
 - Costs: hs = max(hist H1 -> H3, book L1 -> L3). There is no tape-local component. Current fees and gross as in 0.3.
   The display price is **not executable**. This universe is descriptive and cannot overturn the primary verdict.
+
+## Audit (independent adversarial review, 2026-10-18 ~06:00 UTC; auditor did not write sections 0-7)
+
+Scripts: `analyses/audit/mr_a01_audit.py`, output `analyses/audit/out/mr_a01.json`. Corrections made in place above are marked
+**[corrected by auditor]**. Labels as in the rest of the file.
+
+**Audited verdict: no demonstrated edge. The original verdict STANDS.**
+
+What was attacked and the result:
+1. **Pre-registration integrity (VERIFIED, git).** Section 0 is byte-identical to the version committed in `fd8f386`
+   (2026-10-18 04:55 UTC), which predates the first commit of `03_outcomes.py` (`1686a92`, 05:16).
+   - Raw entry and exit prints already existed in step 01 at that time. The commit therefore proves only that section 0 did not change
+     afterwards, not that it was written before any outcome existed.
+2. **Look-ahead in the signal (VERIFIED, none found).** I recomputed 40 random TEST primary 10c shocks from the raw tapes with my own
+   code. 37 of 40 reproduce exactly: anchor_last, anchor_med, the >= 3 / >= 20 print screens, the >= $5k notional screen and endDate - 1 h.
+   The 3 differences are ordering ties among prints in the same second (file order vs API position) and are not look-ahead.
+3. **Executable entry and exit (VERIFIED).** I re-derived the 120 s entry print and the 1 h exit print, or the resolution payout, for all
+   1,683 P1 trades (train + validation + TEST) independently from the tapes. Times, prices and payouts match 1,683 / 1,683.
+4. **Numbers re-run (VERIFIED).** P1 TEST net -0.58% (97.5% cluster [-7.0%, +6.6%], week [-7.3%, +6.1%], entry-day [-7.2%, +6.4%]).
+   Validation -1.79%, train -3.46%. Same-day dependence does not widen the intervals materially.
+5. **Could the cost model hide an edge? (VERIFIED: partly.)**
+   - Gross per $ is significantly positive in TEST (+7.9%; see the correction in section 1).
+   - With an optimistic cost (half the modelled half-spread both ways, zero fee; not achievable by a taker under the current
+     schedule), P1 TEST is +5.3% (95% cluster [-0.6%, +12.0%]) and validation +5.8% [-4.4%, +17.5%]. It still fails R1.
+   - So the verdict is robust to the cost model for a taker. Only maker-style execution, with its own fill and adverse-selection
+     risks, could change the economics. That is a new hypothesis.
+6. **Secondary universe (CORRECTED).** Its 72 h window is anchored on `ref_ts` = min(endDate, closedTime), which is a look-ahead for
+   early closers.
+   - 30% of TEST shocks are in such markets, at -5.5% net.
+   - On the ex-ante window, TEST is -0.2% and validation -0.8%. Still no edge, but the "-1.7% replication" was overstated.
+7. **Other checks.**
+   - Stale or midpoint prices are not used for execution: entries and exits are actual prints plus half-spread.
+   - Fees use the current schedule.
+   - Sign convention checked: s = +1 buys token 1 at 1 - p0, with payout 1 - y0.
+   - 50-50 outcomes pay 0.5.
+   - The TTR used to look up the cost bucket is measured to `ref_ts` (res clock), but it affects costs only, never selection. Minor.
+   - The full-life volume universe selection remains an acknowledged, unquantified bias.
+8. **Not checked.** The ~60 feature-subset "leads" were not re-run. They remain hypotheses for a fresh pre-registration.

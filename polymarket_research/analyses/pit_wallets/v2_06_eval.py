@@ -5,12 +5,11 @@ Signal = a new decision of an eval wallet: the first BUY in an underlying event 
 wallet's pulled history (pre-window newest 3,000 fills + trailing window + eval window), with t0 in [D, 2026-10-01).
 Evaluable = decision market resolved cleanly with t_res < 2026-10-15. Others are counted and excluded.
 Outputs: v2/eval_signals.parquet (all new decisions, with an evaluable flag), v2/eval_markets.parquet,
-         v2/bench_markets.parquet (benchmark market sample: Poisson PPS by Gamma volume, 75 expected per category4,
+         v2/bench_markets.parquet (benchmark market sample: Poisson PPS by Gamma volume, 40 expected per category4,
          clean markets with t_res in [2026-06-01, 2026-10-15); md5('bench|condition_id') < p_i).
 """
 from __future__ import annotations
 
-import glob
 import sys
 from pathlib import Path
 
@@ -19,7 +18,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from v2_05_screens import build_decisions  # noqa: E402
-from v2common import T_D, T_EVAL1, T_RESCUT, V2, load_markets, u01, ue_for_rows  # noqa: E402
+from v2common import T_D, T_EVAL1, T_RESCUT, V2, load_markets, load_wallet_rows, u01, ue_for_rows  # noqa: E402
 
 WC_POS = r"^fifwc-|fifa|world-cup"
 WC_NEG = r"t20|cricket|icc|rugby|hockey|baseball|esports|lol-|cs2|valorant|dota|club-world-cup|womens"
@@ -35,11 +34,8 @@ def main() -> None:
                       "fee_exponent", "sportsMarketType", "volumeNum"])
     scr = pd.read_parquet(V2 / "screens_D.parquet")
     ev = pd.read_parquet(V2 / "eval_wallets.parquet")
-    tr = pd.concat([pd.read_parquet(f) for f in sorted(glob.glob(str(V2 / "wallets_trail" / "chunk_*.parquet")))],
-                   ignore_index=True)
-    tr = tr[tr["wallet"].isin(ev["wallet"])]
-    te = pd.concat([pd.read_parquet(f) for f in sorted(glob.glob(str(V2 / "wallets_eval" / "chunk_*.parquet")))],
-                   ignore_index=True)
+    tr = load_wallet_rows("trail", set(ev["wallet"]))
+    te = load_wallet_rows("eval")
     te = te[(te["timestamp"] >= T_D) & (te["timestamp"] < T_EVAL1)]
     t = pd.concat([tr[tr["timestamp"] < T_D], te], ignore_index=True)
     t["ue"] = ue_for_rows(t["event_slug"], t["condition_id"], m).values
@@ -61,7 +57,17 @@ def main() -> None:
     dec = dec.merge(scr[["wallet", "S1", "S2", "S3", "S5", "B1", "weight", "med_usd"]], on="wallet", how="left")
     dec = dec.drop(columns=["pay0", "pay1"])
     dec.to_parquet(V2 / "eval_signals.parquet", index=False)
-    em = dec.loc[dec["evaluable"], ["condition_id"]].drop_duplicates()
+    # pricing sample (cost rule, outcome-blind): per group u = md5('px|wallet|ue') < min(1, 3000 / n_group)
+    dec["u_px"] = (dec["wallet"] + "|" + dec["ue"]).map(lambda k: u01("px|" + k))
+    dec["priced"] = False
+    for g in ["S1", "S2", "S3", "S5", "B1"]:
+        gm = dec[g].fillna(False).astype(bool) & dec["evaluable"]
+        rate = min(1.0, 3000 / max(1, int(gm.sum())))
+        dec[f"px_{g}"] = gm & (dec["u_px"] < rate)
+        dec["priced"] |= dec[f"px_{g}"]
+        print(f"  pricing {g}: evaluable {int(gm.sum()):,}, rate {rate:.3f}")
+    dec.to_parquet(V2 / "eval_signals.parquet", index=False)
+    em = dec.loc[dec["priced"], ["condition_id"]].drop_duplicates()
     em.to_parquet(V2 / "eval_markets.parquet", index=False)
     print(f"eval fills {len(te):,} wallets with eval fills {te['wallet'].nunique()}/{len(ev)}")
     print(f"new decisions {len(dec):,}, evaluable {int(dec['evaluable'].sum()):,}, markets to price {len(em):,}")
@@ -72,7 +78,7 @@ def main() -> None:
     # benchmark market sample
     b = m[m["clean"] & (m["t_res_s"] >= T_D) & (m["t_res_s"] < T_RESCUT)].copy()
     b["volumeNum"] = b["volumeNum"].fillna(0.0).clip(lower=0)
-    b["p_inc"] = (75 * b["volumeNum"] / b.groupby("category4")["volumeNum"].transform("sum")).clip(upper=1.0)
+    b["p_inc"] = (40 * b["volumeNum"] / b.groupby("category4")["volumeNum"].transform("sum")).clip(upper=1.0)
     b["u"] = b["condition_id"].map(lambda c: u01("bench|" + c))
     bs = b[b["u"] < b["p_inc"]][["condition_id", "category4", "p_inc", "volumeNum"]]
     bs.to_parquet(V2 / "bench_markets.parquet", index=False)

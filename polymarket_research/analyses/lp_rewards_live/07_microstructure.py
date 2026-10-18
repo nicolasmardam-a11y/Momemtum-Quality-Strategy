@@ -48,8 +48,11 @@ def load(labels):
         lv.append(pd.read_parquet(OUT / f"lvl_{lab}.parquet").assign(label=lab))
         f = OUT / ("ws_markets.parquet" if lab == "w1" else f"ws_markets_{lab}.parquet")
         ws.append(pd.read_parquet(f).assign(label=lab))
-    return pd.concat(tr, ignore_index=True), pd.concat(tb, ignore_index=True), pd.concat(lv, ignore_index=True), \
-        pd.concat(ws, ignore_index=True).drop_duplicates("condition_id")
+    out = [pd.concat(x, ignore_index=True) for x in (tr, tb, lv, ws)]
+    for d in out:  # FIX 2026-10-18: window-scoped key, a market can appear in several capture windows (w4 overlaps w1-w3)
+        d["cid"] = d.condition_id
+        d["condition_id"] = d.label + "|" + d.cid
+    return out[0], out[1], out[2], out[3].drop_duplicates("condition_id")
 
 
 def main(labels):
@@ -78,7 +81,7 @@ def main(labels):
         valid = np.array([t + h <= mid.end(c) for c, t in zip(tr.condition_id, tr.t)])
         tr[f"mo{h}"] = np.where(valid, sgn * (mh - tr.price), np.nan)     # maker P&L per share at horizon h
         tr[f"as{h}"] = np.where(valid, sgn * (mh - m0), np.nan)           # adverse selection (<0 = against maker)
-    tr.to_parquet(OUT / "micro_trades.parquet", index=False)
+    tr.assign(mkey=tr.condition_id, condition_id=tr.cid).to_parquet(OUT / "micro_trades.parquet", index=False)
 
     # ---------------- level decreases at the touch: trade-driven vs cancel-driven
     lv = lv.sort_values("t")
@@ -99,7 +102,7 @@ def main(labels):
     dec["by_trade"] = traded
     dec["by_cancel"] = dec.delta - dec.by_trade
     dec["depleted"] = dec.new <= 1e-9
-    dec.to_parquet(OUT / "micro_touch_decreases.parquet", index=False)
+    dec.assign(mkey=dec.condition_id, condition_id=dec.cid).to_parquet(OUT / "micro_touch_decreases.parquet", index=False)
 
     # ---------------- per-market table
     rows = []
@@ -133,6 +136,7 @@ def main(labels):
              "n_trades": 0, "trades_per_h": 0.0, "touch_prints_per_h": 0.0, "notional_per_h": 0.0,
              "wait_h_bid": np.inf, "wait_h_ask": np.inf} for c, r in meta.iterrows() if c not in seen and r.label in hours]
     pm = pd.concat([pm, pd.DataFrame(zero)], ignore_index=True)
+    pm["mkey"] = pm.condition_id; pm["condition_id"] = pm.mkey.str.split("|").str[1]
     pm.to_parquet(OUT / "micro_markets.parquet", index=False)
     print("hours", {k: round(v, 3) for k, v in hours.items()}, "markets with prints", int((pm.n_trades > 0).sum()), "of", len(ws))
     print("prints", len(tr), "at touch %.3f through %.3f consume-level (of touch prints) %.3f" %

@@ -47,7 +47,9 @@ Why a holdout: CryptoHouse fills stop at 2026-01-05. Protocol V2, pUSD, the 2026
   - D: exactly 1 pool event, lost;
   - E: no BUY fill in the pool (sell-only or maker-sell fills).
 - Each class is Bernoulli-sampled by u = md5('sub|wallet') < q_class. The rates are in section 3 and were set from
-  class sizes only.
+  class sizes and pull cost only.
+  - The subset was grown twice, nested (same u, larger q). The decision used pre-D information only: pull cost, and
+    the trailing screen counts of the first 1,280 wallets, which showed S1 to be rare.
 - Wallet histories (`v2_04_wallets.py trail`):
   - [2025-06-01, 2026-06-01), capped at 20 pages (20,000 fills);
   - plus the newest 3,000 fills before 2025-06-01, used only to tell whether an event had been traded before.
@@ -98,8 +100,12 @@ Why a holdout: CryptoHouse fills stop at 2026-01-05. Protocol V2, pUSD, the 2026
   - R, random entry: taker BUY prints in the same category4 and ISO week, with |price - follower price| <= 0.05, in
     a different ue, at the print price + 0.01 and current fees;
   - FAV: taker BUY prints priced 0.70-0.95, same category4 and week.
-  - Benchmark prints come from all pulled eval tapes plus 300 benchmark markets that resolved
-    2026-06-01 .. 2026-10-15. These are drawn PPS by volume within category4 (75 each), capped at 60 pages.
+  - Benchmark prints come from all pulled eval tapes plus benchmark markets that resolved 2026-06-01 .. 2026-10-15.
+    These are drawn by Poisson PPS on Gamma volume, 40 expected per category4, capped at 200 pages.
+- **Pricing sample (cost rule, outcome-blind, set 05:45Z before any eval data).**
+  - Within each group (S1, S2, S3, S5, B1) a signal is priced if u = md5('px|wallet|ue') < min(1, 3,000 / n_group).
+  - A signal is priced if any of its groups selects it. Within a group, every signal keeps the same inclusion rate,
+    so group means need no reweighting.
 - **Fill-selection estimators (adopted from stage-2 addendum A11 before any stage-3 eval data existed).** Whether a
   print follows a signal depends on how the market moves next, so "filled" is outcome-dependent. Every headline is
   therefore reported three ways:
@@ -116,5 +122,81 @@ Why a holdout: CryptoHouse fills stop at 2026-01-05. Protocol V2, pUSD, the 2026
   - reported separately for signals whose market is a 2026 FIFA World Cup market (event slug `fifwc-*`, or a soccer
     'world-cup' slug);
   - and for all signals with t0 in [2026-06-11, 2026-07-20).
+
+## 2. Build: pool, subset and checks (VERIFIED unless marked)
+
+**Pool tapes (`v2_02_tapes.py pool`).**
+- 720 sampled markets took 5,039 requests and returned 4,611,531 fills (all fills, `taker_only=false`).
+- 14 tapes were empty: 10 sports-T1 and 4 crypto-T1 markets.
+- 1 tape hit the 150-page cap: `russia-x-ukraine-ceasefire-by-march-31-2026`, whose Gamma volume reads 0, so it was
+  sampled as T1. Its fills before 2025-10-16 are missing.
+- 297,144 distinct wallets are in the pool.
+- Sampling fractions n_s/N_s run from 0.0002 (sports-T1 and crypto-T1, about 390k and 274k markets) to 0.185
+  (crypto-T3, 216 markets).
+- Wallet classes:
+  - A = 49,016;
+  - B = 54,589;
+  - C = 123,257;
+  - D = 69,321;
+  - E = 961.
+- Median pool wallet: 1 sampled market (p99 = 12).
+
+**Subset.**
+- The final rates were q_A = 0.0408, q_B = 0.0275, q_C = 0.0203, q_D = 0.0072 and q_E = 0.208, giving 6,784 wallets
+  (A 1,984, B 1,518, C 2,588, D 497, E 197).
+- The rates were raised twice, nested, from an initial 2,301 wallets:
+  - first because the pull cost about 3.2 requests per wallet;
+  - then for class C only, because S1 was 0.65% of eligible wallets in the first 1,280.
+
+**Checks.**
+- `outcome_index` of `/v2/trades` equals the Gamma outcome position. All 6,930 rows of 147 markets matched on
+  token id (`v2_09_index_check.py`).
+- Only 0.027% of pool fills come after `t_res`, in 110 markets, with a median of 53 s after `t_res`. So `closedTime`
+  is a good "resolution known" time, with seconds of slack.
+
+## 3. Screens at D = 2026-06-01 (trailing data only; VERIFIED counts from `v2_05_screens.py`, `v2_10_bias.py`)
+
+**Trailing window.**
+- 9,471,418 fills of the 6,784 subset wallets (21,042 requests).
+- 2,354,541 decisions, of which 1,700,221 were counted and resolved.
+- 149 wallets (2.2%) hit the 20,000-fill cap and were excluded as heavy. 5,786 wallets are eligible (>= 5 counted
+  resolved decisions).
+
+| screen | members | share of eligible, unweighted | share, IPW | full population 2025-06..12 (stage 1, CryptoHouse) | median resolved decisions | mean entry price | decisions that made money | median trailing P&L |
+|---|---|---|---|---|---|---|---|---|
+| S1 (5 bets, all won) | 55 | 0.95% | 1.60% | 2.86% | 5 | 0.973 | 76% | $0.17 |
+| S2 (>= 5, no loss) | 1,031 | 17.8% | 16.4% | 18.2% | 14 | 0.980 | 85% | $1.37 |
+| S3 (z >= 2) | 126 | 2.18% | 1.19% | 0.21% | 1,192 | 0.695 | 73% | $344 |
+| S5 (top 1% P&L) | 91 | 1.57% | 1.00% (by construction) | 1.00% | 105 | 0.644 | 70% | $10,029 |
+
+- The S5 cut is $4,482 under IPW (unweighted 99th percentile: $7,555). Stage 1's population cut was $3,300-5,268 in
+  2025-H2.
+- **Outcome-won is not made-money.** S1 wallets won all 5 bets, but only 76% of those decisions made money in their
+  market. The median S1 wallet made **$0.17** in total on its five wins, because it bought favourites at 0.97 on
+  average. The same profile as stage 1 (82% of S1 rows priced >= 0.90) appears in 2026.
+- **The members the trader cares about could not have been selected.** `mintblade` and `GRIMDRIP` were created on
+  2026-06-02, after D, so no point-in-time screen at D can contain them.
+  - Even at a later date, mintblade's record is 5 markets in 3 underlying events (three markets on one match), so it
+    never reaches 5 distinct events. Source: CONTEXT.md, VERIFIED there.
+
+**Evaluation activity (fills 2026-06-01 .. 2026-09-30).**
+- 1,118 of the 1,706 eval wallets traded in the window (4,452 requests in total; 1 wallet hit the 30-page cap).
+- 209,383 new decisions: 206,542 evaluable, 2,498 on unclean markets, 343 unresolved by 2026-10-15.
+
+| group | wallets | active Jun-Sep | median new decisions | evaluable signals | signal wallets | underlying events | World Cup signals | own first-second price (median) | priced (sample rate) |
+|---|---|---|---|---|---|---|---|---|---|
+| S1 | 55 | 53% | 1 | 119 | 29 | 109 | 13 | 0.998 | all |
+| S2 | 1,031 | 63% | 1 | 24,885 | 652 | 5,501 | 2,577 | 0.999 | 12.1% |
+| S3 | 126 | 63% | 52 | 111,118 | 80 | 70,008 | 774 | 0.900 | 2.7% |
+| S5 | 91 | 69% | 8 | 21,704 | 63 | 19,125 | 934 | 0.550 | 13.8% |
+| B1 | 600 | 62% | 3 | 69,685 | 370 | 44,659 | 2,398 | 0.750 | 4.3% |
+
+- Category mix of evaluable signals:
+  - S1: 57% other, 20% crypto;
+  - S2: 67% sports;
+  - S3: 85% crypto, mostly up/down bots;
+  - S5: 66% crypto, 32% sports;
+  - B1: 80% crypto.
+- 11,636 signals are priced, in 9,877 markets (plus 135 benchmark markets, 110 of them new).
 
 __SECTIONS__

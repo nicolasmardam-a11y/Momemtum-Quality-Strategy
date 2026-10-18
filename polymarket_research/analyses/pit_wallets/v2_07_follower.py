@@ -122,7 +122,9 @@ def main() -> None:
     m = load_markets(["condition_id", "event_slug", "category4", "t_res", "clean", "pay0", "pay1", "fee_rate_now",
                       "fee_exponent"])
     sig = pd.read_parquet(V2 / "eval_signals.parquet")
-    sig = sig[sig["evaluable"]].reset_index(drop=True)
+    sig = sig[sig["evaluable"] & sig["priced"]].reset_index(drop=True)
+    for g in ["S1", "S2", "S3", "S5", "B1"]:
+        sig[g] = sig[f"px_{g}"]  # group membership = priced within that group's sample (equal rate within group)
     sig["sid"] = np.arange(len(sig))
     st = pd.read_csv(V2 / "tapes_eval_status.tsv", sep="\t").drop_duplicates("condition_id", keep="last")
     fp = price_signals(sig, st)

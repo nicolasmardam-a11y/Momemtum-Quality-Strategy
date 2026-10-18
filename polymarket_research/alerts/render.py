@@ -52,8 +52,12 @@ def bet_alert(p: dict) -> str:
     if p.get("delayed_note"):
         lines.append(f"DELAYED: {p['delayed_note']}")
     lines += [
-        f"Market: {mk.get('question') or bet.get('title')}",
-        f"Event: {mk.get('event_title') or 'n/a'} | Outcome: {bet.get('outcome')} | Side: {bet['side']}",
+        ("Market: [COMBO: multi-leg RFQ position, not a single order-book market] " if en.get("combo") else "Market: ")
+        + f"{mk.get('question') or bet.get('title')}",
+        # The outcome shown is Gamma's name for the traded token when known (enrich.py cross-checks it
+        # against the Data API label and reports any disagreement under "Enrichment errors").
+        f"Event: {mk.get('event_title') or 'n/a'} | Outcome: {mk.get('outcome') or bet.get('outcome') or 'n/a'}"
+        f" | Side: {bet['side']}",
         f"Filled: {num(f.get('shares'), 2)} sh, avg {num(f.get('avg_fill_price'))}, spent {money(f.get('usdc_spent'))}"
         f" ({f.get('n_fills')} fills; incl. fees eff. {num(f.get('effective_price_incl_fees'))})",
         f"Maker/taker: taker {num(f.get('taker_shares'), 2)} / maker {num(f.get('maker_shares'), 2)} / "
@@ -98,6 +102,77 @@ def bet_alert(p: dict) -> str:
     if en.get("enrichment_errors"):
         lines.append("Enrichment errors: " + "; ".join(en["enrichment_errors"])[:500])
     lines.append(f"Link: {mk.get('market_url') or mk.get('event_url') or 'n/a'}")
+    return clip("\n".join(lines))
+
+
+def _s(x: Any, nd: int | None = None) -> str:
+    """Defensive formatting for the fallback paths: never raises."""
+    try:
+        return "n/a" if x is None else (f"{float(x):,.{nd}f}" if nd is not None else str(x))
+    except (TypeError, ValueError):
+        return str(x)
+
+
+def _t(ts: Any) -> str:
+    try:
+        return utc(ts)
+    except (TypeError, ValueError, OverflowError, OSError):
+        return str(ts)
+
+
+def fallback_bet_alert(bet: dict, wallet_label: str, address: str, error: str) -> str:
+    """Minimal alert from stored bet facts only, used when the full alert could not be built."""
+    shares, notional = bet.get("shares"), bet.get("notional_usdc")
+    try:
+        avg = float(notional) / float(shares) if shares else None
+    except (TypeError, ValueError):
+        avg = None
+    link = f"https://polymarket.com/event/{bet['event_slug']}" if bet.get("event_slug") else "n/a"
+    return clip("\n".join([
+        "[NEW BET DETECTED] [ALERT RENDERING FAILED: enrichment and book data omitted] | "
+        f"{wallet_label} ({short(address)})",
+        DISCLAIMER,
+        f"Market: {_s(bet.get('title'))} | Outcome: {_s(bet.get('outcome'))} | Side: {_s(bet.get('side'))}",
+        f"Filled: {_s(shares, 2)} sh, avg {_s(avg, 4)}, spent ${_s(bet.get('usdc_size'), 2)} "
+        f"({_s(bet.get('n_fills'))} fills)",
+        f"Executed (UTC): {_t(bet.get('first_ts'))} -> {_t(bet.get('last_ts'))}",
+        f"Link: {link}",
+        f"Error while building the full alert: {error[:300]}",
+    ]))
+
+
+def backfill_summary(items: list[tuple[dict, str, str]], now: float, max_age_minutes: float) -> str:
+    """``items``: (bet, wallet_label, address) of qualifying bets suppressed as too old."""
+    lines = [f"[BACKFILL SUMMARY] {len(items)} qualifying bet(s) were detected late (monitoring gap, outage or "
+             f"--backfill-hours) and are older than max_alert_age_minutes={max_age_minutes:g}, so they were "
+             "recorded but NOT alerted individually:"]
+    for bet, label, addr in items[:10]:
+        shares = bet.get("shares") or 0
+        avg = bet["notional_usdc"] / shares if shares else None
+        lines.append(f"- {label} ({short(addr)}): {bet['side']} {bet.get('outcome') or 'n/a'} on "
+                     f"{bet.get('title') or bet.get('condition_id')} | {money(bet.get('usdc_size'))} for "
+                     f"{num(shares, 2)} sh @ avg {num(avg)} | executed {utc(bet['first_ts'])} -> "
+                     f"{utc(bet['last_ts'])} ({dur(now - bet['last_ts'])} before detection)")
+    if len(items) > 10:
+        lines.append(f"(+{len(items) - 10} more; see `python -m alerts.run --report` and the bets table)")
+    lines.append("Prices have likely moved since; these are records, not signals.")
+    return clip("\n".join(lines))
+
+
+def rejected_rows(scope_label: str, rows: list[tuple[dict, list[str]]]) -> str:
+    """Activity rows that failed validation and were quarantined instead of processed."""
+    lines = [f"[DATA PROBLEM] rejected_rows / schema | {scope_label}",
+             f"{len(rows)} activity row(s) of this wallet could not be parsed and were NOT processed (no bet alert "
+             "will be sent for them). The wallet's other rows are processed normally; these rows are kept in "
+             "the rejected_rows table for inspection:"]
+    for r, problems in rows[:5]:
+        r = r if isinstance(r, dict) else {"row": r}
+        tx = str(r.get("transaction_hash") or "")
+        lines.append(f"- {_s(r.get('type'))} {_s(r.get('side'))} {_s(r.get('size'))} sh @ {_s(r.get('price'))} "
+                     f"(${_s(r.get('usdc_size'))}) on {_s(r.get('title'))!r} at {_t(r.get('timestamp'))}, "
+                     f"tx {tx[:10]}…: {'; '.join(problems)[:200]}")
+    if len(rows) > 5:
+        lines.append(f"(+{len(rows) - 5} more)")
     return clip("\n".join(lines))
 
 

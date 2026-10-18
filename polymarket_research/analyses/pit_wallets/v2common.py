@@ -139,3 +139,15 @@ def ue_for_rows(slugs: pd.Series, cids: pd.Series, m: pd.DataFrame) -> pd.Series
     pref = "g:" + s.str.extract(GAME_RE)[0].fillna("#")
     fb = pref.where(pref.isin(gset), "s:" + s)
     return u.fillna(fb)
+
+
+def load_wallet_rows(mode: str, wallets=None) -> pd.DataFrame:
+    """Wallet fills of one pull mode, only from chunks recorded in the status file (no partial duplicates)."""
+    st = pd.read_csv(V2 / f"wallets_{mode}_status.tsv", sep="\t")
+    dfs = []
+    for k in sorted(st["chunk"].unique()):
+        d = pd.read_parquet(V2 / f"wallets_{mode}" / f"chunk_{k:05d}.parquet")
+        if wallets is not None:
+            d = d[d["wallet"].isin(wallets)]
+        dfs.append(d)
+    return pd.concat(dfs, ignore_index=True)

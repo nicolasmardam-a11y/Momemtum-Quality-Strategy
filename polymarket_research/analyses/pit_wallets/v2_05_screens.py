@@ -9,7 +9,6 @@ Outputs:
 """
 from __future__ import annotations
 
-import glob
 import sys
 from pathlib import Path
 
@@ -17,7 +16,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from v2common import T_D, T_TRAIL0, V2, load_markets, u01, ue_for_rows  # noqa: E402
+from v2common import T_D, T_TRAIL0, V2, load_markets, load_wallet_rows, u01, ue_for_rows  # noqa: E402
 
 EP = 6 * 3600
 K = 10
@@ -73,8 +72,7 @@ def main() -> None:
                       "fee_exponent"])
     st = pd.read_csv(V2 / "wallets_trail_status.tsv", sep="\t").drop_duplicates("wallet", keep="last")
     sub = pd.read_parquet(V2 / "wallet_subset.parquet")
-    files = sorted(glob.glob(str(V2 / "wallets_trail" / "chunk_*.parquet")))
-    t = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+    t = load_wallet_rows("trail")
     t = t[t["timestamp"] < T_D]
     print(f"trail fills {len(t):,} wallets {t['wallet'].nunique():,} (status {len(st):,}, subset {len(sub):,})")
     t["ue"] = ue_for_rows(t["event_slug"], t["condition_id"], m).values

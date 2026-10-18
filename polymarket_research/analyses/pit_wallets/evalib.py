@@ -203,22 +203,38 @@ def own_bucket(s: pd.DataFrame) -> np.ndarray:
 
 
 def est_vectors(s: pd.DataFrame, ok: np.ndarray, roi: np.ndarray, d: str, stake: float = 100.0) -> dict:
-    """Per-row (pnl, cost) vectors for each estimator; s must be one signal set (one split, type and screen)."""
+    """Per-row (pnl, cost) vectors for each estimator; s must be one signal set (one split, type and screen).
+
+    ipw (A12 form): under 'always filled' every feasible LOSER loses its stake whatever its entry price, so all
+    feasible losers enter with the mean ROI of filled losers (-1 - fee; -1 if none filled). Filled winners are
+    weighted by n_feasible / n_filled of their own-price bucket; winners in buckets without any fill are spread over
+    the represented buckets (outcome-level fallback). '_w' holds per-row weights for filled rows (losers weighted at
+    outcome level), used to reweight signal-minus-benchmark differences."""
     feas = detect_time(s, d) < s.r.values
     ok = ok & feas
     p1 = s.p.values == 1
-    cls = (p1.astype(np.int64) * 10 + own_bucket(s) + 1)
-    nfe = np.bincount(cls, weights=feas.astype(float), minlength=20)
-    nok = np.bincount(cls, weights=ok.astype(float), minlength=20)
-    fr = np.where(nok > 0, nok / np.maximum(nfe, 1), np.nan)
-    w = np.where(ok, 1.0 / np.where(np.isfinite(fr[cls]), fr[cls], 1.0), 0.0)
-    lose_unf = feas & ~ok & ~p1
+    b = own_bucket(s) + 1
+    n1b = np.bincount(b[feas & p1], minlength=6).astype(float)
+    k1b = np.bincount(b[ok & p1], minlength=6).astype(float)
+    rep = k1b > 0
+    n1_rep, n1_unrep = n1b[rep].sum(), n1b[~rep].sum()
+    scale = (n1_rep + n1_unrep) / n1_rep if n1_rep > 0 else np.nan
+    w1 = np.where(ok & p1 & rep[b], n1b[b] / np.maximum(k1b[b], 1) * (scale if np.isfinite(scale) else 0.0), 0.0)
+    lose = feas & ~p1
+    okl = ok & ~p1
+    lose_roi = float(roi[okl].mean()) if okl.any() else -1.0
+    n0, k0 = float(lose.sum()), float(okl.sum())
+    wl = np.where(okl, n0 / k0 if k0 > 0 else np.nan, 0.0)
+    lose_unf = lose & ~ok
+    ipw_pnl = stake * roi * w1 + stake * np.where(okl, roi, lose_roi) * lose
+    ipw_cost = stake * w1 + stake * lose.astype(float)
     out = {"drop": (stake * roi * ok, stake * ok.astype(float)),
-           "ipw": (stake * roi * w, stake * w),
-           "adv": (stake * roi * ok - stake * lose_unf, stake * (ok | lose_unf).astype(float))}
+           "ipw": (ipw_pnl, ipw_cost),
+           "adv": (stake * roi * ok - stake * lose_unf, stake * (ok | lose_unf).astype(float)),
+           "_w": w1 + wl}
     out["_fill_p1"] = float(ok[feas & p1].mean()) if (feas & p1).any() else np.nan
-    out["_fill_p0"] = float(ok[feas & ~p1].mean()) if (feas & ~p1).any() else np.nan
-    out["_ipw_cover"] = float(nfe[nok > 0].sum() / max(1.0, nfe.sum()))
+    out["_fill_p0"] = float(ok[lose].mean()) if lose.any() else np.nan
+    out["_ipw_cover"] = float(n1_rep / max(1.0, n1_rep + n1_unrep))
     return out
 
 

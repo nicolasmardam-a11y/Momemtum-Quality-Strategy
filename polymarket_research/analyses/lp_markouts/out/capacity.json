@@ -1,0 +1,93 @@
+[
+ {
+  "surv": "sports|7-30d",
+  "days": 189.9,
+  "n_markets": 91,
+  "fill_shares_per_day": 3241.6143439122416,
+  "fill_capital_per_day_usd": 1584.2030667148672,
+  "net5m_pnl_per_day_usd": 4.202156036607163,
+  "trading5m_pnl_per_day_usd": 1.0753509798262557,
+  "res_pnl_per_day_usd": 86.67043456891246,
+  "hold_med_h": 14.85777759552002,
+  "hold_mean_h_fillw": 72.48696877114129,
+  "max_fill_day_share_of_total": 0.27900667627674014
+ },
+ {
+  "surv": ">98c",
+  "days": 199.8,
+  "n_markets": 596,
+  "fill_shares_per_day": 37307.15111322806,
+  "fill_capital_per_day_usd": 9007.470020796145,
+  "net5m_pnl_per_day_usd": 25.728050003316582,
+  "trading5m_pnl_per_day_usd": 25.25832115001443,
+  "res_pnl_per_day_usd": 9.641677549837421,
+  "hold_med_h": 471.67901611328125,
+  "hold_mean_h_fillw": 716.5732830840543,
+  "max_fill_day_share_of_total": 0.02326049688604971
+ },
+ {
+  "surv": "ttr 7-30d",
+  "days": 190.5,
+  "n_markets": 242,
+  "fill_shares_per_day": 53141.51091770959,
+  "fill_capital_per_day_usd": 22351.124418197433,
+  "net5m_pnl_per_day_usd": 10.285585327424176,
+  "trading5m_pnl_per_day_usd": 4.822114194024588,
+  "res_pnl_per_day_usd": 50.8626130517938,
+  "hold_med_h": 397.5880432128906,
+  "hold_mean_h_fillw": 343.570039138436,
+  "max_fill_day_share_of_total": 0.043507599509723154
+ },
+ {
+  "surv": "ttr <=1h",
+  "days": 197.7,
+  "n_markets": 363,
+  "fill_shares_per_day": 9422.091510147377,
+  "fill_capital_per_day_usd": 4921.4057894993675,
+  "net5m_pnl_per_day_usd": 8.12588558058743,
+  "trading5m_pnl_per_day_usd": -2.891832974571281,
+  "res_pnl_per_day_usd": -246.5458330449905,
+  "hold_med_h": 0.05999999865889549,
+  "hold_mean_h_fillw": 2.297250255725037,
+  "max_fill_day_share_of_total": 0.05248890353291997
+ },
+ {
+  "surv": "ttr <=1h ex-crypto",
+  "days": 197.3,
+  "n_markets": 243,
+  "fill_shares_per_day": 3558.172836549714,
+  "fill_capital_per_day_usd": 1965.3144953858628,
+  "net5m_pnl_per_day_usd": 14.287616214164819,
+  "trading5m_pnl_per_day_usd": 11.032881619235432,
+  "res_pnl_per_day_usd": -232.5444130489925,
+  "hold_med_h": 3.228055477142334,
+  "hold_mean_h_fillw": 5.642834262248501,
+  "max_fill_day_share_of_total": 0.1214189212135684
+ },
+ {
+  "surv": "crypto (incentive-dep.)",
+  "days": 197.7,
+  "n_markets": 131,
+  "fill_shares_per_day": 10170.492988451264,
+  "fill_capital_per_day_usd": 4924.526218516486,
+  "net5m_pnl_per_day_usd": 6.673299528657592,
+  "trading5m_pnl_per_day_usd": -3.4414109466701066,
+  "res_pnl_per_day_usd": -12.922723564102297,
+  "hold_med_h": 0.058888889849185944,
+  "hold_mean_h_fillw": 14.897417610073099,
+  "max_fill_day_share_of_total": 0.05964901466647801
+ },
+ {
+  "surv": "all",
+  "days": 199.9,
+  "n_markets": 601,
+  "fill_shares_per_day": 204483.783659581,
+  "fill_capital_per_day_usd": 95931.2100444145,
+  "net5m_pnl_per_day_usd": -91.77999049596403,
+  "trading5m_pnl_per_day_usd": -160.38400019768858,
+  "res_pnl_per_day_usd": -979.6338099866363,
+  "hold_med_h": 30.61083221435547,
+  "hold_mean_h_fillw": 370.27614003738597,
+  "max_fill_day_share_of_total": 0.020027330699134777
+ }
+]

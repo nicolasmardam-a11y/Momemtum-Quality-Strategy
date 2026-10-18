@@ -17,6 +17,11 @@ The same recovery also runs inside a live process for any delivery that has been
 only happens when recording the outcome failed (e.g. ``database is locked`` after
 the send), and without it such a delivery stayed stuck until the next restart.
 
+A failure whose outcome is unknown (``NotifyError.outcome_unknown``: e.g. a read
+timeout after the request was sent) is treated like an interrupted send: re-sent
+with the marker under at_least_once, marked ``unknown`` and reported under
+at_most_once.
+
 Retryable failures are retried with exponential backoff until *both*
 ``max_attempts`` is reached and the alert is older than ``give_up_after_minutes``,
 so a channel or internet outage shorter than that loses nothing; only then (or on
@@ -98,7 +103,7 @@ class Dispatcher:
 
     def flush(self, *, max_items: int = 100, deadline_s: float | None = None) -> dict[str, int]:
         """Attempt every due delivery once (bounded). Returns counts by outcome."""
-        stats = {"sent": 0, "retry": 0, "failed": 0, "rate_limited": 0, "skipped": 0}
+        stats = {"sent": 0, "retry": 0, "failed": 0, "unknown": 0, "rate_limited": 0, "skipped": 0}
         t_end = None if deadline_s is None else time.monotonic() + deadline_s
         self.recover_inflight(older_than_s=self.lease_s)
         for d in self._due(max_items):
@@ -150,13 +155,27 @@ class Dispatcher:
         attempts = d["attempts"] + 1
         now = self.clock()
         age = now - float(d["created_at"] or now)
+        if e.outcome_unknown and n.delivery_semantics == "at_most_once":
+            # The message may already have been delivered: never send it again, but say so.
+            self.store.conn.execute(
+                "UPDATE deliveries SET status = 'unknown', last_error = ? WHERE alert_id = ? AND channel = ?",
+                (("outcome unknown (at_most_once: not resent): " + e.detail)[:500], d["alert_id"], ch))
+            stats["unknown"] += 1
+            log.error("delivery alert=%s channel=%s outcome unknown, not resent (at_most_once): %s",
+                      d["alert_id"], ch, e.detail)
+            self.on_problem(f"notify:{ch}", "delivery_unknown",
+                            f"alert #{d['alert_id']} may not have been delivered on {ch} ({e.detail}); "
+                            "at_most_once, so it was not re-sent")
+            return
         if e.retryable and (attempts < n.max_attempts or age < n.give_up_after_minutes * 60):
             delay = min(n.backoff_max_seconds, n.backoff_base_seconds * 2 ** (attempts - 1))
             if e.retry_after_s:
                 delay = max(delay, e.retry_after_s)
+            # An ambiguous failure may have delivered the message: the re-send carries the marker.
             self.store.conn.execute(
-                "UPDATE deliveries SET status = 'pending', next_attempt_at = ?, last_error = ? "
-                "WHERE alert_id = ? AND channel = ?", (now + delay, e.detail[:500], d["alert_id"], ch))
+                "UPDATE deliveries SET status = 'pending', next_attempt_at = ?, last_error = ?, "
+                "possible_duplicate = MAX(possible_duplicate, ?) WHERE alert_id = ? AND channel = ?",
+                (now + delay, e.detail[:500], int(e.outcome_unknown), d["alert_id"], ch))
             stats["retry"] += 1
             log.warning("delivery alert=%s channel=%s failed (attempt %d), retry in %.0fs: %s",
                         d["alert_id"], ch, attempts, delay, e.detail)

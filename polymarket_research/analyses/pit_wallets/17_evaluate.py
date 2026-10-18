@@ -264,7 +264,7 @@ def bench_compare(s: pd.DataFrame, bp: pd.DataFrame):
                     continue
                 g = s[m]
                 wfull = np.zeros(len(s))
-                wfull[ms] = est_vectors(s[ms], ok[ms], roi_h[ms], d)["ipw"][1] / 100.0
+                wfull[ms] = np.nan_to_num(est_vectors(s[ms], ok[ms], roi_h[ms], d)["_w"], nan=0.0)
                 wv = wfull[m]
                 ev, _ = codes_of(g.underlying_key.values)
                 r = dict(model=model, delay=d, slip=slip, stype=t, screen=sc, split=split, n_fill=int(m.sum()),
@@ -406,9 +406,10 @@ def grid(s: pd.DataFrame, B=1000):
     rc = {}
     G["holm_test"] = np.nan
     for en in ESTS:
-        fam = (G.split == "test") & (G.screen != B1) & (G.n_fill > 0) & (G.est == en)
+        fam = (G.split == "test") & (G.screen != B1) & (G.n_events >= 30) & (G.se > 0) & (G.est == en)
         G.loc[fam, "holm_test"] = holm(G.loc[fam, "p_norm"].values)
         r_ = {"n_variants_defined": int(((G.split == "test") & (G.screen != B1) & (G.est == en)).sum()),
+              "n_variants_any_fill": int(((G.split == "test") & (G.screen != B1) & (G.est == en) & (G.n_fill > 0)).sum()),
               "n_variants_tested_test": int(fam.sum()), "n_holm_sig_005": int((G.loc[fam, "holm_test"] < 0.05).sum()),
               "n_raw_pnorm_lt_005": int((G.loc[fam, "p_norm"] < 0.05).sum()),
               "n_raw_pboot_lt_005": int((G.loc[fam, "p0"] < 0.05).sum())}

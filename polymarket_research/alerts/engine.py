@@ -7,12 +7,13 @@ so a slow or failing channel never delays polling.
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import random
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Any, Callable
 
 from . import DISCLAIMER, grouping, render, rules
 from .clock import as_server_clock
@@ -38,10 +39,11 @@ class CycleReport:
     bets_touched: int = 0
     alerts_created: int = 0
     alerts_suppressed: int = 0
+    internal_errors: list[str] = field(default_factory=list)
 
     @property
     def all_ok(self) -> bool:
-        return all(p.ok for p in self.polls) and self.status_error is None
+        return all(p.ok for p in self.polls) and self.status_error is None and not self.internal_errors
 
 
 class Engine:
@@ -97,74 +99,173 @@ class Engine:
             self.health.resolve("local-clock", ["clock_skew"])
 
     def run_cycle(self) -> CycleReport:
+        """One cycle. Every stage is isolated: an exception in one (a bug, a locked or broken DB)
+        is logged, reported as an ``engine/cycle_failure`` DATA PROBLEM after 2 consecutive cycles,
+        and does not stop the later stages (the stale check and digest always run)."""
         rep = CycleReport(started_at=self.clock())
-        lag = self.check_status(rep)
+
+        def stage(name: str, fn: Callable[..., Any], *args: Any, **kw: Any) -> Any:
+            try:
+                return fn(*args, **kw)
+            except Exception as e:
+                log.exception("cycle stage %r failed", name)
+                rep.internal_errors.append(f"{name}: {type(e).__name__}: {e}")
+                return None
+
+        lag = stage("status check", self.check_status, rep)
         for w in self.cfg.wallets:
             if w.enabled:
-                rep.polls.append(self.poller.poll(w, status_lag_s=lag, forced_backfill_hours=self.forced_backfill_hours))
+                res = stage(f"poll {w.label}", self.poller.poll, w, status_lag_s=lag,
+                            forced_backfill_hours=self.forced_backfill_hours)
+                rep.polls.append(res if res is not None else PollResult(
+                    w.address, ok=False, error=rep.internal_errors[-1], error_class="internal"))
         self.forced_backfill_hours = None    # --backfill-hours applies to the first cycle only
-        self.check_clock()
-        rep.bets_touched = len(grouping.assign_pending(self.store, self.cfg.grouping.gap_minutes * 60, self.clock()))
-        created, suppressed = self.evaluate_bets()
-        rep.alerts_created, rep.alerts_suppressed = created, suppressed
-        self.health.check_stale(self.started_at)
-        self.health.maybe_digest()
+        stage("clock check", self.check_clock)
+        touched = stage("grouping", grouping.assign_pending, self.store, self.cfg.grouping.gap_minutes * 60,
+                        self.clock())
+        rep.bets_touched = len(touched or [])
+        res = stage("alerting", self.evaluate_bets)
+        if res is not None:
+            rep.alerts_created, rep.alerts_suppressed = res
+        stage("stale check", self.health.check_stale, self.started_at)
+        stage("digest", self.health.maybe_digest)
+        self._record_cycle(rep.internal_errors)
         return rep
+
+    def _record_cycle(self, errors: list[str]) -> None:
+        """Turn internal errors into a health episode (they used to be only logged)."""
+        try:
+            if errors:
+                self.health.problem("engine", "cycle_failure",
+                                    "internal error(s) in the monitoring cycle: " + "; ".join(errors)[:1500],
+                                    error_class="internal", min_occurrences=2)
+            else:
+                self.health.resolve("engine", ["cycle_failure"])
+        except Exception:
+            log.exception("could not record the cycle outcome in the database")
 
     # ------------------------------------------------------------------ bets -> alerts
 
     def evaluate_bets(self) -> tuple[int, int]:
         """Turn changed bets into alerts. Freshest first; at most max_enrichments_per_cycle
-        enrichments per cycle (the rest stay queued with needs_eval=1 for the next cycle)."""
+        enrichments per cycle (the rest stay queued with needs_eval=1 for the next cycle).
+
+        Each bet is isolated: if building its alert raises, a plain fallback alert is sent
+        for it (so the trade is not missed) and an ``engine/evaluation`` problem is recorded;
+        the remaining bets are still evaluated."""
         created = suppressed = 0
-        budget = self.cfg.alerting.max_enrichments_per_cycle
+        self._budget = self.cfg.alerting.max_enrichments_per_cycle
+        too_old: list[tuple[Any, WalletConfig, str]] = []
+        failures = 0
         for bet in self.store.q("SELECT * FROM bets WHERE needs_eval = 1 ORDER BY last_ts DESC, bet_id"):
             try:
-                w = self.cfg.wallet(bet["wallet"])
-            except KeyError:
-                self._set_bet(bet["bet_id"], bet["alert_state"])
-                continue
-            if bet["alert_state"] == "alerted":
-                self._set_bet(bet["bet_id"], "alerted")     # one alert per bet; growth shows in the digest
-                continue
-            now = self.clock()
-            d = rules.decide(bet, w, self.cfg, now)
-            if d.action == "skip":
-                state = "below_threshold" if d.reason.startswith("below threshold") else bet["alert_state"]
-                self._set_bet(bet["bet_id"], state)
-            elif d.action == "suppress":
-                if bet["alert_state"] != "suppressed":
-                    payload = {"bet": dict(bet), "reason": d.reason, "qualified_because": d.qualified_because}
-                    text = (f"[suppressed] {w.label} {bet['side']} {bet['outcome']} on {bet['title']}: "
-                            f"${bet['usdc_size']:,.2f} executed {render.utc(bet['first_ts'])}; {d.reason}")
-                    if self.store.create_alert(dedupe_key=f"bet:{bet['bet_id']}:suppressed", kind="BET",
-                                               label=rules.LABEL_NEW, text=text, payload=payload, now=now,
-                                               channels=[], wallet=w.address, bet_id=bet["bet_id"],
-                                               status="suppressed", suppressed_reason=d.reason) is not None:
-                        suppressed += 1
-                self._set_bet(bet["bet_id"], "suppressed")
-            else:
-                cap = self.cfg.alerting.max_alerts_per_wallet_per_hour
-                recent = self.store.count("alerts", "kind = 'BET' AND wallet = ? AND status != 'suppressed' "
-                                                    "AND created_at >= ?", (w.address, now - 3600))
-                if recent >= cap:
-                    self._cap_notice(w, now, cap)
-                    reason = f"wallet alert cap: {recent} alerts for {w.label} in the last hour (max {cap})"
-                    if self.store.create_alert(dedupe_key=f"bet:{bet['bet_id']}:suppressed", kind="BET",
-                                               label=rules.LABEL_NEW, text=f"[suppressed] {reason}",
-                                               payload={"bet": dict(bet), "reason": reason}, now=now, channels=[],
-                                               wallet=w.address, bet_id=bet["bet_id"], status="suppressed",
-                                               suppressed_reason=reason) is not None:
-                        suppressed += 1
-                    self._set_bet(bet["bet_id"], "suppressed")
-                    continue
-                if budget <= 0:
-                    continue                                 # deferred: stays needs_eval=1
-                budget -= 1
-                if self._alert(bet, w, d) is not None:
-                    created += 1
-                self._set_bet(bet["bet_id"], "alerted")
+                outcome = self._evaluate(bet, too_old)
+            except Exception as e:
+                failures += 1
+                outcome = self._evaluation_failed(bet, e)
+            created += outcome == "created"
+            suppressed += outcome == "suppressed"
+        if too_old:
+            self._backfill_summary(too_old)
+        if failures == 0:
+            self.health.resolve("engine", ["evaluation"])
         return created, suppressed
+
+    def _evaluate(self, bet, too_old: list) -> str:
+        """Evaluate one bet. Returns created | suppressed | skipped | deferred | none."""
+        try:
+            w = self.cfg.wallet(bet["wallet"])
+        except KeyError:
+            self._set_bet(bet["bet_id"], bet["alert_state"])
+            return "none"
+        if bet["alert_state"] == "alerted":
+            self._set_bet(bet["bet_id"], "alerted")     # one alert per bet; growth shows in the digest
+            return "none"
+        now = self.clock()
+        d = rules.decide(bet, w, self.cfg, now)
+        if d.action == "skip":
+            state = "below_threshold" if d.reason.startswith("below threshold") else bet["alert_state"]
+            self._set_bet(bet["bet_id"], state)
+            return "skipped"
+        if d.action == "suppress":
+            out = "none"
+            if bet["alert_state"] != "suppressed":
+                payload = {"bet": dict(bet), "reason": d.reason, "qualified_because": d.qualified_because}
+                text = (f"[suppressed] {w.label} {bet['side']} {bet['outcome']} on {bet['title']}: "
+                        f"${bet['usdc_size']:,.2f} executed {render.utc(bet['first_ts'])}; {d.reason}")
+                if self.store.create_alert(dedupe_key=f"bet:{bet['bet_id']}:suppressed", kind="BET",
+                                           label=rules.LABEL_NEW, text=text, payload=payload, now=now,
+                                           channels=[], wallet=w.address, bet_id=bet["bet_id"],
+                                           status="suppressed", suppressed_reason=d.reason) is not None:
+                    out = "suppressed"
+                    if d.reason.startswith("too old"):
+                        too_old.append((bet, w, d.reason))
+            self._set_bet(bet["bet_id"], "suppressed")
+            return out
+        cap = self.cfg.alerting.max_alerts_per_wallet_per_hour
+        recent = self.store.count("alerts", "kind = 'BET' AND wallet = ? AND status != 'suppressed' "
+                                            "AND created_at >= ?", (w.address, now - 3600))
+        if recent >= cap:
+            self._cap_notice(w, now, cap)
+            reason = f"wallet alert cap: {recent} alerts for {w.label} in the last hour (max {cap})"
+            out = "none"
+            if self.store.create_alert(dedupe_key=f"bet:{bet['bet_id']}:suppressed", kind="BET",
+                                       label=rules.LABEL_NEW, text=f"[suppressed] {reason}",
+                                       payload={"bet": dict(bet), "reason": reason}, now=now, channels=[],
+                                       wallet=w.address, bet_id=bet["bet_id"], status="suppressed",
+                                       suppressed_reason=reason) is not None:
+                out = "suppressed"
+            self._set_bet(bet["bet_id"], "suppressed")
+            return out
+        if self._budget <= 0:
+            return "deferred"                            # stays needs_eval=1
+        self._budget -= 1
+        created = self._alert(bet, w, d) is not None
+        self._set_bet(bet["bet_id"], "alerted")
+        return "created" if created else "none"
+
+    def _evaluation_failed(self, bet, exc: Exception) -> str:
+        """Fallback for a bet whose alert could not be built: never lose the trade."""
+        log.exception("evaluating bet %s failed; sending a plain fallback alert", bet["bet_id"])
+        try:
+            w = self.cfg.wallet(bet["wallet"])
+            now = self.clock()
+            try:
+                action = rules.decide(bet, w, self.cfg, now).action
+            except Exception:
+                action = "alert"                         # cannot tell: show it rather than drop it
+            self.health.problem("engine", "evaluation",
+                                f"building the alert for bet {bet['bet_id'][:12]} ({w.label}) failed: "
+                                f"{type(exc).__name__}: {exc}; a plain fallback alert was sent instead",
+                                error_class="internal")
+            out = "none"
+            if action == "alert":
+                text = render.fallback_bet_alert(dict(bet), w.label, w.address, f"{type(exc).__name__}: {exc}")
+                if self.store.create_alert(dedupe_key=f"bet:{bet['bet_id']}", kind="BET", label=rules.LABEL_NEW,
+                                           text=text, payload={"bet": dict(bet), "fallback": True,
+                                                               "error": f"{type(exc).__name__}: {exc}"},
+                                           now=now, channels=list(self.notifiers), wallet=w.address,
+                                           bet_id=bet["bet_id"]) is not None:
+                    out = "created"
+                self._set_bet(bet["bet_id"], "alerted")
+            else:
+                self._set_bet(bet["bet_id"], bet["alert_state"])
+            return out
+        except Exception:
+            log.exception("fallback for bet %s failed too; it stays queued for the next cycle", bet["bet_id"])
+            return "none"
+
+    def _backfill_summary(self, items: list[tuple[Any, WalletConfig, str]]) -> None:
+        """One notice listing qualifying bets that were detected too late to alert individually
+        (after an outage, a monitoring gap or --backfill-hours), so they are not silently skipped."""
+        ids = sorted(b["bet_id"] for b, _, _ in items)
+        key = "backfill:" + hashlib.sha256("|".join(ids).encode()).hexdigest()[:24]
+        now = self.clock()
+        text = render.backfill_summary([(dict(b), w.label, w.address) for b, w, _ in items], now,
+                                       self.cfg.alerting.max_alert_age_minutes)
+        self.store.create_alert(dedupe_key=key, kind="NOTICE", label="BACKFILL SUMMARY", text=text,
+                                payload={"bet_ids": ids, "reasons": [r for _, _, r in items]}, now=now,
+                                channels=list(self.notifiers))
 
     def _cap_notice(self, w: WalletConfig, now: float, cap: int) -> None:
         hour = int(now // 3600)
@@ -253,10 +354,12 @@ class Engine:
                 rep = self.run_cycle()
                 log.info("cycle %d: %d/%d wallet polls ok, %d new alert(s), %d suppressed", cycles + 1,
                          sum(1 for x in rep.polls if x.ok), len(rep.polls), rep.alerts_created, rep.alerts_suppressed)
-            except Exception:
-                # Engine bugs are logged with traceback and the loop continues; poll state was not advanced
-                # for any wallet whose poll did not complete.
+            except Exception as e:
+                # run_cycle isolates its stages, so this is a failure outside them. Logged with traceback,
+                # reported as a health episode, and the loop continues; poll state was not advanced for any
+                # wallet whose poll did not complete.
                 log.exception("cycle failed")
+                self._record_cycle([f"cycle: {type(e).__name__}: {e}"])
             cycles += 1
             if max_cycles is not None and cycles >= max_cycles:
                 break

@@ -258,7 +258,7 @@ def test_delivery_stuck_in_sending_is_recovered_without_a_restart(tmp_path) -> N
     assert h.store.q1("SELECT status FROM deliveries WHERE alert_id = ?", (a,))[0] == "sending"
     h.clock.advance(5)
     disp.flush()                                                # within the lease: left alone
-    assert out.getvalue().count(f"alert test:1") == 1
+    assert out.getvalue().count("alert test:1") == 1
     h.clock.advance(600)
     disp.flush()                                                # same process, lease expired
     assert h.store.q1("SELECT status FROM deliveries WHERE alert_id = ?", (a,))[0] == "sent"
@@ -282,7 +282,9 @@ def test_channel_outage_longer_than_the_attempt_budget_still_delivers(tmp_path) 
     internet outage lost every queued alert for good."""
     h = Harness(tmp_path, T0, wallets=[SECOND])
     tg = _DownUntil(h.clock, T0 + 1800)
-    disp = Dispatcher(h.store, {"telegram": tg}, h.cfg, clock=h.clock)
+    # The token bucket must run on the simulated clock too: on real time.monotonic it never
+    # refilled during the simulated hour (3 burst tokens, then every attempt was "rate limited").
+    disp = Dispatcher(h.store, {"telegram": tg}, h.cfg, clock=h.clock, monotonic=h.clock)
     a = make_alert(h, channels=["telegram"])
     for _ in range(60):
         disp.flush()

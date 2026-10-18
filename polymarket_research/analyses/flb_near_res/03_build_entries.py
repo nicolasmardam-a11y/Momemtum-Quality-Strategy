@@ -80,7 +80,8 @@ def series_query(S, toks, h, max_stale):
     # changes in (h-24h, h]
     idx24 = lookup(S['codes'], S['t'], S['p'], S['chg_t'], qc, h - D)
     n24 = np.full(len(h), np.nan)
-    c_now = S['cum'][idx[ok]]; c_then = np.where(idx24[ok] >= 0, S['cum'][np.maximum(idx24[ok], 0)], 0)
+    first = np.searchsorted(S['codes'], qc[ok], side='left')  # series start of this token (fix 2026-10-18)
+    c_now = S['cum'][idx[ok]]; c_then = np.where(idx24[ok] >= 0, S['cum'][np.maximum(idx24[ok], 0)], S['cum'][first])
     n24[ok] = c_now - c_then
     return price, stale, lca, n24
 
@@ -157,7 +158,8 @@ def build_W():
     lca = np.full(len(h), np.nan); lca[ok] = h[ok] - tt[idx[ok]]
     cens = np.zeros(len(h), bool); cens[ok] = first[idx[ok]]
     idx24 = lookup(cc, tt, pp, None, qc, h - D); n24 = np.full(len(h), np.nan)
-    n24[ok] = cum[idx[ok]] - np.where(idx24[ok] >= 0, cum[np.maximum(idx24[ok], 0)], 0)
+    first_w = np.searchsorted(cc, qc[ok], side='left')  # series start of this market (fix 2026-10-18)
+    n24[ok] = cum[idx[ok]] - np.where(idx24[ok] >= 0, cum[np.maximum(idx24[ok], 0)], cum[first_w])
     hz['p0'] = p0; hz['last_change_age_s'] = lca; hz['change_censored'] = cens; hz['n_chg_24h'] = n24
     hz['src'] = 'f5'
     close = epoch_s(hz.closedTime)

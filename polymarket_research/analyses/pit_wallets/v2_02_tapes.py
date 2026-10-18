@@ -25,7 +25,7 @@ from v2common import TRADE_KEEP_TAPE, V2, to_df, walk  # noqa: E402
 CFG = {
     "pool": dict(src="pool_sample.parquet", taker_only="false", cap=150),
     "eval": dict(src="eval_markets.parquet", taker_only="true", cap=200),
-    "bench": dict(src="bench_markets.parquet", taker_only="true", cap=60),
+    "bench": dict(src="bench_markets.parquet", taker_only="true", cap=200),
 }
 
 

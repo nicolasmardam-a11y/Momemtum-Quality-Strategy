@@ -6,7 +6,7 @@ Output: data/derived/flb_sides.parquet (market x horizon x side, with costs/retu
         analyses/flb_near_res/out/04_results.md, 04_results.json.
 Run   : python analyses/flb_near_res/04_analyze.py [entries_path]
 """
-import json, sys
+import json, sys, zlib
 from pathlib import Path
 import numpy as np, pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -293,7 +293,7 @@ def main(path=None):
                 sub = S[(S['sample'] == smp) & (S.split == sp)]
                 T = rule_trades(sub, 'E1', lambda t: t.category.isin(X)) if rule == 'E1X' else rule_trades(sub, rule)
                 res[(rule, smp, sp)] = summarize(T, full=(sp == 'test') or (sp == 'validation' and smp == 'P'),
-                                                 seed=hash(rule) % 1000)
+                                                 seed=zlib.crc32(rule.encode()) % 1000)
         # literal E2 variant + vol-screen subset (P TEST)
         if rule in ('E1', 'E1X') or rule.startswith('H') or rule == 'E2':
             sub = S[(S['sample'] == 'P') & (S.split == 'test')]

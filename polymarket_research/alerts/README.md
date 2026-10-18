@@ -16,13 +16,14 @@ python -m alerts.run --config alerts/config.example.yaml --once          # one c
 python -m alerts.run --config alerts/config.example.yaml                 # foreground loop (30 s +/- 5 s), Ctrl-C to stop
 python -m alerts.run --config alerts/config.example.yaml --report        # stored state and open problems, no network
 python -m alerts.run --config alerts/config.example.yaml --once --backfill-hours 48 --db /tmp/x.sqlite
-python -m pytest alerts/tests -q                                         # 67 tests, no network
+python -m pytest alerts/tests -q                                         # 108 tests, no network
 ```
 
 Flags: `--once`, `--backfill-hours N` (the first cycle re-reads at least N hours, idempotently),
 `--db PATH`, `--interval S`, `--max-cycles N`, `--dry-run` (console and file only, even if
 Telegram or email are enabled), `--report`, `--log-level`. Exit codes: 0 means all polls were OK,
-2 means a configuration error, 3 means a `--once` run hit at least one data problem (useful under cron).
+2 means a configuration error, 3 means a `--once` run hit at least one data problem (useful under cron),
+4 means another monitor process already holds this database's lock (`<db>.lock`; one process per DB).
 
 ---
 
@@ -68,7 +69,8 @@ Telegram or email are enabled), `--report`, `--log-level`. Exit codes: 0 means a
 Modules (all in `alerts/`): `config.py` strict YAML loader; `http_client.py`; `sources.py`;
 `fills.py` (identity, maker/taker); `poller.py`; `grouping.py`; `enrich.py`; `rules.py`;
 `render.py`; `health.py`; `notify.py`; `dispatch.py`; `engine.py` (one cycle, loop);
-`run.py` (CLI). The shared research client `pmr` is reused for pure functions:
+`clock.py` (server-corrected clock); `logsafe.py` (credential-redacting log handler);
+`instance.py` (one process per DB); `run.py` (CLI). The shared research client `pmr` is reused for pure functions:
 `pmr.fees.taker_fee` and `market_fee_rate`, and `pmr.api.normalize_book` and `jlist`. The alert
 system has its own thin HTTP layer because `pmr.http.request_json` retries up to six times with
 sleeps of up to 60 s and writes every response to `data/raw/`. That suits batch research. In a
@@ -403,7 +405,9 @@ plus the whole polling phase, so median block → alert falls from about 20 s to
 
 ## 18. Tests
 
-`python -m pytest alerts/tests -q`: **67 tests, about 5 s, no network.** Fixtures in
+`python -m pytest alerts/tests -q`: **108 tests, about 7 s, no network** (67 from the build, 39 from the
+adversarial review in `test_review.py` and `test_review_round2.py`, 2 from the live smoke test in
+`test_smoke_findings.py`, see §20). Fixtures in
 `alerts/tests/fixtures/` were recorded from the live API on 2026-10-17 by
 `python -m alerts.tests.record_fixtures`. They are mintblade activity (trimmed to 88 rows: four
 complete bets, 30 fills of the large IR Iran bet, and all five redeems), a second anonymous active
@@ -427,8 +431,9 @@ enrichment failure fails closed; flood control; digest; CLI `--once`, `--report`
 
 * Polling latency (§14). The websocket upgrade is designed, not built.
 * Only executed fills are visible (§3). Partial fills of a larger resting order look like a smaller bet.
-* Maker/taker labels for fee-free markets depend on the `/v2/trades` cross-check (one extra call per
-  alert). If it fails, those fills stay `unknown`.
+* Maker/taker labels depend on the `/v2/trades` cross-check (two extra calls per alert, run for every
+  BUY/SELL bet since review round 2). If it fails or the index has not caught up, fee-free fills stay
+  `unknown` and fee-embedded fills keep an unconfirmed `taker` label (the basis line says so).
 * `overlap_seconds` (600 s) is the maximum ingestion delay tolerated. A row ingested later than
   that, while `/v2/status` reports no lag, would be missed. `/v2/status` lag above 120 s widens the margin.
 * Exposure comes from `/v2/positions` (custody balances) and may lag the fills by a few seconds.
@@ -437,5 +442,82 @@ enrichment failure fails closed; flood control; digest; CLI `--once`, `--report`
   instead, but `event.live` and `gameStartTime` come from Gamma.
 * Cluster labels in the example config are placeholders. They are based only on profile creation
   times in CONTEXT.md and should be updated from `notes/wallets/`.
-* Rate limiting of notifications is per process. Two copies running against one DB would share
-  alerts (each dedupe key is unique) but not rate-limit budgets. Run one instance.
+* One process per DB is enforced by an exclusive `flock` on `<db>.lock` (exit code 4); `--report`
+  is exempt. The lock is advisory and local: it does not protect a DB on a network filesystem
+  shared between machines.
+
+## 20. Review (adversarial, 2026-10-17 and 2026-10-18)
+
+The review tried to make the monitor **miss** a trade, **duplicate** an alert, **silently skip**
+activity after an outage, report a data failure as "no new trades", **leak** a credential, or
+**misreport** a price, side or role. For every real issue a failing test was written first, then the
+code was fixed. Tests named `test_probe_*` document behaviour that was already correct.
+Round 1 (`tests/test_review.py`) was interrupted by a usage limit and committed part-way (two of its
+tests still failed). Round 2 (`tests/test_review_round2.py`) finished it and continued.
+Result: `python -m pytest alerts/tests -q`, **106 passed**, pyflakes clean (108 after the smoke-test fix S1 below).
+
+### 20.1 Issues found and fixed
+
+| # | Failure mode | What went wrong | Fix |
+|---|---|---|---|
+| R1.1 | miss | A local clock days behind (Pi without RTC) put the window's `end` (local now + 1 d) before the newest rows while the watermark (server `Date`) moved past them | `clock.py` `ServerClock`: every block-time decision uses the server's clock; skew above `max_clock_skew_seconds` is a health event |
+| R1.2 | silent skip | A local clock hours *ahead* suppressed fresh bets as "too old" and inflated detection lag | same `ServerClock` |
+| R1.3 | misreport | Gamma ignoring `condition_ids` would put another market's question, fees and in-play state on the alert | the response must contain the requested `conditionId`, otherwise it is a schema error |
+| R1.4 | misreport | A `/book` for another token would be shown as the traded outcome's book | `asset_id` must equal the traded token |
+| R1.5 | blocked alerts | A malformed Gamma field raised out of `enrich()`; the bet stayed queued and crashed every cycle | each enrichment component is isolated and fails closed |
+| R1.6 | misreport (maker/taker) | Absence from the taker-only feed was read as "maker" even when `/v2/trades` had not yet ingested the fills | "maker" only once `taker_only=false` contains every fill of the bet; otherwise `unknown` |
+| R1.7 | leak | `--log-level DEBUG` printed the Telegram bot credential (urllib3 logs `POST /bot<credential>/sendMessage`) | `logsafe.py` redacting formatter (plain, URL-quoted and key-part forms) on the root handler, installed by `run.configure_logging` (round 2 wrote this; round 1 left only the test) |
+| R1.8 | silent loss | A delivery left in `sending` after a failed outcome write stayed stuck until restart | in-process lease (`max(60 s, 3 x send timeout)`), then re-sent as POSSIBLE DUPLICATE |
+| R1.9 | silent loss | 8 attempts with 5..600 s backoff gave up after ~14 min, so a 30-min internet outage dropped queued alerts | retry until **both** `max_attempts` and `give_up_after_minutes` (360) are exhausted. Round 2: the test itself was broken (its token bucket ran on real `time.monotonic` inside a simulated hour); fixed |
+| R1.10 | silent loss | A delivery-failure notice for the only channel had no channel at all | it is queued on that channel |
+| R1.11 | "no new trades" | A degraded backend answering 200 `data: []` looked like a quiet wallet and the watermark advanced | **canary**: every window reaches back to stored rows and must return at least one; otherwise `incomplete_data` DATA PROBLEM |
+| R1.12 | "no new trades" | A signer/EOA or a typo'd valid-looking address returns 200 `[]` forever | full-history probe at bootstrap; `no_history` warning |
+| R1.13 | misreport | Trades made while the first (bootstrap) polls were failing were treated as baseline | `first_attempt_at`: fills after the first *attempt* are live |
+| R1.14 | miss | A `/v2/status` outage dropped the safety margin to 30 s | the last known lag is kept |
+| R1.15 | miss/stall | A walk that cannot finish in one poll (page cap, expired cursor, late-page error) restarted from the same watermark forever | checkpoint to one second before the newest row of the last page that had a successor |
+| R1.16 | duplicate | A cursor page re-serving rows from before its anchor became phantom "repeat" fills | the ASC walk must be non-decreasing in block time, else schema error |
+| R2.1 | duplicate | Overlapping cron `--once` runs, or a manual `--once` beside the loop: each startup `recover_inflight()` re-queued the *other* process's in-flight send | `instance.py`: exclusive non-blocking `flock` on `<db>.lock`, exit code 4; `--report` exempt. Verified live: the second process exits 4 |
+| R2.2 | duplicate | A Telegram read timeout (request sent, reply lost) was retried **without** the POSSIBLE DUPLICATE marker. Under `at_most_once` it was re-sent anyway | `NotifyError.outcome_unknown`: re-sent marked (at_least_once), or marked `unknown` plus a `delivery_unknown` health event (at_most_once) |
+| R2.3 | duplicate | SMTP: the server accepted the message but `QUIT` failed (421) and the email was re-sent every retry | an error after `send_message` returned counts as delivered (logged). A disconnect or timeout during DATA is `outcome_unknown` |
+| R2.4 | blocked/silent | Any exception while building *one* alert (render, rules, store) escaped `evaluate_bets`: the cycle aborted before every older bet, the stale check and the digest, on every cycle, and was only logged | per-bet isolation: a plain **fallback alert** from stored facts (`[ALERT RENDERING FAILED]`) plus an `engine/evaluation` problem. `run_cycle` isolates each stage; internal errors become `engine/cycle_failure` (DATA PROBLEM after 2 cycles, then RECOVERED) and make `--once` exit 3 |
+| R2.5 | misreport (side) | The outcome came only from the Data API row label. A mislabel would show "Yes" for a NO purchase, and unlabelled rows (`outcome_index: 999`) showed "Outcome: None" | Gamma's parallel `clobTokenIds`/`outcomes` lists map the traded token to its outcome. Gamma's name is shown; a disagreement or a token that is not one of the market's is reported in the alert (`outcome_data_api` and `outcome_gamma` kept in the payload) |
+| R2.6 | misreport (maker/taker) | "Fee embedded ⇒ taker" was confirmed only when the bet also had a fee-free fill. Builder fees can be charged to makers (data_infrastructure.md pitfall 16) | the `/v2/trades` cross-check runs for every BUY/SELL bet. A fee-embedded fill missing from a complete taker feed becomes `unknown`. Verified live: two real bets confirmed as taker |
+| R2.7 | silent skip | After an outage, qualifying bets older than `max_alert_age_minutes` were stored as suppressed **with no channel**: the user saw DATA RECOVERED and nothing about the bets | one **BACKFILL SUMMARY** notice per cycle listing them (wallet, side, outcome, market, spend, size, avg, times; at most 10 lines). Idempotent |
+| R2.8 | miss (loud) | One row failing validation (for example a TRADE with no outcome token, as a new product could produce) failed every poll of that wallet until the code changed, so all its later trades were missed | invalid rows are **quarantined** (`rejected_rows`, migration 3) and each new one is reported with its facts. A walk in which *no* row is valid is still a hard schema failure (probe test) |
+| R2.9 | miss (loud) | The bootstrap probe still raised on a malformed newest row, so such a dormant wallet failed bootstrap forever | that row is quarantined and the wallet polls on without a canary |
+
+| S1 | misreport / noise | Live smoke test 2026-10-18 (`notes/alerts_smoke_test.md`): **Combo** fills (`is_combo: true`, synthetic condition id, title "A AND B") went through normal enrichment. `/v2/positions` answered 400 "invalid condition id" (a DATA PROBLEM health event per combo bet), CLOB `/book` 404 was shown as "market closed or not tradable", and the fee-free fill was labelled **maker** because combo fills never appear in the taker-only `/v2/trades` feed (0 of 6 live) | `enrich.is_combo` + `Enricher._enrich_combo`: no lookups, roles stay unknown (fee-embedded = taker, unconfirmed), the alert says `[COMBO: multi-leg RFQ position …]` and why book/fee/exposure are unavailable. Test `test_smoke_findings.py` (fails without the fix) |
+
+### 20.2 Probed and found correct (no change)
+
+* **`start` inclusive vs exclusive.** Windows reach back to `canary - 1` and overlap 600 s, so an exclusive `start` would lose nothing.
+* **Same-second fills, many fills in one tx, true identical repeats across a page boundary.** The occurrence index is per walk and walks cover whole seconds, so ids are stable.
+* **Cursor pages re-send every filter.** An expired or invalid cursor (400) fails only that walk; cursors are never reused across polls, and the checkpoint keeps progress.
+* **`has_more` without `next_cursor`, a repeated cursor, page-cap overflow.** All are schema errors. A walk is never silently truncated.
+* **Gamma for closed markets.** An empty open lookup is retried with `closed=true`. CLOB `closed`/`accepting_orders` (not CDN-cached) take precedence.
+* **Neg-risk markets.** The book fetched is the traded token's (for example the NO token of a neg-risk outcome) and `neg_risk` is shown.
+* **Data API v1 retirement (2026-10-24).** Every Data API call is `/v2/*`, both in `alerts/` and in `analyses/alerts_latency/` (test `test_probe_only_v2...`). Nothing changes on that date.
+* **SPLIT/MERGE/REDEEM/CONVERSION rows.** They carry empty strings, not nulls, in `token_id`/`side`/`outcome` (checked against `data/derived/activity_types_probe_20261017T1558.json`), so they pass validation.
+* **Negative `overlap_seconds` / `ingest_safety_seconds`.** Already rejected by the config's generic non-negative check.
+
+### 20.3 Remaining limitations (not fixed)
+
+* **Phantom duplicates are detected, not prevented.** If the API re-served a row at the *same* second across a page boundary, the walk cannot tell it from a true repeat (rows carry no sequence id). The next overlapping re-read reports it as a `vanished_rows` warning, but the size may already be in an alert.
+* **Ambiguous sends are inherent.** A ConnectionError after the request left the machine is still treated as "not sent". Telegram 5xx is retried without the duplicate marker.
+* **The builder-fee premise is PLAUSIBLE, not VERIFIED for the Data API.** The docs say makers can pay builder fees. Whether `usdc_size` on the Data API includes them was not verified, so R2.6 is a safeguard. The cross-check costs two `/v2/trades` calls per alert, and while the index lags the label stays an unconfirmed `taker`.
+* **The outcome cross-check depends on Gamma.** If Gamma is down or does not list the market, the Data API label is shown unverified, and the alert's enrichment-errors line says Gamma failed.
+* **Quarantined rows are reported, not interpreted.** A trade in a format this code cannot parse produces a DATA PROBLEM with its raw facts, never a bet alert. If many rows break at once (and some rows still parse), there is one such message per poll.
+* **One process per DB on one machine.** The lock is a local `flock`; it does not protect a DB on a network filesystem shared by two hosts.
+* **A dead database cannot report itself.** If SQLite itself fails (disk full, I/O error), health events cannot be written, so the failure is only in the log (with traceback), and `--once` exits 3.
+* **Health-episode race (theoretical).** `HealthMonitor.problem` reads the open episode before taking the write lock. Two connections raising the same (scope, kind) at the same moment could open two episodes, which means two notices. In practice the engine and the dispatcher thread use disjoint scopes, and the instance lock rules out a second process.
+* All limitations in §19 still apply (polling latency, executed fills only, 600 s maximum ingestion delay, CDN-cached Gamma metadata, placeholder cluster labels).
+
+### 20.4 Verification
+
+* `python -m pytest alerts/tests -q`: 106 passed, about 7 s, no network (108 after S1). `pyflakes alerts analyses/alerts_latency`: clean.
+* Live, read-only smoke on 2026-10-18 (`--dry-run`; DBs, logs and alert file under `data/derived/alerts_smoke/`, which is git-ignored):
+  * The example config with `--backfill-hours 2000`: the three dormant wallets bootstrap via the history probe; the second cycle re-reads each canary row ("ok, no new trades", exit 0).
+  * While a lock was held, a second `--once` process exited 4 and `--report` still worked.
+  * Two active public wallets with `alert_on_bootstrap`: 2 bet alerts, 1 ALERT CAP notice, 6 deliveries, 0 enrichment errors. The Data API and Gamma outcome labels agreed ("Under"), and the cross-check confirmed both bets as taker.
+* No Telegram or email message was sent; those channels were exercised only against fakes. Nothing was deployed, and no monitoring is running.
+* A fuller live smoke test (history reconstruction of the three candidate wallets, 17 min on three busy wallets, a 5-minute outage checked against an independent `/v2/trades` pull) is in `notes/alerts_smoke_test.md`.

@@ -9,6 +9,7 @@ concurrently on the same file.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 import time
@@ -157,6 +158,18 @@ CREATE TABLE IF NOT EXISTS meta (
     # first *successful* poll comes much later.
     (2, """
 ALTER TABLE poll_state ADD COLUMN first_attempt_at REAL;
+"""),
+    # Review round 2 (2026-10-18): activity rows that failed validation are quarantined here
+    # (and reported) instead of failing every poll of the wallet.
+    (3, """
+CREATE TABLE IF NOT EXISTS rejected_rows (
+    row_id        TEXT PRIMARY KEY,       -- sha256(canonical raw json | occurrence within the walk)
+    wallet        TEXT NOT NULL,
+    ts            INTEGER,                -- block timestamp if the row had a usable one
+    problems      TEXT NOT NULL,
+    raw_json      TEXT NOT NULL,
+    first_seen_at REAL NOT NULL
+);
 """),
 ]
 
@@ -313,6 +326,30 @@ class Store:
                 cur = c.execute(sql, tuple(f[k] for k in cols))
                 if cur.rowcount == 1:
                     new.append(f["fill_id"])
+        return new
+
+    def insert_rejected(self, wallet: str, rows: Iterable[tuple[Any, list[str]]], *, now: float) -> list[tuple[Any, list[str]]]:
+        """Quarantine rows that failed validation. Returns the ones not stored before.
+
+        Identity is the canonical JSON of the row plus its occurrence index among identical
+        rejected rows of the same walk, so re-reading the overlap does not re-report a row.
+        """
+        counts: dict[str, int] = {}
+        new: list[tuple[Any, list[str]]] = []
+        with self.tx() as c:
+            for row, problems in rows:
+                raw = json.dumps(row, sort_keys=True, separators=(",", ":"), default=str)
+                n = counts.get(raw, 0)
+                counts[raw] = n + 1
+                row_id = hashlib.sha256(f"{wallet}|{raw}|{n}".encode()).hexdigest()
+                ts = row.get("timestamp") if isinstance(row, dict) else None
+                cur = c.execute(
+                    "INSERT OR IGNORE INTO rejected_rows (row_id, wallet, ts, problems, raw_json, first_seen_at) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (row_id, wallet, ts if isinstance(ts, int) and not isinstance(ts, bool) else None,
+                     "; ".join(problems)[:1000], raw, now))
+                if cur.rowcount == 1:
+                    new.append((row, problems))
         return new
 
     def known_fill_ids(self, wallet: str, types: Iterable[str], since_ts: int, until_ts: int) -> set[str]:

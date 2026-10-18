@@ -7,6 +7,7 @@ alert, and a copy-candidate rule that needs missing data fails closed.
 """
 from __future__ import annotations
 
+import json
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -195,6 +196,23 @@ def exposure(market_positions: list[dict], event_positions: list[dict] | None, t
     return out
 
 
+def outcome_for_token(gamma: dict, token_id: str) -> tuple[str | None, bool | None]:
+    """(Gamma's outcome name for ``token_id``, whether the token is one of the market's tokens).
+
+    Gamma's ``clobTokenIds`` and ``outcomes`` are parallel JSON lists, so the traded token
+    identifies the outcome independently of the Data API row's own ``outcome`` label.
+    (None, None) when Gamma lists no tokens.
+    """
+    tokens = [str(t) for t in jlist(gamma.get("clobTokenIds"))]
+    outcomes = jlist(gamma.get("outcomes"))
+    if not tokens:
+        return None, None
+    if str(token_id) not in tokens:
+        return None, False
+    i = tokens.index(str(token_id))
+    return (str(outcomes[i]) if len(outcomes) == len(tokens) else None), True
+
+
 def links(event_slug: str | None, market_slug: str | None) -> dict:
     """polymarket.com/event/<event_slug> is canonical (verified 2026-10-17: 200 with a
     matching rel=canonical); /event/<event_slug>/<market_slug> deep-links one market."""
@@ -202,6 +220,30 @@ def links(event_slug: str | None, market_slug: str | None) -> dict:
         return {"event_url": None, "market_url": None}
     return {"event_url": EVENT_URL.format(event_slug=event_slug),
             "market_url": MARKET_URL.format(event_slug=event_slug, market_slug=market_slug) if market_slug else None}
+
+
+COMBO_NOTE = ("combo (multi-leg RFQ position): no CLOB order book, Gamma market or /v2/positions entry "
+              "exists for its id, so book, fee, exposure and market state are not available")
+
+
+def is_combo(fills: list[dict]) -> bool:
+    """True if any fill is a Combo leg-bundle (Data API rows carry ``is_combo: true``).
+
+    Live smoke test 2026-10-18 (notes/alerts_smoke_test.md): combo rows have a synthetic
+    ``condition_id`` (34 hex digits then zeros), a title "<market A> AND <market B>", no
+    slugs, ``/v2/positions?condition=`` answers 400 "invalid condition id", CLOB ``/book``
+    404 and Gamma/``/v2/tokens`` nothing. They are absent from the ``taker_only=true``
+    feed (0 of 6 combo trades), so "absent from the taker feed => maker" does not apply.
+    """
+    for f in fills:
+        raw = f.get("raw_json") if isinstance(f, dict) else None
+        try:
+            row = json.loads(raw) if isinstance(raw, str) else (raw or {})
+        except ValueError:
+            continue
+        if isinstance(row, dict) and row.get("is_combo") is True:
+            return True
+    return False
 
 
 # --------------------------------------------------------------------------- network enrichment
@@ -232,20 +274,27 @@ class Enricher:
         except self.PAYLOAD_ERRORS as e:
             err = DataError("schema", source, "", f"{label}: unexpected payload ({type(e).__name__}: {e})",
                             retryable=False)
-        en.errors.append(err)
-        en.data.setdefault("enrichment_errors", []).append(f"{label}: {err}")
+        self._error(en, label, err)
         return None
 
+    @staticmethod
+    def _error(en: Enrichment, label: str, err: DataError) -> None:
+        en.errors.append(err)
+        en.data.setdefault("enrichment_errors", []).append(f"{label}: {err}")
+
     def _roles(self, en: Enrichment, bet: sqlite3.Row, fills: list[dict]) -> str:
-        """Resolve 'unknown' liquidity roles via /v2/trades; returns the cross-check outcome.
+        """Check every fill's liquidity role against /v2/trades; returns the cross-check outcome.
 
         "maker" is inferred from *absence* from the taker-only feed, which is only valid
         once /v2/trades has ingested these fills. So the full feed (taker_only=false,
         verified equal to the activity TRADE rows) must contain every fill of the bet
-        first; otherwise roles stay unknown ("incomplete").
+        first; otherwise roles stay as inferred ("incomplete").
+
+        Fee-embedded ("taker") fills are checked too: builder fees can be charged to makers
+        (notes/platform/data_infrastructure.md, pitfall 16), so an embedded fee alone does not
+        prove the taker role. A fee-embedded fill missing from the taker feed becomes unknown.
         """
-        if not (self.taker_crosscheck and bet["side"] in ("BUY", "SELL")
-                and any(f["liquidity_role"] == "unknown" for f in fills)):
+        if not (self.taker_crosscheck and bet["side"] in ("BUY", "SELL") and fills):
             return "not run"
         span = (bet["wallet"], bet["first_ts"], bet["last_ts"])
         everything = self._try(en, "trades index check", lambda: self.sources.trade_fill_keys(*span, taker_only=False),
@@ -270,12 +319,14 @@ class Enricher:
         en = Enrichment()
         d = en.data
         fills = [dict(f) for f in fills]
+        if is_combo(fills):
+            return self._enrich_combo(en, bet, fills)
         # 1. Maker/taker: fee-embedded rows are takers; the rest are checked against /v2/trades.
         crosscheck = self._roles(en, bet, fills)
         d["maker_taker_basis"] = (
-            "fee embedded in usdc_size => taker; " +
-            ("remaining fills checked against /v2/trades taker-only feed" if crosscheck == "ok"
-             else "remaining fills unknown (cross-check " + crosscheck + ")"))
+            "every fill checked against the /v2/trades taker-only feed (fee-embedded fills confirmed)"
+            if crosscheck == "ok" else
+            "fee embedded in usdc_size => taker (unconfirmed); other fills unknown (cross-check " + crosscheck + ")")
         d["fills"] = fill_stats(fills)
 
         # 2. Market metadata (Gamma) and fresh state (CLOB).
@@ -299,9 +350,26 @@ class Enricher:
                                                            "event_id": None, "outcomes": []})
         event_slug = bet["event_slug"] or ev.get("slug")
         market_slug = bet["market_slug"] or g.get("slug")
+        # Outcome side: Gamma's name for the traded token wins over the row's label (the token is
+        # what was bought, and its book is what the alert shows). Disagreement is reported.
+        gamma_outcome = None
+        if sect is not None and bet["token_id"]:
+            mapped = self._try(en, "outcome mapping", lambda: outcome_for_token(g, bet["token_id"]), "gamma")
+            gamma_outcome, listed = mapped if mapped is not None else (None, None)
+            if listed is False:
+                self._error(en, "outcome mapping", DataError(
+                    "schema", "gamma", "", f"traded token {str(bet['token_id'])[:16]}... is not one of this market's "
+                    "clobTokenIds (wrong market metadata?); outcome and fee data may not belong to this bet",
+                    retryable=False))
+            elif gamma_outcome and bet["outcome"] and gamma_outcome.casefold() != str(bet["outcome"]).casefold():
+                self._error(en, "outcome label", DataError(
+                    "schema", "data-api", "", f"outcome label mismatch: the Data API row says {bet['outcome']!r} but "
+                    f"Gamma maps the traded token to {gamma_outcome!r}; showing Gamma's label", retryable=False))
         d["market"] = {
             **mfields,
-            "outcome": bet["outcome"],
+            "outcome": gamma_outcome or bet["outcome"],
+            "outcome_data_api": bet["outcome"],
+            "outcome_gamma": gamma_outcome,
             "condition_id": bet["condition_id"],
             "token_id": bet["token_id"],
             "gamma_found": gamma is not None,
@@ -360,5 +428,33 @@ class Enricher:
                          "data-api") if eid else None
         d["exposure"] = (self._try(en, "exposure", lambda: exposure(mpos, epos, bet["token_id"]), "data-api")
                          if mpos is not None else None)
+        d["enriched_at"] = self.clock()
+        return en
+
+    def _enrich_combo(self, en: Enrichment, bet: sqlite3.Row, fills: list[dict]) -> Enrichment:
+        """Facts-only enrichment for a Combo bet (see ``is_combo``).
+
+        No lookups are made: each would fail for a structural reason, not a data outage, and
+        would otherwise be reported as a DATA PROBLEM and rendered as "market closed". The
+        maker/taker cross-check is skipped because combo fills never appear in the taker-only
+        feed; roles stay as stored (fee-embedded => taker, unconfirmed; otherwise unknown).
+        """
+        d = en.data
+        d["combo"] = True
+        d["maker_taker_basis"] = ("combo fill: not in the CLOB taker-only feed by construction, so no cross-check; "
+                                  "fee embedded in usdc_size => taker (unconfirmed), otherwise unknown")
+        d["fills"] = fill_stats(fills)
+        d["market"] = {
+            "question": bet["title"], "event_title": None, "event_id": None, "outcomes": [],
+            "outcome": bet["outcome"], "outcome_data_api": bet["outcome"], "outcome_gamma": None,
+            "condition_id": bet["condition_id"], "token_id": bet["token_id"], "gamma_found": False,
+            **links(bet["event_slug"], bet["market_slug"]),
+        }
+        d["market_state"] = {"in_play_basis": COMBO_NOTE}
+        d["book"] = {"available": False, "reason": COMBO_NOTE}
+        d["deterioration"] = deterioration(d["fills"]["avg_fill_price"] or 0.0, None, bet["side"])
+        d["follower_fee"] = {"fee_rate": None, "fee_cents_per_share": None, "follow_fee_usd": None,
+                             "follow_usd": self.follow_usd, "basis": "n/a (combo: RFQ, not an order-book trade)"}
+        d["exposure"] = None
         d["enriched_at"] = self.clock()
         return en

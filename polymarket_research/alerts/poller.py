@@ -31,6 +31,8 @@ State rules
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import time
 import traceback
@@ -42,7 +44,7 @@ from .config import Config, WalletConfig
 from .fills import OccurrenceCounter, to_fills
 from .health import HealthMonitor
 from .http_client import DataError
-from .sources import Sources
+from .sources import DATA, Sources
 from .store import Store
 
 log = logging.getLogger("alerts.poller")
@@ -121,6 +123,7 @@ class Poller:
         max_ts: int | None = None
         complete_before: int | None = None    # every row with ts < this has been returned
         seen: set[str] = set()
+        rejected: list[tuple[object, list[str]]] = []
         mode = "bootstrap" if bootstrap else "live"
         try:
             for page in self.sources.iter_activity(w.address, start=start, types=p.activity_types,
@@ -131,6 +134,7 @@ class Poller:
                 fills = to_fills(page.rows, occ, seen_at=self.clock(), poll_mode=mode,
                                  live_from_ts=first_attempt if bootstrap else None)
                 seen.update(f["fill_id"] for f in fills)
+                rejected.extend(page.rejected)
                 res.new_fills += len(self.store.insert_fills(fills))
                 res.rows += len(page.rows)
                 res.pages = page.page_no
@@ -140,6 +144,12 @@ class Poller:
                     max_ts = max(max_ts or 0, page_max)
                     if page.next_cursor:
                         complete_before = page_max
+            if rejected and res.rows == 0:
+                # Nothing in the walk was valid: a schema change, not one odd row. Fail hard.
+                probs = [f"{p}" for _, ps in rejected[:5] for p in ps[:2]]
+                raise DataError("schema", "data-api", f"{DATA}/v2/activity",
+                                f"/v2/activity schema surprise: all {len(rejected)} row(s) returned failed "
+                                "validation: " + "; ".join(probs), retryable=False)
             if bootstrap and res.rows == 0:
                 self._probe_history(w, now, end)
         except DataError as e:
@@ -168,6 +178,7 @@ class Poller:
             self.health.resolve(w.address, ["vanished_rows"])
         if res.rows:
             self.health.resolve(w.address, ["no_history"])
+        self._quarantine(w, rejected)
 
         ref = server_time if server_time is not None else self.clock()
         margin = max(float(p.ingest_safety_seconds), float(status_lag_s or 0.0))
@@ -181,6 +192,31 @@ class Poller:
                  render.utc(start), ", bootstrap" if bootstrap else "")
         return res
 
+    def _quarantine(self, w: WalletConfig, rejected: list[tuple[object, list[str]]]) -> None:
+        """Store rows that failed validation and report each new one with its facts.
+
+        Every new row is reported (one message per poll listing them), so a trade the
+        system cannot parse is visible rather than dropped; rows already reported are not
+        re-reported when the overlap re-reads them.
+        """
+        if not rejected:
+            self.health.resolve(w.address, ["rejected_rows"])
+            return
+        new = self.store.insert_rejected(w.address, rejected, now=self.clock())
+        self.health.problem(w.address, "rejected_rows",
+                            f"{len(rejected)} row(s) in this poll's window failed validation and are quarantined in "
+                            f"rejected_rows ({len(new)} new); they are not processed as fills",
+                            error_class="schema", severity="warning", notify=False)
+        if not new:
+            return
+        digest = hashlib.sha256(json.dumps([r for r, _ in new], sort_keys=True, default=str).encode()).hexdigest()
+        self.store.create_alert(
+            dedupe_key=f"rejected:{w.address}:{digest[:24]}", kind="DATA_PROBLEM", label="DATA PROBLEM",
+            text=render.rejected_rows(self.health.scope_label(w.address), new),
+            payload={"wallet": w.address, "rows": [r for r, _ in new][:20], "problems": [p for _, p in new][:20]},
+            now=self.clock(), channels=self.health.channels, wallet=w.address)
+        log.warning("poll %s: %d new row(s) failed validation and were quarantined", w.label, len(new))
+
     def _probe_history(self, w: WalletConfig, now: float, end: int) -> None:
         """Empty bootstrap window: is this a dormant account or an address with no history at all?"""
         latest = self.sources.latest_activity(w.address, self.cfg.poll.activity_types, end=end)
@@ -188,8 +224,14 @@ class Poller:
             self.health.problem(w.address, "no_history", NO_HISTORY_DETAIL, error_class="no_history",
                                 severity="warning")
             return
+        row, problems = latest
+        if problems:
+            # A real (dormant) account whose newest row is malformed: report it, and poll on without
+            # a canary (as for any wallet with nothing stored yet) rather than failing every bootstrap.
+            self._quarantine(w, [(row, problems)])
+            return
         # Store the newest row as baseline: it becomes the canary every later poll must re-read.
-        self.store.insert_fills(to_fills([latest], OccurrenceCounter(), seen_at=self.clock(), poll_mode="bootstrap"))
+        self.store.insert_fills(to_fills([row], OccurrenceCounter(), seen_at=self.clock(), poll_mode="bootstrap"))
 
     def _checkpoint(self, w: WalletConfig, complete_before: int | None, server_time: float | None,
                     status_lag_s: float | None, max_ts: int | None) -> None:

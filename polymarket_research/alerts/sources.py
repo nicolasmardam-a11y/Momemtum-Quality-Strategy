@@ -18,7 +18,7 @@ Verified against https://data-api.polymarket.com/v2/openapi.json and live calls 
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator
 
 from pmr.api import jlist, normalize_book
@@ -108,6 +108,9 @@ class ActivityPage:
     page_no: int
     server_now: float | None = None     # Date + Age, for clock-offset estimation
     window_end: int | None = None       # the ``end`` actually requested (rows after it were not asked for)
+    # Rows that failed validation, with their problems. Not processed as fills; the poller
+    # quarantines them (or fails the whole walk if no row of the walk was valid).
+    rejected: list[tuple[Any, list[str]]] = field(default_factory=list)
 
 
 class Sources:
@@ -141,11 +144,13 @@ class Sources:
                       max_pages: int = 5000, end: int | None = None) -> Iterator[ActivityPage]:
         """Walk /v2/activity for one wallet oldest-first from ``start`` (inclusive) to ``end``.
 
-        Follows ``next_cursor`` until it is null. Raises DataError on a schema
+        Follows ``next_cursor`` until it is null. Raises DataError on an envelope
         problem, a repeated cursor, a walk that goes backwards in time (a page that
         re-serves rows from before its anchor would otherwise be stored as phantom
         repeats) or more than ``max_pages`` pages, so a walk is never silently
-        truncated or padded. Each page is checked *before* it is yielded.
+        truncated or padded. Each page is checked *before* it is yielded. Rows that
+        fail validation are returned separately in ``ActivityPage.rejected`` (one odd
+        row must not block every later row of the wallet); the caller decides.
         """
         if end is None:   # the API default ("now plus one day"); unique per second -> CDN miss
             end = int(self.clock()) + 86_400
@@ -163,25 +168,26 @@ class Sources:
         while True:
             resp = self.http.get_json(f"{DATA}/v2/activity", params, source="data-api")
             rows, pag = _check_envelope(resp, "/v2/activity")
-            problems = []
-            for i, r in enumerate(rows):
-                for p in validate_activity_row(r, wallet, types):
-                    problems.append(f"row {i}: {p}")
-            if not problems:
-                for i, r in enumerate(rows):
-                    if last_ts is not None and r["timestamp"] < last_ts:
-                        problems.append(f"row {i} (page {page_no + 1}): timestamp {r['timestamp']} < previous "
-                                        f"{last_ts}; sort_direction=ASC walk went backwards (re-served or "
-                                        "unordered rows), refusing to store possible phantom repeats")
-                        break
-                    last_ts = r["timestamp"]
-            if problems:
-                raise DataError("schema", "data-api", resp.url,
-                                f"/v2/activity schema surprise ({len(problems)} problem(s)): " + "; ".join(problems[:5]),
-                                status=resp.status, retryable=False, params=params)
+            valid: list[dict] = []
+            rejected: list[tuple[Any, list[str]]] = []
+            for r in rows:
+                probs = validate_activity_row(r, wallet, types)
+                if probs:
+                    rejected.append((r, probs))
+                else:
+                    valid.append(r)
+            for i, r in enumerate(valid):
+                if last_ts is not None and r["timestamp"] < last_ts:
+                    raise DataError("schema", "data-api", resp.url,
+                                    f"/v2/activity schema surprise: row {i} (page {page_no + 1}): timestamp "
+                                    f"{r['timestamp']} < previous {last_ts}; sort_direction=ASC walk went backwards "
+                                    "(re-served or unordered rows), refusing to store possible phantom repeats",
+                                    status=resp.status, retryable=False, params=params)
+                last_ts = r["timestamp"]
             page_no += 1
             cur = pag.get("next_cursor")
-            yield ActivityPage(rows, cur, resp.server_time, page_no, server_now=resp.server_now, window_end=end)
+            yield ActivityPage(valid, cur, resp.server_time, page_no, server_now=resp.server_now, window_end=end,
+                               rejected=rejected)
             if not cur:
                 return
             if cur in seen_cursors:
@@ -229,8 +235,10 @@ class Sources:
     def taker_fill_keys(self, wallet: str, start: int, end: int) -> set[tuple]:
         return self.trade_fill_keys(wallet, start, end, taker_only=True)
 
-    def latest_activity(self, wallet: str, types: tuple[str, ...], *, end: int | None = None) -> dict | None:
-        """The wallet's newest activity row of ``types`` over its full history, or None.
+    def latest_activity(self, wallet: str, types: tuple[str, ...], *,
+                        end: int | None = None) -> tuple[dict, list[str]] | None:
+        """The wallet's newest activity row of ``types`` over its full history and its
+        validation problems (empty = valid), or None.
 
         Used once per wallet when the bootstrap window is empty: it distinguishes a
         dormant account (the row becomes a known "canary" that later polls must
@@ -243,11 +251,7 @@ class Sources:
         rows, _ = _check_envelope(resp, "/v2/activity")
         if not rows:
             return None
-        problems = validate_activity_row(rows[0], wallet, types)
-        if problems:
-            raise DataError("schema", "data-api", resp.url, "/v2/activity (latest): " + "; ".join(problems[:5]),
-                            status=resp.status, retryable=False, params=params)
-        return rows[0]
+        return rows[0], validate_activity_row(rows[0], wallet, types)
 
     def positions(self, wallet: str, *, condition: str | None = None, event_id: str | None = None) -> list[dict]:
         """OPEN positions (the superset incl. settled-but-unredeemed) for a wallet, optionally narrowed."""

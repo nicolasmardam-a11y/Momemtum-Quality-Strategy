@@ -1,6 +1,6 @@
 # Family G: public-information and cross-market lead-lag (as of 2026-10-17)
 
-Status: IN PROGRESS. Pre-registration below was written at 2026-10-17 ~22:55 UTC, before any lead-lag
+Status: COMPLETE (2026-10-18 ~06:10 UTC). **Verdict: no demonstrated edge** (sections 4, 5, 6 and 8). Pre-registration below was written at 2026-10-17 ~22:55 UTC, before any lead-lag
 result was computed. Market discovery and the rules read (section 1) came first. A 1.5-minute collector smoke test also ran first, but only to check that the plumbing works. No price comparison was run.
 
 ## 0. Pre-registration (written before results; not to be changed)
@@ -142,7 +142,85 @@ Reading:
   **+5.3 c in the first 4 days and −0.8 c in the last 3 days**. For 1h it is +3.8 c (CI −1.5 to 9.4 c, n = 336). Entering at a price that is ~15 s stale, while the fair value uses spot up to t, is a
   look-ahead advantage, so these numbers are an **upper bound**, not evidence of edge. The live test is the binding one.
 
-<!-- SECTIONS 3-4 (live crypto) are inserted here -->
+### 2.1 Addendum (2026-10-18 ~05:40 UTC): 5-minute markets, and a direct check of the series staleness
+* **5m extension** (`02c_hist_5m.py`, 3 days, 1,728 events, 1,701 with data, median volume $4.5k; `hist5m_summary.json`): Polymarket log-loss 0.429 vs fair model 0.474 (PM better).
+  The response coefficients have the same shape (0–5 s 0.02, 5–15 s 0.05, 15–30 s 0.87, 30–60 s 1.02, 60–120 s 0.21).
+  **R4 applied to 5m** (`04c_hist5m_r4.py`, `hist5m_r4_paper.json`): median predictable move 2.36 c vs median hurdle 1.72 c, and 44% of points clear it.
+  **On the series, R4 does not reject H1 for 5m.** The non-executable paper test gives +4.3 c/share (CI +2.2 to +6.4 c, n = 1,666 markets). Both are upper bounds and are invalidated by the next bullet.
+* **The series is ~18 s stale (VERIFIED, `10_series_vs_book.py`, `series_vs_book_L4.json`).** I compared 370 `/prices-history` fidelity=1 points (30 up/down markets inside the L4 live window)
+  with the live CLOB best bid/ask mid at t − lag. The mean absolute error is **3.5 c at lag 0 and falls to 0.9 c at lag 17–18 s**. The share within half a tick is 36% at lag 0 and 68% at 18 s.
+  The 18-s minimum holds for every kind (5m, 15m, 1h, 4h). The point timestamps sit at ~20 s past the minute.
+  **So the `prices-history` value stamped t is the book mid at about t − 18 s.** The "10–15 s Polymarket lag", the 5m R4 pass and the paper P&L in section 2 are all
+  produced by this publishing delay. They are not lag in the tradable book. The live tests below are the binding ones.
+
+## 3. Live sample (crypto): data and checks (written 2026-10-18 ~05:45 UTC)
+
+| Window | UTC | Length | Markets in grid | Notes |
+|---|---|---|---|---|
+| L2 | 2026-10-17 22:59:52–23:14:50 (Sat evening US) | 15 min | 50 | — |
+| L3 | 2026-10-17 23:16:51–23:36:50 | 20 min | 35 | 1 CLOB "slow consumer" reconnect; the collector was killed at 23:38 by the session interruption (after the analysed window) |
+| L4 | 2026-10-18 04:56:04–05:35:52 (Sun ~1 am ET, ~5.5 h later) | 40 min | 47 | 51 markets (5m 18, 15m 8, 1h 4, 4h 2, above-K 19), 102 tokens; 6 CLOB disconnects; 697 grid-seconds around them excluded |
+
+* Total live crypto sample **75 min** in two sessions ~5.5 h apart. Collector `live_collect.py` (public CLOB market WS, RTDS `crypto_prices_chainlink`, Binance `data-stream.binance.vision`
+  bookTicker + aggTrade, Coinbase ticker). All times are **local receive times on this sandbox**, so co-located participants see every feed earlier.
+  Raw frames: `data/raw/lead_lag_live/20261017/*_L{2,3}_*.tsv.gz` (~430 MB with S1) and `20261018/*_L4_*.tsv.gz` (277 MB). Analysis: `03_live_analyze.py` → `live_<tag>_{meta,grid,episodes}.parquet`,
+  `live_<tag>_summary.json`; `05_live_lag.py` → impulse/events; `08_combine.py` → `live_pooled_summary.json`; `09_latency_pool.py` → `live_latency_pool.json`.
+* **Strike (VERIFIED):** Gamma `priceToBeat` equals the mean of the public RTDS Chainlink spot over the 60 s before the window start. Median |diff| is 0.04 / 0.06 / 0.03 bp (L2 n = 2, L3 n = 10, L4 n = 18), with p90 ≤ 0.2 bp.
+  Against a 30-s mean it is 0.25–0.37 bp, and against the single spot value 0.6–1.6 bp. A live trader can reconstruct the strike at the window start, although Gamma publishes it only afterwards.
+* **Settlement (VERIFIED):** in 66/66 resolved 5m/15m windows, Up won iff the next window's `priceToBeat` ≥ this window's.
+* Spreads at signal time: 1 c median on 5m/15m/1h, 2 c on 4h, **6 c on hourly above-K**. Median best-ask depth: 77 (5m), 63 (15m), 45 (1h), 400 (4h) and **5 (above-K)** shares.
+
+## 4. Live results (crypto)
+
+### 4.1 H1: does the Polymarket book lag public spot? Sub-second, and the public Chainlink feed is itself late
+* **Impulse response** (Polymarket mid vs the change in Binance-implied fair value, 200-ms bins, `05_live_lag.py`): **half of the 15-s response arrives within 0.0–0.4 s** of our Binance
+  receive time, in every window, asset and kind (L2, L3, L4). 90% arrives within 0.2–0.6 s (two L3 1h series reach 1.0–1.8 s). VERIFIED for this vantage point.
+* **RTDS Chainlink spot arrives 2–3 s after Binance here.** The cumulative response of the RTDS Chainlink BTC value to a Binance move is 0.01–0.14 at 1 s, 0.25–0.31 at 2 s and 0.68–0.87 at 3 s (all windows).
+  The 5m/15m markets resolve on Chainlink, yet their quotes move with **Binance**, before the public Chainlink feed shows the move. The free Chainlink feed is a lagging signal.
+* **Trade bursts:** Polymarket trade arrivals in the 0–0.5 s after a spot event are 2.4–8.0 per second, against a base rate of 0.5–0.9 per second (L2–L4). Someone takes the stale quotes in the first half-second.
+* **Event study** (pooled L2–L4, `live_latency_pool.json`, bootstrap by market). Taker round trip in the direction of the Binance move: buy the favoured side at the ask at t_E + L, sell at the bid at t_E + L + 10 s,
+  with the 0.07·p(1−p) fee on both legs.
+
+| Entry latency L after our Binance receive | 1-s ≥ 4σ moves (87 spot events, 246 market events): gross | net of both fees | 10-s ≥ 3σ moves (32 / 96): net |
+|---|---|---|---|
+| 0 s | **+3.1 c** [+1.5, +5.4] | +0.4 c [−1.2, +2.4] | −1.2 c [−3.0, +1.1] |
+| 0.2 s | +1.8 c [+0.3, +3.6] | −1.0 c [−2.4, +0.8] | −3.0 c [−4.9, −1.0] |
+| 0.5 s | −1.2 c [−2.4, +0.1] | **−3.9 c** [−5.0, −2.7] | −5.7 c |
+| 1 s | −1.6 c | −4.4 c [−5.5, −3.4] | −6.0 c |
+| 2 s | −1.6 c | −4.3 c | −5.7 c |
+| 5 s | −2.1 c | −4.8 c | −5.0 c |
+
+  The median time from our Binance receive to a ≥ 1 c mid move is **+0.06 s** (p25 −0.25 s, p75 +0.27 s, p90 +0.42 s). In 35% of fast events the mid moved *before* we received the Binance print.
+  For 10-s moves the market had already moved in 87% of cases by the time the move qualified as an event.
+* **Reading (answers "how much is predictable, after costs, at what latency"):** a predictable component exists only at **zero latency**. It is ~3 c gross over 10 s for a 4σ one-second Binance move,
+  after crossing the 1-c spread. Even there, two taker fees take it to ≈ 0. It halves by 0.2 s and is negative by 0.5 s. A retail taker's latency is ≥ 0.3–0.5 s: decision, network,
+  the **150 ms `itode` taker delay on 5m/15m**, and matching. That puts it in the −1 to −4 c rows. Bots co-located near Binance and the CLOB see the move tens of ms before this sandbox does,
+  and their quotes already respond in ~60 ms (median) from our vantage point. **Bots compete at sub-second latency. A retail participant reacting to public spot is the stale side of the trade, not the arbitrageur.**
+* **H1 verdict:** rejected economically. R4 rejects it on the historical 15m/1h series. R4 does not reject it on the 5m series, but section 2.1 shows that series is 18 s stale. The live event study shows no positive
+  net at any achievable latency.
+
+### 4.2 H2: executable mispricing vs the pre-registered fair-value model (R1–R5)
+Signal: edge ≥ 2 c net of the taker fee with best-ask depth ≥ 5 shares; episodes merged across < 2-s gaps; entry 1 s later if still edge ≥ 0; hold to resolution.
+
+| | L2 | L3 | L4 | **Pooled** |
+|---|---|---|---|---|
+| Distinct episodes (markets) | 149 (11) | 266 (18) | 414 (26) | **829 (53)** |
+| Median duration / share ≥ 2 s / survive to t+1 s | 3.0 s / 70% / 87% | 3.0 s / 71% / 88% | 4.0 s / 73% / 92% | 3.0 s / 72% / 90% |
+| Hold-to-resolution P&L per share, delayed entry (95% CI, bootstrap by market) | −15.8 c [−28.6, −2.5] | −3.7 c [−21.1, +10.8] | −3.9 c [−11.6, +3.3] | **−6.1 c [−13.7, +1.9]** (n 715) |
+| +30 s markout at the bid, entry fee | −2.9 c | −1.0 c | −3.5 c | **−2.6 c [−3.8, −1.5]** |
+| +30 s markout at the bid, both fees | −4.2 c | −2.1 c | −4.7 c | **−3.75 c [−4.9, −2.7]** |
+| +5 s markout at the mid | −2.1 c | −1.8 c | −1.9 c | **−1.9 c [−2.3, −1.5]** |
+| Log-loss on outcomes, fair vs mid (R3) | 0.727 vs 0.689 | 0.271 vs 0.270 | 0.537 vs 0.514 | **0.354 vs 0.346** (n 3,516, 64 markets) |
+
+* **R1 (persistence): pass.** Median 3 s, 90% survive 1 s. Episodes persist because they are mostly **model disagreement**, not stale quotes.
+* **R2 (P&L): REJECT, no demonstrated edge.** The hold P&L is negative with a CI that includes 0. The +5 s and +30 s markouts are negative and significant in **every window**: prices move *against* the signal after entry.
+* **R3 (model check): REJECT.** The fair model's log-loss is worse than the Polymarket mid's on 15m (0.790 vs 0.757), 5m (0.402 vs 0.386) and 1h (1.008 vs 0.837). It is better only on 4h and above-K, which have few
+  markets (2 and 19) and wide books. The "mispricing" is model error.
+* **R5 (sample): ok** (829 episodes).
+* Exploratory (not pre-registered): bigger model gaps do worse. The +30 s markout is −3.2 c for gaps of 2–3 c and **−6.4 c for gaps of 5–10 c**, which is adverse selection. A variant with fair value from basis-adjusted
+  Binance (the fastest free feed) for the Chainlink markets gives hold −6.6 c [−16.5, +3.6] and +30 s markout −3.6 c [−4.9, −2.4] (602 episodes). No time-to-expiry bucket has a positive lower bound.
+* **Persistence across sessions:** the sign is the same in the Saturday-evening windows (L2/L3) and the Sunday-night window (L4) on every markout. The family does not "work sometimes".
+* Size at the signal: median best-ask depth 59 shares (~$28), 130 shares within 1 c (~$65).
 
 ## 5. Cross-venue: Kalshi vs Polymarket (written 2026-10-18 ~05:10 UTC)
 
@@ -256,3 +334,41 @@ pages, not independently tested here.
    always read the market).
 4. **Costs:** paid feed ($ hundreds–thousands/month) and a server near the Polymarket matching engine. The 1-s taker delay and maker cancellation during it mean a retail
    edge needs a *multi-second* information advantage, not a sub-second one.
+
+## 7. Strategy card (family G)
+
+| Item | Crypto spot → Polymarket up/down / above-K | Cross-venue (Kalshi ↔ Polymarket) | Sports public data → Polymarket |
+|---|---|---|---|
+| **Signal** | (a) Binance move ≥ 4σ within 1 s, so buy the side it favours. (b) Fair value P = Φ(ln(S/K)/(σ√τ)) (TWAP-adjusted for Chainlink markets) minus ask minus fee ≥ 2 c | `ask_YES(A) + ask_NO(B) + fee_A + fee_B < 0.99`, rules matched; or a venue-lead signal | A score change in a free feed (ESPN, league API) before the Polymarket moneyline moves |
+| **Entry rule** | Taker buy at the best ask, size ≤ best-ask depth, only if the edge persists 1 s after the signal (retail latency) | Simultaneous taker on both venues, ≥ $100 of depth on each leg | Taker at the ask on the scoring team, ≥ 1 s after detection (1-s `secondsDelay`) |
+| **Exit rule** | Hold to resolution (5 min to 1 h), or sell at the bid after 10–30 s | Hold both legs to resolution | Sell at the bid after 30 s, or hold |
+| **Holding period** | Seconds to ≤ 1 h (4h markets: ≤ 4 h) | Days to weeks (Fed: ~10 days; House: weeks) | Seconds to minutes |
+| **Data** | Binance bookTicker/aggTrade (free via data-stream.binance.vision), RTDS Chainlink (free, 2–3 s behind Binance here), Polymarket CLOB WS, Gamma metadata. The Chainlink TWAP stream needs CLOB credentials. Competitive play needs co-location | Kalshi authenticated feed (member only), Polymarket CLOB WS, both rulebooks | A low-latency score feed (official/paid), Polymarket CLOB WS |
+| **Why it might persist** | Large uninformed retail flow in short-horizon markets. The fee (≤ 1.75 c) and the 150-ms taker delay deter some arbitrageurs. The TWAP-vs-spot basis misleads naive models | Venue segmentation: eligibility, KYC and two separate capital pools | The 1-s taker delay protects makers; feed costs deter retail |
+| **Main reason it fails** | **Quotes re-price within ~0.1–0.4 s of public Binance prints (faster for co-located bots).** The predictable move (~3 c gross at zero latency) is gone by 0.5 s and is smaller than two taker fees plus the spread. Model "mispricings" are model error with adverse markouts | Typical aligned divergence (~0.6 c, published) is far below the 3–5 c fee + spread hurdle. Rule mismatch risk. Most traders cannot legally use both venues | Polymarket moves **before** the free feed (median 96% of the move happens before ESPN detection, n = 5) |
+| **Verdict** | **Rejected** under the pre-registered R2/R3 (H2) and R4 plus live (H1) | **Inconclusive data** by construction (no Kalshi data, by pre-registered decision) | **Inconclusive** (n = 6 < 10); both rejection conditions trip on the small sample |
+
+**Capacity** (for a strategy without demonstrated edge, the honest capacity is $0. These are the mechanical limits if one ran it anyway):
+* **$5k:** crypto: ~$28 at the best ask and ~$65 within 1 c per signal (5m/15m median). Signals cluster on the same spot moves across markets. Expected P&L is negative: −2.6 c/share at the +30 s markout after the entry fee, −6.1 c/share on hold.
+  Cross-venue: depth is not the constraint (Polymarket Fed "no change" has $1.66M of ask depth within 3 c), but eligibility and the missing edge are.
+* **$25k / $100k:** crypto: no additional capacity. Book depth binds, not capital, and going beyond the best level adds ≥ 1 c per share. 4h books are deeper (400 shares at best) but have few signals.
+  Cross-venue: capital is split across two venues and locked to resolution. Same eligibility limit.
+
+## 8. Overall verdict and labels
+* **Family G verdict: no demonstrated edge.**
+  * Crypto lead–lag: rejected (pre-registered R2, R3 and R4, plus the live event study).
+  * Cross-venue: inconclusive data, by the access decision.
+  * Sports: inconclusive data (n = 6), but directionally negative.
+  * Nothing here is risk-free. Even a matched cross-venue lock carries rule-mismatch, venue and settlement risk.
+* **VERIFIED:** the rules and sources in section 1; `priceToBeat` = 60-s mean of Chainlink spot; settlement consistency (66/66); `prices-history` fidelity=1 ≈ the book mid ~18 s earlier;
+  the sub-second impulse response (0.0–0.4 s) at this vantage point; RTDS Chainlink 2–3 s behind Binance here; the H2 episode statistics and the R1–R3/R5 outcomes; the event-study latency curve;
+  the Kalshi public endpoints needing no auth; the Kalshi fee rounding mechanics; the Kalshi Fed-meeting contract terms (2023 CFTC filing); the S1 counts.
+* **PLAUSIBLE:** the Kalshi quadratic fee table values (0.07/0.0175; live PDF 429); the Fed-contract rule match (current KXFED rules not read); the published cross-venue findings (abstracts);
+  "ESPN lags Polymarket" (n = 5–6); vendor feed costs and latencies.
+* **UNSUPPORTED:** House/Senate rule equivalence across venues; the Polymarket sports WS latency (0 frames received); any claim that a paid official feed would give a retail-usable lead.
+
+## 9. Files
+* Scripts: `analyses/lead_lag/01_rules.py`, `02_hist_collect.py`, `02b_binance_1s.py`, `02c_hist_5m.py`, `04_hist_analyze.py`, `04b_hist_r4_paper.py`, `04c_hist5m_r4.py`, `live_collect.py`,
+  `03_live_analyze.py`, `05_live_lag.py`, `08_combine.py`, `09_latency_pool.py`, `10_series_vs_book.py`, `06_xvenue_pm_side.py`, `sports_collect.py`, `07a_sports_rebuild.py`, `07_sports_analyze.py`.
+* Derived: `data/derived/lead_lag/` (`hist_*`, `hist5m_*`, `live_L{2,3,4}_*`, `live_pooled_summary.json`, `live_latency_pool.json`, `series_vs_book_L4.json`, `xvenue_pm_side.json`, `sports_S1_*`).
+* Raw: `data/raw/lead_lag_live/2026101{7,8}/` (live frames), `data/raw/lead_lag_docs/cftc_ptc040523303.{pdf,txt}` (Kalshi Fed-meeting contract filing).

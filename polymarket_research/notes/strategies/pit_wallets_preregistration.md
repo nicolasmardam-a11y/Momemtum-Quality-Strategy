@@ -291,15 +291,16 @@ return or evaluation-window statistic existed.
     at most 100% deployed; signals in time order; a signal without free cash is skipped (counted); capital is locked
     until t_res; run on the sampled signal stream (so it is "follow a random subset of signals"); no annualisation.
 
-- **A11 (2026-10-18T05:25Z, stage 2, written AFTER the confirmatory test results and a first exploratory grid were
+- **A11 (2026-10-18T05:13Z, stage 2, written AFTER the confirmatory test results and a first exploratory grid were
   seen) post-hoc diagnostic: outcome-dependent fills in the print-based proxy.** This addendum changes no rule of
   sections 7-11 or A10. The 28 confirmatory verdicts are those computed under the pre-registered rule (unfilled
   signals dropped). What follows is a labelled post-hoc robustness analysis, and it can only weaken a claim, not create
   one.
   - Finding that triggered it: a signal counts as filled only if other wallets' taker BUY prints follow it. Whether
     they do depends on how the market moves next. In the test split, at the 2-minute delay, $2,500 VWAP fills happen
-    for 39% of winning S4-crypto decisions and 20% of losing ones. Even B1 (random eligible wallets) then shows +17%
-    ROI at that size, and the first-print model on the VWAP-filled subset goes from -5% to +33%. For first-print fills
+    for 39% of winning S4-crypto decisions and 20% of losing ones. Even B1 (random eligible wallets) then shows +9.7%
+    ROI at that size [corrected 2026-10-18T05:30Z from "+17%", which is B1's first-print ROI on the $2,500-filled
+    subset], and the first-print model on the VWAP-filled subset goes from -5% to +33%. For first-print fills
     the bias runs the other way in several screens: losers fill more often, 0.80-0.87 against 0.67-0.72.
   - So every result is also reported under two more estimators (`evalib.est_vectors`).
     - *ipw*: the outcome-neutral "always filled" estimate. Each filled signal is weighted by 1 / fill rate of its
@@ -323,3 +324,17 @@ return or evaluation-window statistic existed.
     - delays follow A10;
     - fees use each market's current feeSchedule.
   - Nothing above this line was changed.
+- **A12 (2026-10-18T05:21Z, stage 2, post hoc, written after the A11 grid was seen) repair of the ipw estimator and
+  of the exploratory Holm family.** No confirmatory rule changes.
+  - The first ipw version weighted filled signals by class (outcome x own-price bucket). For large VWAP sizes it
+    broke down. In S4_other at $2,500-$10,000 many loser classes had no fill at all, so those losers dropped out and
+    ipw came out positive (+4% to +19%). On the same variants the adverse bound gave -68% to -90%.
+  - Under "always filled" a loser loses its stake whatever its entry price. So ipw now counts every feasible loser at
+    the mean ROI of filled losers (-1 minus fees; -1 if none filled).
+  - Only winners are reweighted, by bucket. A bucket with no filled winner falls back to the outcome level: its
+    winners are spread over the represented buckets.
+  - Signal-minus-benchmark differences use per-row weights for filled rows, with losers weighted at the outcome
+    level.
+  - In the exploratory grid, Holm and the reality check now use the same family: variants with >= 30 distinct
+    filled events and a non-zero bootstrap SE. The first run's 12 "Holm-significant" ipw variants were all single
+    signals with SE = 0. The number of variants with any fill is reported as well.

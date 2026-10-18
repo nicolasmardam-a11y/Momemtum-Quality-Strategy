@@ -67,17 +67,19 @@ def test_repeated_cursor_and_truncation_are_errors(second_rows) -> None:
 
 def test_schema_surprises_are_detected(second_rows) -> None:
     api = FakeApi(Clock(T0))
+    # Review round 2: invalid rows are returned separately (ActivityPage.rejected), never as fills;
+    # the poller fails the walk when no row of it is valid and quarantines them otherwise
+    # (test_polling.test_schema_surprise_notifies_immediately, test_review_round2).
     api.fail("/v2/activity", "missing_field")
-    with pytest.raises(DataError) as e:
-        list(client(api).iter_activity(SECOND, start=1, types=TYPES))
-    assert e.value.kind == "schema"
+    pages = list(client(api).iter_activity(SECOND, start=1, types=TYPES))
+    assert pages[0].rows == [] and any("missing field" in p for p in pages[0].rejected[0][1])
     api.fail("/v2/activity", "bad_json")
     with pytest.raises(DataError, match="not JSON"):
         list(client(api).iter_activity(SECOND, start=1, types=TYPES))
     bad = dict(second_rows[0], proxy_wallet="0x" + "1" * 40)
     api.add_activity(SECOND, [bad])
-    with pytest.raises(DataError, match="proxy_wallet"):
-        list(client(api).iter_activity(SECOND, start=1, types=TYPES))
+    pages = list(client(api).iter_activity(SECOND, start=1, types=TYPES))
+    assert pages[0].rows == [] and "proxy_wallet" in pages[0].rejected[0][1][0]
 
 
 def test_retries_honour_retry_after_then_classify() -> None:

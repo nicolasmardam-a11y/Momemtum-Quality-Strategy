@@ -15,6 +15,7 @@ Email:    PM_ALERT_SMTP_HOST, PM_ALERT_SMTP_PORT (default 587), PM_ALERT_SMTP_US
 from __future__ import annotations
 
 import json
+import logging
 import os
 import smtplib
 import ssl
@@ -31,14 +32,21 @@ import requests
 from .config import Config, resolve_path
 
 TELEGRAM_API = "https://api.telegram.org"
+log = logging.getLogger("alerts.notify")
 
 
 class NotifyError(Exception):
-    def __init__(self, detail: str, *, retryable: bool = True, retry_after_s: float | None = None) -> None:
+    """A failed send. ``outcome_unknown`` means the message may nevertheless have been delivered
+    (the request was sent but the reply was lost, e.g. a read timeout): the dispatcher then re-sends
+    it marked [POSSIBLE DUPLICATE] (at_least_once) or does not re-send it (at_most_once)."""
+
+    def __init__(self, detail: str, *, retryable: bool = True, retry_after_s: float | None = None,
+                 outcome_unknown: bool = False) -> None:
         super().__init__(detail)
         self.detail = detail
         self.retryable = retryable
         self.retry_after_s = retry_after_s
+        self.outcome_unknown = outcome_unknown
 
 
 @dataclass
@@ -155,7 +163,11 @@ class TelegramNotifier:
         try:
             r = self._post(url, json=body, timeout=self.timeout)
         except requests.RequestException as e:
-            raise NotifyError(redact(f"telegram request failed: {type(e).__name__}: {e}", [self._bot])) from None
+            # A read timeout or a broken response body means the request reached Telegram; whether the
+            # message was posted is unknown. Connection errors and connect timeouts happen before sending.
+            sent = isinstance(e, (requests.ReadTimeout, requests.exceptions.ChunkedEncodingError))
+            raise NotifyError(redact(f"telegram request failed: {type(e).__name__}: {e}", [self._bot]),
+                              outcome_unknown=sent) from None
         try:
             j = r.json()
         except ValueError:
@@ -192,6 +204,7 @@ class EmailNotifier:
         em["To"] = ", ".join(self.recipients)
         em.set_content(msg.body())
         ctx = ssl.create_default_context()
+        stage = "connect"         # connect -> send (DATA in progress) -> accepted (server took the message)
         try:
             if self._factory is not None:
                 smtp = self._factory(self.host, self.port, timeout=self.timeout)
@@ -204,11 +217,22 @@ class EmailNotifier:
                     smtp.starttls(context=ctx)
                 if self.user:
                     smtp.login(self.user, self._password or "")
+                stage = "send"
                 smtp.send_message(em)
+                stage = "accepted"
         except smtplib.SMTPAuthenticationError as e:
             raise NotifyError(redact(f"smtp auth failed: {e.smtp_code}", [self._password or ""]), retryable=False) from None
         except (smtplib.SMTPException, OSError) as e:
-            raise NotifyError(redact(f"smtp failed: {type(e).__name__}: {e}", [self._password or ""])) from None
+            detail = redact(f"{type(e).__name__}: {e}", [self._password or ""])
+            if stage == "accepted":
+                # send_message returned, so the server accepted the message; only QUIT/close failed.
+                # Re-sending would deliver it twice.
+                log.warning("email: message accepted by the server, error while closing the session ignored: %s",
+                            detail)
+                return
+            # Lost connection or timeout while the server processed DATA: it may have queued the message.
+            unknown = stage == "send" and isinstance(e, (smtplib.SMTPServerDisconnected, TimeoutError))
+            raise NotifyError(f"smtp failed: {detail}", outcome_unknown=unknown) from None
 
 
 class NotifierConfigError(ValueError):

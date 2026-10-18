@@ -67,8 +67,11 @@ def main() -> None:
     d = V2 / f"wallets_{mode}"
     d.mkdir(exist_ok=True)
     stp = V2 / f"wallets_{mode}_status.tsv"
-    done_chunks = set(pd.read_csv(stp, sep="\t")["chunk"]) if stp.exists() else set()
-    chunks = [(k, ws[i:i + CH]) for k, i in enumerate(range(0, len(ws), CH)) if k not in done_chunks]
+    prev = pd.read_csv(stp, sep="\t") if stp.exists() else pd.DataFrame(columns=["wallet", "chunk"])
+    done_w = set(prev["wallet"])
+    ws = [w for w in ws if w not in done_w]  # resumable by wallet, so the wallet list may grow (nested subsets)
+    k0 = int(prev["chunk"].max()) + 1 if len(prev) else 0
+    chunks = [(k0 + k, ws[i:i + CH]) for k, i in enumerate(range(0, len(ws), CH))]
     print(f"{mode}: {len(ws)} wallets, {len(chunks)} chunks to pull", flush=True)
     t0 = time.time()
     with ThreadPoolExecutor(16) as ex:
