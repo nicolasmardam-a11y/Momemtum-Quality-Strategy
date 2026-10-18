@@ -338,3 +338,8 @@ return or evaluation-window statistic existed.
   - In the exploratory grid, Holm and the reality check now use the same family: variants with >= 30 distinct
     filled events and a non-zero bootstrap SE. The first run's 12 "Holm-significant" ipw variants were all single
     signals with SE = 0. The number of variants with any fill is reported as well.
+- **AUD-A1 (2026-10-18, stage 4 adversarial audit; pointer only, written after all results were seen).** No rule above
+  was changed. The audit re-computed the confirmatory results independently, checked look-ahead, fills, execution,
+  fees and dependence, and ran post-hoc sensitivity checks (slippage convention, wallet-clustered CIs, CL priced
+  without the fresh wallets' own prints, the stage-3 market-table gap). All of them are labelled exploratory and can
+  only weaken a claim. They are reported in `pit_wallets_FINAL.md`; the scripts are `analyses/pit_wallets/a01`-`a07`.

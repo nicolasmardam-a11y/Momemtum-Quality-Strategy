@@ -7,7 +7,9 @@ follower's entry print. This script re-prices every cluster signal from the firs
 (d = 5 s, 30 s, 2 min, 10 min, 15 min, 60 min; within 60 min) by wallets that are NOT fresh wallets whose first
 decision is on that token (fresh_first_decisions.parquet, matched by cityHash64(address)), and also without the
 exclusion (to reproduce stage 2). One CryptoHouse query (external table of 773 signals).
-Output: data/derived/pit_wallets/audit/a04_cluster_prices.parquet
+Then evaluates CL (first print + 0.01, cap 0.999, $100, hold; fee 0 and current category fee) by split and delay, with
+an event-clustered CI at 2 min, with and without the exclusion.
+Output: data/derived/pit_wallets/audit/a04_cluster_prices.parquet, a04_cluster_eval.parquet
 Run from polymarket_research/:  python analyses/pit_wallets/a04_cluster_selfprints.py
 """
 from __future__ import annotations
@@ -53,6 +55,10 @@ FROM j
 
 
 def main():
+    fpath = OUT / "audit" / "a04_cluster_prices.parquet"
+    if fpath.exists():   # resumable: re-evaluate without re-querying
+        evaluate(pd.read_parquet(fpath))
+        return
     cl = pd.read_parquet(OUT / "cluster_signals.parquet", columns=["k", "signal_ts"])
     cl = cl.reset_index(drop=True); cl["sid"] = np.arange(len(cl))
     fr = pd.read_parquet(OUT / "fresh_first_decisions.parquet", columns=["wallet_hash", "k"])
@@ -71,6 +77,37 @@ def main():
     out.to_parquet(OUT / "audit" / "a04_cluster_prices.parquet", index=False)
     st = body.get("statistics", {})
     print(f"signals {len(cl)}, with prints {out.sid.nunique()}, server {st.get('elapsed')} s, rows {st.get('rows_read')}")
+    evaluate(out)
+
+
+def evaluate(a: pd.DataFrame) -> None:
+    from a01_recompute_stage2 import RATE, cboot
+    s = pd.read_parquet(OUT / "sig_members.parquet")
+    s = s[s.stype == "CL"]
+    s = s.merge(pd.read_parquet(OUT / "follower_prices.parquet"), on="psid", how="left")
+    rng = np.random.default_rng(5)
+    rows = []
+    for d in DL:
+        x = a[a.delay == d][["k", "signal_ts", "ts_all", "px_all", "ts_ex", "px_ex"]]
+        g = s.merge(x, left_on=["k", "t_sig"], right_on=["k", "signal_ts"], how="left")
+        for which in ["all", "ex"]:
+            ts = g[f"ts_{which}"].fillna(0).values; px = g[f"px_{which}"].fillna(0).values
+            ok = (ts > 0) & (px > 0) & (ts < g.r.values)
+            e = np.minimum(0.999, np.round(px, 4) + 0.01)
+            p = g.p.astype(float).values
+            for fee in ["hist", "cur"]:
+                fr = g.category.map(RATE).fillna(0.05).values * (1 - e) if fee == "cur" else 0.0
+                roi = np.where(ok, p / np.where(ok, e, 1) - 1 - fr, 0.0)
+                for sp in ["train", "val", "test"]:
+                    m = (g.split == sp).values & ok
+                    lo, hi = (cboot(g.underlying_key.values[m], 100 * roi[m], np.full(int(m.sum()), 100.0), rng, 1000)
+                              if d == 120 else (np.nan, np.nan))
+                    rows.append(dict(delay=d, prints=which, fee=fee, split=sp, n_fill=int(m.sum()),
+                                     n_ev=int(g.underlying_key[m].nunique()), roi=float(roi[m].mean()), lo=lo, hi=hi,
+                                     share_first_print_by_fresh=float(((g.ts_all != g.ts_ex) & (g.ts_all > 0))[g.split == sp].mean())))
+    r = pd.DataFrame(rows)
+    r.to_parquet(OUT / "audit" / "a04_cluster_eval.parquet", index=False)
+    print(r[r.delay == 120].round(4).to_string(index=False))
 
 
 if __name__ == "__main__":

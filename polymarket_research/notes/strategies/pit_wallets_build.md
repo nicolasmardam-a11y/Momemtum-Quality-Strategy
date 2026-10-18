@@ -6,6 +6,15 @@ was computed in this stage. Pre-registration: `notes/strategies/pit_wallets_prer
 Labels: **VERIFIED** = I inspected the primary data or source myself; **PLAUSIBLE** = consistent with the
 evidence but not checked directly; **UNSUPPORTED** = not established.
 
+> **Stage-4 audit (2026-10-18, [corrected by auditor]).** No error was found in this stage. Independent checks
+> (`analyses/pit_wallets/a01`-`a07`, outputs in `data/derived/pit_wallets/audit/`): a fresh hash sample of 25 S1 members at
+> TEST dates plus 14 negative controls was re-derived from Data API fills cut at D with the auditor's own code, 39/39
+> matched, and every counted market also had its UMA resolution record (`/v2/resolutions`) before D (`a03`); no
+> exchange, adapter or CTF contract ever appears as a fill owner (one CryptoHouse query); the S1 profile below is now
+> backed by a price-implied luck null (`a02`). The only qualification: "resolved decisions are complete before D by
+> construction" (A2, `04_screens.py`) holds except for fills after closedTime, which are rare (0.0065% of tokens have
+> one more than 1 h after it). Final conclusions: `pit_wallets_FINAL.md`.
+
 ## 0. Stage-1 result in brief (resumed session, finished 2026-10-17T23:17Z)
 
 - **Built (VERIFIED).** The point-in-time screens were computed at all 24 selection dates
@@ -33,7 +42,10 @@ evidence but not checked directly; **UNSUPPORTED** = not established.
   - The median S1 wallet's trailing P&L on those bets is $0.56, and only 4.4% made more than $100.
   - Membership turns over by about half each month.
   - So S1 mostly picks small favourite buyers. Copying such buys at worse prices after detection leaves little
-    room for profit. That is a prior (PLAUSIBLE), not a result; stage 2 tests it.
+    room for profit. That is a prior (PLAUSIBLE), not a result; stage 2 tests it. [corrected by auditor: the
+    selection mechanism is now VERIFIED (`a02`): among the random eligible sample (B1) at test dates, 27% of
+    wallets with exactly 5 resolved bets won all 5, while their own entry prices imply 24-30% under fair pricing;
+    the median S1 member would have gone 5 for 5 with probability >= 0.91 by luck alone.]
 - **New constraint.** CryptoHouse enforces 120 queries per hour (section 2). Stage 2 must batch its
   follower-price pulls.
 

@@ -38,6 +38,7 @@ the project, was rejected or showed no demonstrated edge at executable prices af
   screen mostly selects people buying 0.99 favourites. All 28 pre-registered wallet screens were rejected,
   including skill-based, category-specialist, large-bet, returning-wallet and clustered-new-wallet signals.
   Skilled wallets' edge exists at *their* prices but is gone at the price a follower gets two minutes later.
+  A 2026 holdout on Protocol V2 data replicates this (S1 −3.2%; no screen beats matched random entries).
 - **mintblade is not a copyable signal.** Its "5-for-5" counts markets, not events: it is really 3 decisions
   (one a $4.81 test ticket). Run point-in-time, your screen would have copied **zero** of its trades. It has
   not traded since 16 June 2026.
@@ -82,7 +83,7 @@ Capacity is measured at executable prices today. "Locked" means capital is tied 
 | 3 | **D. Maker-side favourites / selective quoting** | Zero maker fee + rebates + rewards, against adverse selection and inventory | Literature: makers out-earn takers everywhere, but fill-conditional. Ours: historical realised spread ≈ 0.0–0.1¢/share; live 114 market-hours weakly negative (4 fills drive it) | **Needs forward book capture**; free 1-min L2 Feb–Aug 2026 exists | High: queue position, cancels, monitoring | Moderate | Unknown | **No demonstrated edge** → research |
 | 4 | H. Near-resolution ≥ 0.99 (T−6h) | Lock-up aversion near settlement | Pre-registered, audited | Same as 2 | Low | Short lock | Tiny | No demonstrated edge |
 | 5 | F. Taker mean reversion after ≥ 10¢ shocks | Order-flow pressure reverses | Pre-registered, 869 TEST trades, audited: gross +7.9%/$ but net −0.6% | Tapes | Medium | Short | n/a | No demonstrated edge |
-| 6 | A. Wallet following (all screens) | "Informed" wallets lead prices | **Strong negative.** PIT on 2024–25 on-chain fills, 28 pre-registered hypotheses, 10,200 exploratory variants, all rejected; 2026 holdout see §C | CryptoHouse (to 2026-01-05), Data API v2 | Medium–high (seconds matter) | Varies | n/a | **Rejected** |
+| 6 | A. Wallet following (all screens) | "Informed" wallets lead prices | **Strong negative.** PIT on 2024–25 on-chain fills, 28 pre-registered hypotheses, 10,200 exploratory variants, all rejected; 2026 V2 holdout also negative (S1 −3.2%, S2 −0.6%, S3 −3.8%, S5 −4.0%) | CryptoHouse (to 2026-01-05), Data API v2 | Medium–high (seconds matter) | Varies | n/a | **Rejected** |
 | 7 | G. Lead–lag (crypto spot, Kalshi, sports) | Slow incorporation of public info | Crypto: −4.1¢/trade (CI −11.3 to +2.9), 30 s markout −2.6¢ [−3.8, −1.5]; Kalshi/sports inconclusive (no Kalshi data by design; 6 sports events) | Binance/Coinbase public; Kalshi terms risk | Very high (sub-second) | Short | n/a | No demonstrated edge |
 | 8 | B. Complete-set (binary and neg-risk) | Sum of outcome prices ≠ 1 | Binary: 0 of 2.59M market-scans (structural). Neg-risk: 8 of 252k group-scans net-positive, 0 of 436 on re-check | Public books | High (legging, in-play flickers ~2 s) | Low if converted | $0/day demonstrated | No demonstrated edge |
 | 9 | E. Fading longshots (buy NO < 0.10) | Overpriced longshots | Pre-registered, rejected (−6.5%; −3.4% in an unscreened sample) | Same as 2 | Low | Locked | n/a | **Rejected** |
@@ -207,15 +208,38 @@ guarantees thousands of perfect records by luck.
   Follower entry is the first other-wallet taker print ≥ 2 min after the signal (plus 1 tick), held to
   resolution. Benchmarks: random eligible wallets (B1), price- and category-matched prints (B2), a favourite
   rule, and T-bills. Inference is event-clustered, with Holm and reality-check adjustments.
-- **TEST (selection dates 2025-07..12):** S1 "exactly 5, all won" **−7.1%** [−10.6, −3.7]; S2 "≥ 5, no
-  losses" −3.2% [−4.5, −2.0]; S3 skill −7.8%; S4 category specialists −2.9% to −6.0%; S5 top-1% P&L −1.8%
-  [−5.1, +1.5]. Large-bet, returning-wallet and fresh-wallet-cluster signals were also rejected.
+- **TEST (selection dates 2025-07..12):** S1 "exactly 5, all won" **−7.1%** [−10.6, −3.7] at zero fee and
+  −7.8% at current fees, and between −8% and −10% at every delay from 5 s to 60 min. S2 "≥ 5, no losses"
+  −3.2% [−4.5, −2.0]; S3 skill −7.8%; S4 category specialists −2.9% to −6.0%; S5 top-1% P&L −1.8%
+  [−5.1, +1.5]. Large-bet, returning-wallet and fresh-wallet-cluster signals were also rejected. All 28
+  confirmatory hypotheses were rejected (Holm p = 1.00); the auditor's recompute matched all 90 cells, and 0 of
+  186 slippage/fee/estimator variants has a CI above zero.
+- **Why 5-for-5 fails (luck null).** Among random eligible wallets with exactly 5 resolved bets, 26.9% won all
+  five, while their own entry prices implied 23.5–30.1%. There is no excess skill. The median S1 member bought
+  at 0.98, would have won all five by luck with probability ≥ 0.91, and made $0.43 on the record.
 - **Skill is real but already priced.** Skill-screened wallets' own entries had +0.6 to +7.6 points of edge.
   At the follower's price two minutes later it was −0.2 to +0.2 points, and still negative at a 5 s delay.
 - **Methodology trap (important for any copy-trading backtest).** Counting a signal as "filled" only when later
-  prints exist makes even random wallets look profitable (+5.6% to +15.7%), because winners fill up to 3× as
-  often as losers. Outcome-neutral estimators remove it.
-- **2026 Protocol-V2 holdout** (`pit_wallets_v2_holdout.md`): __HOLDOUT__
+  prints exist makes even random wallets look profitable (+5.6% to +15.7% at $500–$10k sizes), because whether
+  a signal fills depends on what the market does next. Outcome-neutral estimators remove it.
+- **2026 Protocol-V2 holdout** (`pit_wallets_v2_holdout.md`, audited in `pit_wallets_FINAL.md`). One selection
+  date (2026-06-01), signals June–September 2026, current per-market fees, 2-minute model.
+  - Results: S1 **−3.2%** [−7.9, +0.5], or −2.6% [−7.2, +1.0] after the audit fixed a market-table gap that had
+    misclassified 23 of 55 members. S2 −0.6% [−3.4, +2.3]; S3 −3.8% (corrected); S5 −4.0%. Random wallets (B1)
+    −9.4%.
+  - No screen beats random entries matched on category, week and price (Holm p = 1.00), and results stay
+    negative at a 5 s delay.
+  - S1 is low-power (85–90 events), so its verdict rests on a negative point estimate consistent with 2024–25.
+  - World Cup signals are too few to conclude anything.
+  - **mintblade and GRIMDRIP were created on 2026-06-02, after the selection date**, so no point-in-time screen
+    could have selected them.
+- **Audit corrections** (none changes a verdict):
+  - the cluster signal used the cluster's own prints;
+  - the 2026 market-table gap;
+  - 18 fills at or after resolution;
+  - a slippage tick that was too large near 0.96.
+- **Verdict: no demonstrated edge for any wallet-following family, at any delay, net of current fees, against
+  every benchmark.** The 2024–25 test split is now spent: any new wallet idea needs fresh data after 2026-10-17.
 
 ---
 

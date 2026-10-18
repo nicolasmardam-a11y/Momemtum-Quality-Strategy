@@ -8,6 +8,15 @@
 - Labels: **VERIFIED** = computed from the data here or checked against a primary source; **PLAUSIBLE** = consistent
   with the evidence but not directly verified; **UNSUPPORTED** = no evidence.
 
+> **Stage-4 audit (2026-10-18, [corrected by auditor]).** The confirmatory numbers were re-computed from the raw signal
+> and print tables with the auditor's own code (`a01_recompute_stage2.py`, no `evalib` import): ROI, fills and event
+> counts match to 1e-16 for all 90 (type, screen, split) cells, and the ipw estimator matches within 0.02 point in
+> 30 of 31 test cells (0.6 point in F2 S4_politics, 22 events). Three
+> corrections, none of which changes a verdict: (1) CL entries were priced from prints that include the cluster's own
+> fresh wallets (sections 1-2 below); (2) the +0.01 "tick" is 10 ticks above 0.96 (section 0, item 1); (3) the
+> current-fee stress uses the category table, which overstates some markets' fees (section 2). Wallet-clustered CIs
+> were added (section 4). Final, audited conclusions: `pit_wallets_FINAL.md`.
+
 ## 0. Bottom line
 
 1. **The trader's rule does not survive as a follower strategy.** The rule is to follow wallets with exactly 5 bets
@@ -19,7 +28,11 @@
    - Validation was -4.5% and train -6.1%. Every split is negative with a CI below zero. **VERIFIED.**
    - The reason is visible in the data. S1 wallets buy near-certain favourites: the median own entry price is 0.987.
      They also have no edge of their own in the evaluation window, at -2.3 points per decision (payout minus their own
-     first-fill price). The extra tick then costs about 1.1% per trade.
+     first-fill price). The extra tick then costs about 1.1% per trade. [corrected by auditor: +0.01 is ten ticks
+     for prices above 0.96, where the tick is 0.001, and 64% of S1's filled entries are above 0.96. With a
+     tick-aware +0.001 / +0.01, S1 is -6.6% [-10.4%, -2.7%]; with no slippage at all, -6.0% [-9.5%, -1.8%]. Across
+     the three slippage conventions x two fee regimes x drop / ipw (186 test variants, `a01_slippage_sens.parquet`)
+     no confirmatory hypothesis has a CI above zero.]
 2. **All 28 pre-registered hypotheses are rejected.** The family is 9 screens x {new decision, large bet, returning
    wallet} plus the fresh-wallet cluster signal.
    - 27 of 28 have negative test ROI. None beats both benchmark B1 (random eligible wallets) and B2 (price/category-
@@ -122,6 +135,11 @@ Test-split summary at the pre-registered model (first print >= 2 min after the s
   - **Taker prints show prices that traded, not the book.** The follower would compete with these takers for the same
     asks. For large sizes the VWAP may understate cost (no depth information) or overstate it (it buys over 30
     minutes while the price moves). This is an exploratory proxy.
+  - [corrected by auditor] For CL signals no wallet was excluded (A10, "cluster signals: no exclusion"), although
+    pre-registration sections 7 and 12 say prices paid by the followed wallets are never used. At the 2-minute delay
+    41% of CL first prints were buys by the cluster's own fresh wallets. Re-priced without any fresh wallet whose
+    first decision is on that token (`a04_cluster_selfprints.py`, one CryptoHouse query): test -0.8% [-6.6%, +5.8%]
+    (282 filled, 180 events) instead of -0.7%; validation -15.2% instead of -10.4%; train -7.5%. Verdict unchanged.
 - **Spot check (VERIFIED).** 25 hash-chosen P signals in small markets were re-derived independently from the Data API
   taker tape (`/v2/trades?condition=`).
   - Fill status agreed 25/25; the time from detection to the first print was identical 18/18.
@@ -135,6 +153,10 @@ Test-split summary at the pre-registered model (first print >= 2 min after the s
   - (b) Prospective case: the current taker schedule fee = shares x rate x p(1-p), with rate 0.07 crypto, 0.05
     sports, 0.04 politics and 0.05 other (`pmr.fees`, CONTEXT.md). This costs a buyer rate x (1 - p) per dollar
     staked. The exit variant also pays the fee on the sale.
+    [corrected by auditor: the category table overstates today's per-market fee for sports markets on
+    `sports_fees_v2` (0.03), fee-free geopolitics markets inside "politics", and finance/tech/mentions markets
+    (0.04) inside "other" (0.05), so this stress case is slightly pessimistic. It cannot hide an edge: every
+    hypothesis already fails at fee 0, and any taker rebate (at most 50% of the fee) lies between the two cases.]
 - **Cash benchmark (iv).** 3-month T-bill, FRED series DTB3 (secondary-market discount rate), downloaded 2026-10-18
   04:57 UTC to `data/raw/fred/DTB3.csv`.
   - Mean rate: 5.24% in 2024H1, 4.70% in 2024H2, 4.22% in 2025H1 and 3.92% in 2025H2.
@@ -214,6 +236,9 @@ Test split (2025-07..2025-12 selection dates), all pre-registered hypotheses plu
 | F2 | B1_random_eligible | 545 | 0.80 | 270 | -7.2% | [-15.5%, +1.8%] | [-17.7%, +4.5%] |  |  |  |  |  | -12.0% | -16.3% | benchmark |
 | CL | CL | 349 | 0.85 | 183 | -0.7% | [-6.2%, +5.4%] | [-5.4%, +3.7%] | -4.7% | 0.12 | -3.1% | 0.21 | 1.00 | -0.5% | -4.3% | rejected |
 
+- **[auditor addition] Wallet-clustered 95% CIs** (`a01`; many signals come from a few bot wallets): P S1
+  [-9.5%, -4.6%], P S2 [-4.4%, -2.1%], P S3 [-12.3%, -3.6%], P S5 [-5.5%, +2.3%], P S4_politics [-11.5%, -0.2%],
+  F1 S4_sports [-4.1%, +11.7%], CL [-6.4%, +5.3%]. No verdict changes.
 - **Benchmark columns.**
   - **B1** = the same signal type from random eligible wallets.
   - **B2** = mean ROI of all sampled taker BUY prints in the same month, category and price decile, with the same

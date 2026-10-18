@@ -5,6 +5,16 @@
   (section 1), written before any evaluation-window (2026-06-01 onwards) trade, price or outcome was pulled.
 - Scripts: `analyses/pit_wallets/v2_*.py` and `v2common.py`. Data: `data/derived/pit_wallets/v2/`.
 
+> **Stage-4 audit (2026-10-18, [corrected by auditor]).** Two errors, neither changes a verdict. (1) The market table
+> (`markets_resolved.parquet`: closed markets with endDate < 2026-10-16) misses markets that resolved early but carry a
+> later endDate. Gamma shows 1,309 such markets resolved cleanly before D and 575 inside the evaluation window
+> (`a05_stage3_market_gap.py`). Decisions on them were treated as open, so **23 of the 55 S1 members were
+> misclassified** (they had 1-2 more resolved bets, so not exactly 5). Corrected S1 = 43 wallets (32 kept, 11 new and
+> never pulled). The S1 follower result on the 32 correct members is -2.6% [-7.2%, +1.0%] (86 filled, 85 events, 12
+> wallets), against -3.2% for all 55. (2) M1 accepted a print at or after t_res when detection was before t_res (18
+> signals); under the stage-2 rule S3 is -3.8% (not -4.5%), S5 -4.0%, B1 -9.2% (`a06_stage3_recompute.py`, which
+> otherwise reproduces this note's numbers). Final conclusions: `pit_wallets_FINAL.md`.
+
 ## 0. Result in brief
 
 **Verdict: no demonstrated edge in the 2026 regime.** S1, S2, S3 and S5 are all rejected under pre-registration
@@ -224,6 +234,10 @@ Why a holdout: CryptoHouse fills stop at 2026-01-05. Protocol V2, pUSD, the 2026
 
 - The S5 cut is $4,482 under IPW (unweighted 99th percentile: $7,555). Stage 1's population cut was $3,300-5,268 in
   2025-H2.
+- [corrected by auditor] These counts use a market table that misses 1,309 markets resolved before D (long-dated
+  markets that closed early; see the audit box at the top). With them, S1 has 43 members (23 of the 55 above drop
+  out, 11 join), S2 1,027 (19 out, 15 in) and S3 127 (4 out, 5 in); S5 was not recomputed (its P&L needs the missing
+  markets' payouts per fill). 1.3% of eligible wallets' counted decisions and 20% of S1 members' were on such markets.
 - **Outcome-won is not made-money.** S1 wallets won all 5 bets, but only 76% of those decisions made money in their
   market. The median S1 wallet made **$0.17** in total on its five wins, because it bought favourites at 0.97 on
   average. The same profile as stage 1 (82% of S1 rows priced >= 0.90) appears in 2026.
@@ -283,6 +297,15 @@ Why a holdout: CryptoHouse fills stop at 2026-01-05. Protocol V2, pUSD, the 2026
 
 \* The wallet's own first-second VWAP with the current taker fee. It is not available to a follower, and it overstates
 fees for wallets that were makers.
+
+[corrected by auditor] (a) M1 here accepts a print at or after t_res when detection is before t_res (S3 9, S5 3,
+B1 6 signals). Under the stage-2 rule (no fill at or after t_res): S3 -3.8% [-12.2%, +6.1%], S5 -4.0%, B1 -9.2%;
+S1 and S2 unchanged. (b) Wallet-clustered CIs: S1 [-10.6%, -0.3%] (24 signal wallets with fills), S2 [-2.8%, +1.9%],
+S3 [-12.8%, +4.1%], S5 [-12.9%, +2.5%]. (c) Signals on early-resolved markets missing from the table were not
+evaluated: S1 2, S2 705 (99% winners, bought at a median 0.999), S3 51, S5 75, B1 222 should have been evaluable. At
+the group pricing rates about 94 S2 and at most 7 per other group would have been priced. At S2's fill rates
+(winners 27%, losers 92%) that is about 26 more filled S2 signals, which would move S2's ROI by roughly 0.1 point
+(PLAUSIBLE; not priced).
 
 - **Benchmarks.**
   - "vs R" is the paired difference from random taker entries in the same category and week at +-5 cents
@@ -414,6 +437,8 @@ fees for wallets that were makers.
   - The eval window straddles 2026-05-28 (Taker Rebate Program start) and possible schedule changes. The schedule
     in force at each trade was not reconstructed (UNSUPPORTED that it was constant).
 - One selection date and a 4-month window. S1 has 90 events, so its power is low.
+- [corrected by auditor] The market table excludes markets with endDate >= 2026-10-16 even when they resolved earlier;
+  this mis-set 23 of 55 S1 memberships (top-of-note box, `a05`).
 - Trades come from Data API v2, and the CryptoHouse fill rule was not re-verified for V2. The outcome-index mapping was
   verified on 6,930 rows, and the API is the platform's own record (VERIFIED for the fields used).
 - The decision P&L uses fills only. Splits, merges and conversions in `/v2/activity` were not pulled: they were not

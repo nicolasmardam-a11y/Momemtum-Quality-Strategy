@@ -60,8 +60,12 @@ def main():
     dm = d[d.counted & ~d.condition_id.isin(mk) & d.wallet.isin(sub)]
     em = e[~e.condition_id.isin(mk)]
     cids = sorted(set(dm.condition_id) | set(em.condition_id))
-    g = lookup(cids)
-    g.to_parquet(OUT / "audit" / "a05_missing_markets.parquet", index=False)
+    fpath = OUT / "audit" / "a05_missing_markets.parquet"
+    if fpath.exists():   # resumable: the Gamma lookup is stored on the first run
+        g = pd.read_parquet(fpath)
+    else:
+        g = lookup(cids)
+        g.to_parquet(fpath, index=False)
     found = set(g.condition_id)
     g["cls"] = np.select([~g.closed, g.clean & (g.t_res_s < T_D), g.clean & (g.t_res_s < T_RESCUT), g.clean],
                          ["open", "resolved<D", "resolved D..10-15", "resolved>=10-15"], "closed_unclean")
@@ -98,6 +102,18 @@ def main():
         z = y[y[s].fillna(False).astype(bool)]
         tot = int(e[s].fillna(False).astype(bool).sum())
         print(f"  eval {s}: missing-market signals {len(z)} of {tot}; should have been evaluable {int(z.should_be_evaluable.sum())}")
+    # ---- stage-3 S1 follower result restricted to wallets that are S1 under the corrected resolution status
+    sys.path.insert(0, str(Path(__file__).parent))
+    from a01_recompute_stage2 import cboot
+    f = pd.read_parquet(V / "follower.parquet")
+    f = f[(f.delay == "2m") & f.S1.astype(bool)]
+    ok = (f.status == "ok") & (f.dt < f.t_res_s) & f.m1_raw.notna()
+    keep = set(w.loc[w.S1.astype(bool) & w.S1_fix, "wallet"])
+    rng = np.random.default_rng(4)
+    for nm, mm in [("S1 as published", ok), ("S1 corrected members only", ok & f.wallet.isin(keep))]:
+        lo, hi = cboot(f.ue.values[mm], 100 * f.m1_roi.values[mm], np.full(int(mm.sum()), 100.0), rng, 2000)
+        print(f"  {nm}: filled {int(mm.sum())}, events {f.ue[mm].nunique()}, wallets {f.wallet[mm].nunique()}, "
+              f"net ROI {f.m1_roi[mm].mean():.4f} [{lo:.4f}, {hi:.4f}]")
 
 
 if __name__ == "__main__":
