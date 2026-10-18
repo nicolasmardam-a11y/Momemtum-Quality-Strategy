@@ -4,9 +4,10 @@
 **Scope:** public, read-only data only. No wallet was connected, no order was placed, no data was bought,
 nothing was deployed. Labels: **VERIFIED** (checked in the primary source or the data), **PLAUSIBLE**
 (consistent with the evidence, not checked directly), **UNSUPPORTED**.
-**Evidence base:** every number below comes from a notes file under `notes/` (paths given), produced by
-pre-registered analyses that were then audited adversarially. Code is under `analyses/`, the shared read-only
-client under `pmr/`, the alert system under `alerts/`.
+**Evidence base:** every number below comes from a notes file under `notes/` (paths given). The strategy tests
+were pre-registered and then audited adversarially; the wallet case studies, platform notes and literature synthesis
+were reviewed adversarially but not pre-registered. Code is under `analyses/`, the shared read-only client under
+`pmr/`, the alert system under `alerts/`.
 
 ---
 
@@ -20,10 +21,11 @@ the project, was rejected or showed no demonstrated edge at executable prices af
 1. **k-of-n "all-NO" count-set baskets** (cross-market logical arbitrage). This is the only family with genuine
    payoff dominance after per-leg fees and a verified rules check. Example: the 19 separate "nominated for Best
    Actor?" markets, of which at most 5 can resolve Yes. Buying NO on all 19 pays at least 14 per set. That
-   basket was profitable after fees in 34 of 34 snapshots over 15.4 h. **But** the standing profit shrank from
-   $527 to $314 while we watched. It returns 9.4–12.1%/yr on capital locked to January 2027, against a
-   pre-registered 10% hurdle. Capacity is about $10k. Verdict: **marginal**.
-2. **Buying favourites priced ≥ 0.95 seven days before resolution, in small size.** Such favourites lost only
+   basket was profitable after fees in 34 of 34 snapshots over 15.4 h. **But** the total standing profit across
+   all verified baskets shrank from $527 to $314 while we watched (Best Actor alone: $481–483, then $237).
+   Capital-weighted, the verified baskets return 9.4–12.1%/yr (10.75% pooled) on capital locked to January 2027,
+   against a pre-registered 10% hurdle. Capacity is about $10k. Verdict: **marginal**.
+2. **Buying favourites priced ≥ 0.95 seven days before the scheduled end (kick-off for sports), in small size.** Such favourites lost only
    0.54× as often as their prices implied (95% CI 0.36–0.78), so the bias is real. After the audit, the
    expected net is about **+0.5% per ~8-day hold**, it is fragile to one loss, and it fades above about
    $500 per market. Verdict: **marginal**.
@@ -35,8 +37,9 @@ the project, was rejected or showed no demonstrated edge at executable prices af
 **Reject or deprioritise:**
 - **Your screen, "5 bets in 12 months, all 5 won", is rejected.** Run point-in-time on 2024–25 on-chain data, a
   follower loses **−7.1%** per $ staked on the held-out period (95% CI −10.6% to −3.7%; 1,542 events). The
-  screen mostly selects people buying 0.99 favourites. All 28 pre-registered wallet screens were rejected,
-  including skill-based, category-specialist, large-bet, returning-wallet and clustered-new-wallet signals.
+  screen mostly selects people buying ~0.98 favourites. All 28 pre-registered hypotheses (9 screens × 3 signal
+  types, plus a cluster signal) were rejected, including skill-based, category-specialist, large-bet,
+  returning-wallet and clustered-new-wallet signals.
   Skilled wallets' edge exists at *their* prices but is gone at the price a follower gets two minutes later.
   A 2026 holdout on Protocol V2 data replicates this (S1 −3.2%; no screen beats matched random entries).
 - **mintblade is not a copyable signal.** Its "5-for-5" counts markets, not events: it is really 3 decisions
@@ -50,7 +53,8 @@ the project, was rejected or showed no demonstrated edge at executable prices af
   30 s markout (significant). Competition is sub-second.
 - **Taker mean reversion after shocks:** about +7.9% per $ gross, but less than costs.
 - **Near-resolution ≥ 0.99:** no demonstrated edge.
-- **Fading longshots:** rejected (−3.4% to −6.5%).
+- **Buying favourites at 0.80–0.95 one day before the end (rule E1):** rejected (−6.5% net in liquid markets;
+  −0.6% to −3.4% in unscreened markets). Buying ≤ 10¢ longshots also loses heavily.
 - **Cross-venue Kalshi:** inconclusive, and blocked by access rules and data terms for most people.
 
 ---
@@ -66,9 +70,9 @@ the project, was rejected or showed no demonstrated edge at executable prices af
 | Maker incentives | Maker rebates are 15–25% of taker fees in the same market. Liquidity rewards were $173k–289k/day across ~14.5k markets, **median about $3/day per market**, and allocations churn hourly. Holding rewards are paid on 339 markets; the stated rate conflicts (4.00% vs 3.25%). All discretionary. | same; `notes/strategies/lp_rewards_live.md` |
 | Order book | YES and NO books are one mirrored book: BUY+BUY matches as a mint, SELL+SELL as a merge. Sports orders have a 1 s delay (3 s on ~533 markets) and cannot be cancelled during it. 5m/15m/1h crypto up/down markets have a 150 ms taker delay. | `notes/platform/mechanics.md` |
 | Settlement | Match to chain ~2.3 s; auto-redeem ~12 s after resolution. Sports resolve a median ~4.2 h after kick-off; UMA disputes 0.08% of markets (5.1% of geopolitics markets ≥ $10k volume); 50-50 outcomes 0.56% of traded markets. Live UMA bonds $250–500 and a 15-min challenge window on ~89k markets differ from the docs. | `mechanics.md`, `notes/strategies/universe.md` |
-| Data API | **v1 is retired 2026-10-24**; everything here uses v2. Identical-URL polls are CDN-cached up to 300 s (median 112 s stale); cache-busted polls see a trade ~4.6 s after its block. The public RTDS `activity` websocket sees all wallets' trades ~2.2 s after the match (no server-side wallet filter). **No historical order books** are published. | `notes/platform/data_infrastructure.md` |
+| Data API | **v1 will be retired on 2026-10-24**; everything here uses v2. Identical-URL polls are CDN-cached up to 300 s (median 112 s stale); cache-busted polls see a trade ~4.6 s after its block. The public RTDS `activity` websocket sees all wallets' trades ~2.2 s after the match (no server-side wallet filter). **No historical order books** are published. | `notes/platform/data_infrastructure.md` |
 | Historical data | Gamma: 4.15M closed markets 2024-01..2026-10. CryptoHouse SQL: 257.6M on-chain fills, **2022-11-21 to 2026-01-05 only** (pre-V2). Free third-party 1-min L2 archive (Feb–Aug 2026) has a **gap on 12–17 June 2026**, mintblade's window. | same; `universe.md` |
-| Access | polymarket.com bars US, UK, France, Germany, Italy, Australia, Singapore, Taiwan, Thailand, Russia, Poland and ~40 others (ToS covers residence, location and citizenship; VPNs prohibited). Polymarket US (CFTC-regulated) is a separate book with different fees and no public trade tape. Kalshi's data terms may restrict systematic collection. **Your own eligibility must be confirmed before any trading.** | `notes/platform/geography_legal.md` |
+| Access | polymarket.com bars US, UK, France, Germany, Italy, Australia and Singapore, plus about 40 other jurisdictions including Taiwan, Thailand, Russia and Poland (ToS covers residence, location and citizenship; VPNs prohibited). Polymarket US (CFTC-regulated) is a separate book with different fees and no public trade tape. Kalshi's data terms may restrict systematic collection. **Your own eligibility must be confirmed before any trading.** | `notes/platform/geography_legal.md` |
 
 ---
 
@@ -79,20 +83,21 @@ Capacity is measured at executable prices today. "Locked" means capital is tied 
 | Rank | Family | Mechanism | Strength of evidence | Data availability | Execution difficulty | Capital intensity | Likely capacity | Verdict |
 |---|---|---|---|---|---|---|---|---|
 | 1 | **C. k-of-n count sets** (all-NO baskets) | Separate markets are quoted independently, and liquidity rewards pay makers to rest YES bids in each one, so Σ YES bids can exceed the k slots that can pay | Live executable books, per-leg fees, official rules checked (Oscars Rule Five §6 on oscars.org), 34/34 snapshots over 15.4 h, audited | Public CLOB books + Gamma rules text | Medium: 19–50 taker legs, leg risk, 5-share minimums | High: locked ~95 days | ~$6–10k standing; one-off stock, recurrence unmeasured | **Marginal** → forward test |
-| 2 | **E. Favourites ≥ 0.95 at T−7d** | Lock-up aversion and longshot preference leave long-dated favourites underpriced (loss ratio k = 0.54) | Pre-registered, 2026 TEST, audited; fragile (one loss flips the mean); only 25 losses pooled | Gamma + `/prices-history` + tapes; live asks for forward test | Low | Locked ~8 days | ~$500 per market; net ≈ 0 at $2.5k | **Marginal** → paper test |
+| 2 | **E. Favourites ≥ 0.95 at T−7d** (= fading ≤ 5¢ longshots) | Long-dated favourites are underpriced (loss ratio 0.54×, VERIFIED); lock-up aversion and longshot preference are PLAUSIBLE causes | Pre-registered, 2026 TEST, audited; fragile (one loss flips the mean); only 25 losses pooled | Gamma + `/prices-history` + tapes; live asks for forward test | Low | Locked ~8 days | ~$500 per market; net ≈ 0 at $2.5k | **Marginal** → paper test |
 | 3 | **D. Maker-side favourites / selective quoting** | Zero maker fee + rebates + rewards, against adverse selection and inventory | Literature: makers out-earn takers everywhere, but fill-conditional. Ours: historical realised spread ≈ 0.0–0.1¢/share; live 114 market-hours weakly negative (4 fills drive it) | **Needs forward book capture**; free 1-min L2 Feb–Aug 2026 exists | High: queue position, cancels, monitoring | Moderate | Unknown | **No demonstrated edge** → research |
 | 4 | H. Near-resolution ≥ 0.99 (T−6h) | Lock-up aversion near settlement | Pre-registered, audited | Same as 2 | Low | Short lock | Tiny | No demonstrated edge |
 | 5 | F. Taker mean reversion after ≥ 10¢ shocks | Order-flow pressure reverses | Pre-registered, 869 TEST trades, audited: gross +7.9%/$ but net −0.6% | Tapes | Medium | Short | n/a | No demonstrated edge |
-| 6 | A. Wallet following (all screens) | "Informed" wallets lead prices | **Strong negative.** PIT on 2024–25 on-chain fills, 28 pre-registered hypotheses, 10,200 exploratory variants, all rejected; 2026 V2 holdout also negative (S1 −3.2%, S2 −0.6%, S3 −3.8%, S5 −4.0%) | CryptoHouse (to 2026-01-05), Data API v2 | Medium–high (seconds matter) | Varies | n/a | **Rejected** |
+| 6 | A. Wallet following (all screens) | "Informed" wallets lead prices | **Strong negative.** PIT on 2024–25 on-chain fills: 28 pre-registered hypotheses rejected; 0 of 8,526 testable exploratory variants survive under outcome-neutral estimators; 2026 V2 holdout also negative (S1 −3.2%, S2 −0.6%, S3 −3.8%, S5 −4.0%) | CryptoHouse (to 2026-01-05), Data API v2 | Medium–high (seconds matter) | Varies | n/a | **Rejected** |
 | 7 | G. Lead–lag (crypto spot, Kalshi, sports) | Slow incorporation of public info | Crypto: −4.1¢/trade (CI −11.3 to +2.9), 30 s markout −2.6¢ [−3.8, −1.5]; Kalshi/sports inconclusive (no Kalshi data by design; 6 sports events) | Binance/Coinbase public; Kalshi terms risk | Very high (sub-second) | Short | n/a | No demonstrated edge |
 | 8 | B. Complete-set (binary and neg-risk) | Sum of outcome prices ≠ 1 | Binary: 0 of 2.59M market-scans (structural). Neg-risk: 8 of 252k group-scans net-positive, 0 of 436 on re-check | Public books | High (legging, in-play flickers ~2 s) | Low if converted | $0/day demonstrated | No demonstrated edge |
-| 9 | E. Fading longshots (buy NO < 0.10) | Overpriced longshots | Pre-registered, rejected (−6.5%; −3.4% in an unscreened sample) | Same as 2 | Low | Locked | n/a | **Rejected** |
+| 9 | E. Short-dated favourites (E1: 0.80–0.95 at T−1d); buying longshots | Favourite/longshot mispricing at short horizons | Pre-registered, rejected: E1 −6.5% net (liquid), −0.6% to −3.4% unscreened; buying ≤ 10¢ longshots −48% to −88% | Same as 2 | Low | Locked | n/a | **Rejected** |
 
 ---
 
 ## B. Verified academic evidence
 
-Full synthesis, 74 papers, adversarially cross-checked: `notes/literature/LITERATURE.md`.
+Full synthesis: `notes/literature/LITERATURE.md`, 72 references. 62 were adversarially cross-checked (33 confirmed,
+23 corrected, 6 unverifiable); about 10 peripheral entries were not.
 
 ### B.1 The four titles from the earlier discussion: all exist, but each was mis-characterised
 
@@ -155,8 +160,9 @@ Full detail: `notes/wallets/WALLETS.md` (consolidated and adversarially reviewed
 3. **Iran–New Zealand**: a $7.14M "Iran does not win" bet at ~0.49, an even-money call, which won on a 2–2 draw.
 
 **Timing (no identity or insider inference is made):** both large bets were placed in the ~47 minutes before
-kick-off, with prices flat before entry. No fill followed a goal or card; the first Iran goal came 6.5 min
-after the last fill. Decoded order timestamps show the final orders were signed around the actual kick-off. The wallet
+kick-off, with prices flat before entry. No fill followed a goal or card; the match's first goal (New Zealand's)
+came 6.5 min after the last fill. Decoded order timestamps show the final orders were signed around the inferred
+kick-off (PLAUSIBLE, ±1 min). The wallet
 was 72.6% of all taker volume in its Iran window and moved the price by 4¢.
 
 ### C.2 The screens
@@ -169,8 +175,9 @@ was 72.6% of all taker volume in its Iran window and moved the price by 4¢.
 
 **Why 5-for-5 is weak evidence.** It counts outcomes, not edge versus entry price, and nested legs inflate the
 count. In 2025 on-chain data, 1–4% of eligible wallets (**~11,800 wallets** at 2025-12-01) passed "exactly
-5, all won" at any time. 82% of their entries were at ≥ 0.90, the median member's trailing profit was **$0.56**,
-and half dropped out the next month (`notes/strategies/pit_wallets_build.md`). Searching that many wallets
+5, all won" at any time. On the audited test dates, 85% of their entries were at ≥ 0.90 and the median member's
+trailing profit was **$0.43** ($0.56 across all dates); half dropped out the next month
+(`notes/strategies/pit_wallets_build.md`, `pit_wallets_FINAL.md`). Searching that many wallets
 guarantees thousands of perfect records by luck.
 
 ### C.3 Linkage (classified, not asserted)
@@ -179,8 +186,9 @@ guarantees thousands of perfect records by luck.
   owner EOAs. All 1,862 order signatures recover to each wallet's own owner, and there were zero transfers
   between the wallets or owners.
 - **Strong probabilistic link: a common financial counterparty** (VERIFIED flows). Withdrawals from all three
-  were routed, via single-purpose hop addresses, into the same Etherscan-tagged *Binance Deposit* addresses on
-  2026-06-18. A deposit address identifies an exchange account, not a person; an intermediary serving several
+  reached the same Etherscan-tagged *Binance Deposit* address A on 2026-06-18, directly (mintblade) or via
+  single-purpose hop addresses (GRIMDRIP, endlessFate); a second deposit address B received funds from mintblade
+  and endlessFate. A deposit address identifies an exchange account, not a person; an intermediary serving several
   clients is not excluded.
 - **Weak:** all deposits came from Binance hot wallets. That is meaningless on its own.
 - **Extended cluster (PLAUSIBLE membership):** **LEEEROYJENKINS** (−$2.75M overall) and **FlickRaw**
@@ -205,8 +213,8 @@ guarantees thousands of perfect records by luck.
 
 `notes/strategies/pit_wallets_results.md`, pre-registered, then audited (`pit_wallets_FINAL.md`).
 - **Design.** Monthly selection dates 2024-01..2025-12, using only fills and resolutions before each date.
-  Follower entry is the first other-wallet taker print ≥ 2 min after the signal (plus 1 tick), held to
-  resolution. Benchmarks: random eligible wallets (B1), price- and category-matched prints (B2), a favourite
+  Follower entry is the first other-wallet taker print ≥ 2 min after the signal (plus 0.01, which is ten ticks above 0.96),
+  held to resolution. Benchmarks: random eligible wallets (B1), price- and category-matched prints (B2), a favourite
   rule, and T-bills. Inference is event-clustered, with Holm and reality-check adjustments.
 - **TEST (selection dates 2025-07..12):** S1 "exactly 5, all won" **−7.1%** [−10.6, −3.7] at zero fee and
   −7.8% at current fees, and between −8% and −10% at every delay from 5 s to 60 min. S2 "≥ 5, no losses"
@@ -225,10 +233,10 @@ guarantees thousands of perfect records by luck.
 - **2026 Protocol-V2 holdout** (`pit_wallets_v2_holdout.md`, audited in `pit_wallets_FINAL.md`). One selection
   date (2026-06-01), signals June–September 2026, current per-market fees, 2-minute model.
   - Results: S1 **−3.2%** [−7.9, +0.5], or −2.6% [−7.2, +1.0] after the audit fixed a market-table gap that had
-    misclassified 23 of 55 members. S2 −0.6% [−3.4, +2.3]; S3 −3.8% (corrected); S5 −4.0%. Random wallets (B1)
-    −9.4%.
-  - No screen beats random entries matched on category, week and price (Holm p = 1.00), and results stay
-    negative at a 5 s delay.
+    misclassified 23 of 55 members. S2 −0.6% [−3.4, +2.2]; S3 −3.8% (corrected); S5 −4.0%. Random wallets (B1)
+    −9.2% (audited).
+  - No screen beats random entries matched on category, week and price (Holm p = 1.00), and none turns
+    positive at a 5 s delay (S2 0.0%).
   - S1 is low-power (85–90 events), so its verdict rests on a negative point estimate consistent with 2024–25.
   - World Cup signals are too few to conclude anything.
   - **mintblade and GRIMDRIP were created on 2026-06-02, after the selection date**, so no point-in-time screen
@@ -237,7 +245,7 @@ guarantees thousands of perfect records by luck.
   - the cluster signal used the cluster's own prints;
   - the 2026 market-table gap;
   - 18 fills at or after resolution;
-  - a slippage tick that was too large near 0.96.
+  - the +0.01 slippage is ten ticks above 0.96 (tick-aware variants do not change any verdict).
 - **Verdict: no demonstrated edge for any wallet-following family, at any delay, net of current fees, against
   every benchmark.** The 2024–25 test split is now spent: any new wallet idea needs fresh data after 2026-10-17.
 
@@ -263,13 +271,13 @@ guarantees thousands of perfect records by luck.
   more than cost.
 - **Holding period.** ~95 days (Oscars nominations 2027-01-21); ~100 days (College Football Playoff title game).
 - **Benchmarks.** A T-bill over the same lock-up; the 10%/yr pre-registered hurdle.
-- **Capacity today.** $5k: ~$190 once over ~95 days. $25k or $100k: capacity-bound at ~$10k for ~$314 (down
-  from $18.2k for $545 a day earlier).
+- **Capacity today.** $5k: ~$200 once over ~95 days (pre-audit estimate). $25k or $100k: capacity-bound at ~$10k
+  for ~$314 (down from $18.2k for $545 about 8 h earlier).
 - **Why it might persist.** It needs 19–50 taker orders, months of lock-up for 3–4%, and a manual rules check.
   No neg-risk convert exists to recycle capital, which deters dedicated arbitrageurs.
 - **Main reason it might fail.** It may be a one-off stock, not a flow. The other risks: one wrong Yes among
   19–50 UMA resolutions costs 1 per set against ~0.5 of edge; a rule change; and leg risk across many orders.
-- **Kill criteria (pre-declare before the forward test).**
+- **Kill criteria (my proposal; pre-declare before the forward test).**
   - Fewer than ~$500/month of new TRUE-set net profit at ≥ 10%/yr on locked capital across 8 weekly scans.
   - Or the median opportunity fails the R5 buffer (< 0.5% of committed capital).
   - Or any TRUE set is found to break on rules re-reading.
@@ -278,22 +286,26 @@ guarantees thousands of perfect records by luck.
 
 ### D2. Long-dated favourites ≥ 0.95 at T−7d (rule "E2"), small size
 
-- **Mechanism.** Lock-up aversion and retail longshot preference. Realised losses were 0.54× the
-  price-implied rate (95% CI 0.36–0.78; 25 losses pooled across splits). Break-even after base costs is 0.79×.
+- **Mechanism.** Realised losses were 0.54× the price-implied rate (95% CI 0.36–0.78; 25 losses pooled across
+  splits; VERIFIED). Break-even after base costs is 0.79×. Lock-up aversion and retail longshot preference are
+  the PLAUSIBLE causes. Economically this is the same trade as fading ≤ 5¢ longshots.
 - **Signal / entry.** Seven days before the scheduled end (`gameStartTime` for sports), taker-buy the side priced
   ≥ 0.95 if ask + fee ≤ 0.999, at ≤ $500 per market, across many events and days. Report soccer exact-score
   markets and stale books (no price change in 24 h) separately.
 - **Exit.** Hold to resolution; capital returns at `closedTime` (~8 days).
-- **Benchmarks.** The same rule at 0.90 (rejected), at 0.99/T−6h (no edge), T-bills, random favourites.
+- **Benchmarks.** E1 (favourites 0.80–0.95 at T−1d, rejected), H90 at 24 h / 1 h (rejected), H99 at T−6h (no
+  demonstrated edge), T-bills, random favourites.
 - **Evidence (2026 TEST, audited).** +1.0% net at the pre-registered model, but +0.57% unweighted [−0.49,
   +1.34]. One extra loss gives −0.75%. Model-based central estimate ≈ +0.5% per trade.
-- **Capacity.** ~+0.25% at $500 per market, ~0 at $2.5k, negative at $10k. At $5k, ~$20–500 per market. At
-  $25k/$100k it is capped by per-market depth, not by the account.
+- **Capacity.** ~+0.25% at $500 per market, ~0 at $2.5k, negative at $10k. Trading every qualifying liquid market
+  at $500 each would need ~$119k, so at $5k / $25k / $100k you would size about $20 / $105 / $420 per market.
+  Below ~$119k the thin edge and the number of markets bind, not book depth.
 - **Why it might persist.** Thin maker competition in long-dated books, and capital-cost aversion.
 - **Main reason it might fail.** Costs eat most of the bias, and every trade carries a −100% tail.
-- **Kill criteria (pre-registered by the audit).** Kill if realised losses exceed **0.75×** the price-implied
-  losses (Σ(1 − fill price)) once that sum reaches 5. Also kill if the median paid ask exceeds the series price
-  by > 0.5¢.
+- **Kill criteria (proposed by the audit, post hoc; fix before the paper test starts).** Kill if realised losses
+  exceed **0.75×** the price-implied losses (Σ(1 − fill price)) once that sum reaches 5. My addition: also kill
+  if the median paid ask exceeds the series price by > 0.5¢. The FLB note asks for at least 3 months of paper
+  trading.
 - **Data.** Live asks and depth at decision time (free), outcomes, settlement delay. Scripts:
   `analyses/flb_near_res/`.
 
@@ -311,13 +323,15 @@ guarantees thousands of perfect records by luck.
 - **Evidence so far.** Historical realised spread +0.0–0.1¢/share and about 0 held to resolution. The live
   conservative-fill simulation was −0.63¢/share quantity-weighted (−0.31¢ equal-weight, CI includes 0), with
   99% of the loss in 4 fills.
-- **Why it might persist.** The fee design pays makers; most rewards go to markets with little competition.
+- **Why it might persist.** The fee design pays makers. Most reward allocations are small and thinly contested,
+  although the largest pools (~$500/day) are contested (median share 1.8%).
 - **Main reason it might fail.** Adverse selection: bids on favourites fill precisely when bad news arrives.
   Queue position is unobservable historically.
-- **Kill criteria.** Kill if fill-weighted 1 h markout < −(half-spread + rebate) over ≥ 200 simulated fills.
+- **Kill criteria.** Kill if fill-weighted 1 h markout < −(half-spread + rebate) over ≥ 1,000 conservative
+  simulated fills in ≥ 100 markets across ≥ 4 weeks (the bar set in `lp_rewards_live.md`), with ≥ 30 events per cell.
   Also kill if the realised loss ratio on filled favourites exceeds 0.79×, or if the edge depends on rewards
   (discretionary).
-- **Data needed (forward).** Websocket market-channel capture (book + price_change + trades) for ~50 markets
+- **Data needed (forward).** Websocket market-channel capture (book + price_change + trades) for ≥ 100 markets
   over ≥ 4 weeks. Optionally the free `Joseph3222/polymarket-orderbook` 1-min L2 (Feb–Aug 2026, excluding
   12–17 June) for a historical first pass.
 
@@ -333,14 +347,15 @@ scans for B, C, D and G; the alert system.
 
 **Stage 1: immediately, public data, no forward collection needed.**
 1. **D1 recurrence scan.** Run `analyses/logical_arb/` weekly (read-only) and log every TRUE/NEAR set, its depth
-   and net edge. This answers "stock or flow" within 4–8 weeks. Cost: minutes per week.
+   and net edge. First decision on "stock or flow" after 8 weekly scans; keep logging to the 2027-01-21
+   resolution. Cost: minutes per week.
 2. **D2 paper log.** Each day, list markets with a side ≥ 0.95 at T−7d, record the executable ask, depth and
    fee, paper-fill, and track outcomes. Apply the kill rule continuously. Cost: one small daily job.
 3. **Historical first pass for D3** on the free 1-min L2 archive (Feb–Aug 2026) for a sample of favourites.
    Estimate how often a resting best bid would plausibly have filled, and the markouts after those fills.
 
 **Stage 2: needs forward collection (continuous process).**
-4. **Order-book recorder.** Market-channel websocket for ~50 markets (D2 candidates + reward-eligible), stored
+4. **Order-book recorder.** Market-channel websocket for ≥ 100 markets (D2 candidates + reward-eligible), stored
    compactly with local timestamps. Prerequisite for any maker verdict (D3).
 5. **Wallet signals, only if you still want them.** Record the RTDS `activity` firehose (~2 s latency), apply a
    pre-registered PIT skill screen, and log the executable book at detection + 2 s / 30 s / 2 min against
@@ -401,7 +416,7 @@ every 30 s ± jitter:
 - the follower's taker fee at the ask; the wallet's exposure to the market and the event;
 - in-play status, accepting orders and `secondsDelay`; the link; the reason it qualified.
 
-**Measured (2026-10-18, 3 active wallets, 16 min, console only):**
+**Measured (2026-10-18, 3 active wallets, 16 min, console and file notifiers only):**
 - detection lag after the block: p50 16 s, p90 29 s;
 - 0 duplicate deliveries;
 - a 5-minute simulated outage recovered with **no fills skipped** (checked against an independent full pull);
@@ -423,18 +438,21 @@ fakes.
 ## G. How the tests were run (data and backtest realism)
 
 - **Point-in-time discipline.**
-  - Rejection criteria were written to notes before results were computed, and kept byte-identical in later
-    commits (verified by the auditors).
+  - Rejection criteria were written to notes before results were computed and kept unchanged afterwards. The
+    auditors verified this in git for the FLB, mean-reversion and LP-markout studies; for the PIT wallet study it
+    is PLAUSIBLE (self-reported timestamps consistent with file times).
   - Selection used only data timestamped before the decision; resolutions counted only once resolved.
   - Splits were time-ordered: train < 2025-07, validation 2025-07..12, **TEST 2026-01-01..2026-10-15** for the
     market studies. PIT wallets: TEST = selection dates 2025-07..12, plus a 2026 Data-API holdout.
 - **Dependence.** Bootstrap clustered by event (sports games across several Gamma events share one key) and by
-  week or entry day; Holm and reality-check adjustments across the 28 hypotheses and 10,200 exploratory variants.
+  week or entry day; Holm and reality-check adjustments across the 28 hypotheses and the 8,526 testable exploratory variants.
 - **Executable prices.**
   - Live studies walked depth on real books with each leg's own `feeSchedule`.
   - Historical studies used next taker prints plus a measured spread model, and were audited against actual
     first-buy prints. Midpoints were used only where labelled.
-- **Fees.** Prospective results use the *current* per-market schedule. As-traded fees were checked on-chain.
+- **Fees.** Prospective results use the current fee schedule: each market's `feeSchedule` in the live scans and the
+  2026 wallet holdout, and the current category table in the FLB and 2024–25 wallet studies. As-traded fees were
+  checked on-chain.
   Results on 2024–25 data are optimistic because they were effectively fee-free.
 - **Capital.** Returns are on committed capital to resolution, with lock-up and T-bill comparison. Short windows
   were not mechanically annualised; where an annual rate is quoted it is simple, over the stated lock-up.
@@ -459,15 +477,17 @@ fakes.
 
 ## First experiment (one concrete recommendation)
 
-**Run a read-only, pre-registered 6-week forward scan of k-of-n count-set baskets (D1), with the favourite
-paper log (D2) on the same daily job.**
+**Run a read-only, pre-registered forward scan of k-of-n count-set baskets (D1): weekly for 8 weeks to the first
+decision, then on to the 2027-01-21 resolution. Put the favourite paper log (D2) on the same daily job for at least
+3 months.**
 
 - **What it measures.**
   - D1: each week, every TRUE set's executable net edge, depth and annualised return on lock-up, and whether new
     sets appear (recurrence).
   - D2: daily paper fills at real asks, and the realised loss ratio.
 - **Kill rules (fixed now).**
-  - D1: reject if new TRUE-set profit is < $500/month at ≥ 10%/yr, or if any set fails a rules re-read.
+  - D1 (my proposed threshold): reject if new TRUE-set profit is < $500/month at ≥ 10%/yr, or if any set fails a
+    rules re-read.
   - D2: reject when realised losses exceed 0.75× price-implied losses after the implied sum reaches 5.
 - **Why first.** It is the cheapest test of the only true-dominance candidate. It needs no funded wallet and no
   paid data, and it rejects quickly if the opportunity was a one-off stock.

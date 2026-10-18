@@ -23,8 +23,8 @@ lp_rewards_snapshot.py, cost_table.py, keccak.py). Derived data: `data/derived/o
    (fee type, date) cell the modal implied rate equals a documented or Gamma rate. The docs formula is what the
    exchange charges. ([docs/trading/fees](https://docs.polymarket.com/trading/fees.md))
 2. **Who pays today.** 99.6% of the 288,003 open markets have fees, and they carry 93.1% of Gamma 24h volume.
-   Fee-free markets (1,169) are almost all geopolitics/world. **Tags do not set the fee class.** Only 29% of
-   markets tagged `geopolitics` are fee-free. For example, "Xi Jinping out before 2027?" is `politics_fees` (0.04).
+   Fee-free markets (1,169) are almost all geopolitics/world. **Tags do not set the fee class.** Only about 71% of
+   markets tagged `geopolitics` are fee-free; 29% carry fees [corrected 2026-10-18: earlier text said "only 29% are fee-free", contradicting the §1 census table]. For example, "Xi Jinping out before 2027?" is `politics_fees` (0.04).
    Always read the per-market `feeSchedule`.
 3. **Sports is not one rate.** Sports is 0.05 / 15% maker rebate (`sports_fees_v3`, 215,626 markets) for markets
    created from 2026-07-11. Two exceptions charge 0.03, and neither is documented:
