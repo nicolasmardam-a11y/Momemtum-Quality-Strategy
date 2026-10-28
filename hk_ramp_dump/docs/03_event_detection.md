@@ -50,21 +50,22 @@ in the pilot.
 
 | Category | Episodes | Median run-up | Median max DD, 20d | Median DD, 60d | Median traded value in run (HK$m/day) | Designated short-sellable at peak |
 |---|---|---|---|---|---|---|
-| A ramp_dump | 1,265 | +171% | −51% | −60% | 5.3 | 6.0% |
-| B sustained | 1,039 | +109% | −15% | −17% | 3.3 | 6.2% |
-| C volatile | 2,582 | +124% | −28% | −40% | 4.4 | 6.7% |
-| censored | 37 | | | | | |
+| A ramp_dump | 1,434 | +179% | −51% | −61% | 6.0 | 6.3% |
+| B sustained | 771 | +129% | −15% | −18% | 3.4 | 6.1% |
+| C volatile | 2,667 | +133% | −28% | −40% | 4.4 | 6.8% |
+| censored | 51 | | | | | |
 
-- 1,574 distinct stocks had at least one episode. 1,265 category A episodes
-  is about 98 per year since 2016.
-- **Only 76 of 1,069 (7.1%) category-A events since the first archived DS
-  list (2016-05-03) were on the designated short-selling list at the
-  peak.** All 76 shortable A events across the sample had mean run-up value
-  >= HK$5m/day.
-- At the first qualifying day, a median 81% of the eventual peak-to-trough
-  decline is still ahead. The price is usually still *rising*, though, so a
-  short at the first signal also bears the rest of the run-up (see models).
-- 24% of A events started from a baseline with zero median traded value:
+- 1,574 distinct stocks had at least one episode. Category A runs at
+  about 108 episodes per year since 2016.
+- **Only 90 of 1,185 (7.6%) category-A events since the first archived
+  designated-securities list (2016-05-03) were short-sellable at the
+  peak.** 89 of those 90 had mean run-up value >= HK$5m/day.
+- 766 A events had mean run-up traded value >= HK$5m/day and 362 had
+  >= HK$20m/day. The rest are too thin to trade in size in any direction.
+- At the first qualifying day, a median 73% of the eventual peak-to-trough
+  decline is still ahead. The price is usually still rising, though, so a
+  short at the first signal also bears the rest of the run-up (docs/04).
+- 23% of A events started from a baseline with zero median traded value:
   dormant shells that suddenly trade.
 - GEM is 21% of all episodes and 26% of A events.
 
@@ -72,23 +73,37 @@ in the pilot.
 HK ramp targets are later suspended for 18+ months and delisted, so the
 true A count, and especially the worst outcomes, is higher.
 
-## Sensitivity (post window 20d, drawdown 40%)
+## Sensitivity
 
-Share of episodes that become category A, with episode count n:
+Share of episodes followed by a >= 40% drawdown within 20 days (value
+multiple 5x), with episode count n:
 
 | Run window | Run-up >= 50% | >= 80% | >= 150% |
 |---|---|---|---|
-| 5 days, value x5 | 21% (6,680) | 32% (2,629) | 46% (670) |
-| 10 days, value x5 | 19% (8,295) | 29% (3,726) | 44% (1,063) |
-| 20 days, value x5 | 18% (9,411) | **26% (4,923)** | 39% (1,655) |
+| 5 days | 22% (6,680) | 35% (2,629) | 50% (670) |
+| 10 days | 21% (8,295) | 32% (3,726) | 48% (1,063) |
+| 20 days | 20% (9,411) | **29% (4,923)** | 42% (1,655) |
+
+Primary definition (20d / +80% / 5x), varying what counts as the collapse:
+
+| Collapse definition | A share | A count | Short-sellable A |
+|---|---|---|---|
+| >= 30% within 20d | 51% | 2,462 | 161 |
+| >= 40% within 20d | 29% | 1,394 | 88 |
+| >= 60% within 20d | 9% | 414 | 15 |
+| >= 30% within 60d | 76% | 3,630 | 240 |
+| >= 40% within 60d | 56% | 2,699 | 174 |
+| >= 60% within 60d | 21% | 1,006 | 35 |
+
+(The grid censors with the longest window, 60 days, so its A count, 1,394,
+is slightly below the event database's 1,434.)
 
 - Faster and larger run-ups collapse more often.
-- The traded-value multiple barely matters once the run-up is large (3x
-  vs 10x changes the A share by about 1 point).
-- The A share swings from 7% (D = 60%) to 46% (D = 30%), and to 70% with a
-  60-day window at D = 30%. "Ramp-and-dump" frequency is mostly a
-  definition choice, so the predictive work targets all three drawdown
-  levels.
+- The traded-value multiple barely matters once the run-up is large: 3x,
+  5x and 10x give A shares of 28.8%, 29.1% and 30.1%.
+- How often a "ramp-and-dump" occurs is mostly a definition choice. That is
+  why the predictive work targets all three drawdown levels. Under every
+  definition, short-sellable cases stay at 4-7% of the total.
 
 Full grid: `outputs/research/sensitivity_grid.csv`; heat map:
 `outputs/figures/sensitivity_heatmap.png`.
@@ -98,10 +113,14 @@ Full grid: `outputs/research/sensitivity_grid.csv`; heat map:
 `data/reference/sfc_cases.csv` holds hand-sourced SFC cases. The event
 database flags `sfc_code_match` and `sfc_period_overlap`.
 
-- **8291 (Wan Cheng Metal Packaging; SFC alleges manipulation 2020-12-22 to
-  2021-04-23).** The detector finds episodes under code 8291 peaking
-  2021-01-27 (C: +209%, then −28%) and 2021-04-01 (A: +150%, then −83%),
-  both inside the alleged window. Caveat: code 8291 now trades as "HK ENT
+- **8291 (Wan Cheng Metal Packaging).** The SFC alleges manipulation from
+  2020-12-22 to 2021-04-23. The detector finds two overlapping episodes
+  under code 8291:
+  - peak 2021-03-12 (C: +419% from 2021-01-11, then −9%);
+  - peak **2021-04-21** (A: +206%, then **−89% by 2021-05-11**).
+
+  The collapse starts two days before the end of the alleged period
+  (`outputs/figures/cases_sfc.png`). Caveat: code 8291 now trades as "HK ENT
   INTL". Whether that is the same issuer renamed or a recycled code is not
   yet verified.
 - The same code also shows A episodes in 2017 and 2018, which the SFC case
@@ -111,7 +130,7 @@ database flags `sfc_code_match` and `sfc_period_overlap`.
 ## Figures
 
 - `outputs/figures/events_by_year.png`: episodes per year by category,
-  with clear clusters in 2015 (GEM mania), 2020-21 and 2024-26.
+  with clusters in 2015 (GEM mania), 2020-21 and 2024-26.
 - `outputs/figures/cases_category_A.png`, `cases_category_B.png`,
   `cases_category_C.png`, `cases_sfc.png`: representative price and
   traded-value paths, marked with run start, first signal, peak and trough.

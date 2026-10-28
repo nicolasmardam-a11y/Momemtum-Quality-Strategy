@@ -325,7 +325,8 @@ def portfolio_backtest(weights: pd.DataFrame, close: pd.DataFrame, traded: pd.Da
         cost = (trade * (explicit_cost_rate(dates[i].date(), brokerage_bps) + hs[i])).sum()
         gross = (new * R[i]).sum()
         out.append({"date": dates[i], "ret_gross": gross, "cost": cost, "ret": gross - cost,
-                    "turnover": trade.sum() / 2, "n_holdings": int((new > 0).sum())})
+                    "turnover": trade.sum() / 2, "n_holdings": int((new > 0).sum()),
+                    "exposure": float(new.sum())})
         w = new * (1 + R[i])
         tot = w.sum() + max(1 - new.sum(), 0)  # cash earns 0
         w = w / tot if tot > 0 else w

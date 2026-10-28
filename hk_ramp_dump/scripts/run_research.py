@@ -38,12 +38,8 @@ def flag_sfc_cases(ev: pd.DataFrame, sfc: pd.DataFrame) -> pd.DataFrame:
     return ev
 
 
-def step_events(cfg, inp, w, sh, out: Path):
-    ev, grid = P.build_event_db(cfg, inp, w, sh)
-    ev = flag_sfc_cases(ev, pd.read_csv(cfg.path("reference_dir") / "sfc_cases.csv",
-                                        parse_dates=["alleged_period_start", "alleged_period_end"]))
-    ev.to_csv(out / "event_db.csv", index=False)
-    grid.to_csv(out / "sensitivity_grid.csv", index=False)
+def make_event_figures(cfg, ev, grid, w):
+    """Event figures. Price panels use the traded (unadjusted) price."""
     figs = cfg.path("outputs_dir") / "figures"
     figs.mkdir(exist_ok=True)
     plots.events_by_year(ev, figs / "events_by_year.png")
@@ -53,16 +49,26 @@ def step_events(cfg, inp, w, sh, out: Path):
     # representative cases: spread across years, liquid enough to matter
     rep = (a[a["mean_value_run_hkd"] >= 2e6].sort_values("peak_date")
            .groupby(a["peak_date"].dt.year).head(1).head(6))
-    plots.event_gallery(rep, w["close"], w["value"], figs / "cases_category_A.png",
+    plots.event_gallery(rep, w["raw_close"], w["value"], figs / "cases_category_A.png",
                         "Category A: run-up on abnormal value, then >= 40% collapse within 20 days")
     for cat, fn in (("B_sustained", "cases_category_B.png"), ("C_volatile", "cases_category_C.png")):
         g = ev[(ev["category"] == cat) & (ev["mean_value_run_hkd"] >= 2e6)]
-        plots.event_gallery(g.sample(min(3, len(g)), random_state=1) if len(g) else g, w["close"],
+        plots.event_gallery(g.sample(min(3, len(g)), random_state=1) if len(g) else g, w["raw_close"],
                             w["value"], figs / fn, f"Category {cat}")
     sfc_ev = ev[ev["sfc_period_overlap"]]
     if len(sfc_ev):
-        plots.event_gallery(sfc_ev.head(6), w["close"], w["value"], figs / "cases_sfc.png",
+        plots.event_gallery(sfc_ev.head(6), w["raw_close"], w["value"], figs / "cases_sfc.png",
                             "Episodes in stocks named in SFC ramp-and-dump actions (pattern match, not proof)")
+
+
+def step_events(cfg, inp, w, sh, out: Path):
+    ev, grid = P.build_event_db(cfg, inp, w, sh)
+    ev = flag_sfc_cases(ev, pd.read_csv(cfg.path("reference_dir") / "sfc_cases.csv",
+                                        parse_dates=["alleged_period_start", "alleged_period_end"]))
+    ev.to_csv(out / "event_db.csv", index=False)
+    grid.to_csv(out / "sensitivity_grid.csv", index=False)
+    make_event_figures(cfg, ev, grid, w)
+    a = ev[ev["category"] == "A_ramp_dump"]
     summary = {
         "n_episodes": int(len(ev)), "n_stocks": int(ev["code"].nunique()),
         "by_category": ev["category"].value_counts().to_dict(),
@@ -146,13 +152,13 @@ def step_models(cfg, df, ev, out: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["events", "dataset", "models", "all"])
+    ap.add_argument("step", choices=["events", "figures", "dataset", "models", "all"])
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     cfg = load_config()
     out = cfg.path("outputs_dir") / "research"
     out.mkdir(parents=True, exist_ok=True)
-    if args.step in ("events", "dataset", "all"):
+    if args.step in ("events", "figures", "dataset", "all"):
         inp = P.load_inputs(cfg)
         w = P.wide_frames(inp["panel"])
         sh = P.shortable_wide(inp["ds"], w["close"].index, w["close"].columns)
@@ -161,6 +167,9 @@ def main():
     else:
         ev = pd.read_csv(out / "event_db.csv", parse_dates=["run_start_date", "first_signal_date",
                                                             "last_signal_date", "peak_date", "trough_date"])
+    if args.step == "figures":
+        make_event_figures(cfg, ev, pd.read_csv(out / "sensitivity_grid.csv"), w)
+        return
     if args.step in ("dataset", "all"):
         df = step_dataset(cfg, inp, w, ev, out)
         del w, inp

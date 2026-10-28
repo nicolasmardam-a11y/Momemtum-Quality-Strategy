@@ -61,8 +61,37 @@ daily research finds tradable signal (see section 4 and the memo).
 
 ## 3. Event and opportunity counts (pilot, current listings only)
 
-FILLED_BY_RESULTS
+From the pilot event database (docs/03) and backtests (docs/05):
+
+| Quantity | Count |
+|---|---|
+| Abnormal run-up episodes (20d run >= 80%, value >= 5x), 2012 to 2026-10 | 4,923 in 1,574 stocks |
+| Followed by a >= 40% drawdown within 20 days (category A) | 1,434, about 108 a year since 2016 |
+| ... and short-sellable (designated list) at the peak, since 2016-05 | **90 of 1,185 (7.6%)** |
+| ... with mean traded value >= HK$5m/day during the run | 766 (all years) |
+| Stock-days in a run-up state (model population) | 84,126 of 5.19M eligible |
+| Model alert opportunities, 2016-05 to 2024-06 (distinct stock-months) | 2,328 |
+| ... executable as shorts after designation, locate and liquidity | **195 trades (8%), about 24 a year** |
+| Average capital deployable short, HK$50m book | about HK$1m (HK$2.3m in holdout) |
+
+The statistical sample is large enough to identify the phenomenon. The
+**tradable** sample on the short side is small: about 24 trades a year and
+low single-digit HK$ millions deployed. That alone caps Strategy A's
+economic value, before any question of profitability.
 
 ## 4. Feasibility verdict on the premise
 
-FILLED_BY_RESULTS
+**The premise is only partly monetisable.**
+- The event is common and predictable: out-of-sample precision is about 2x
+  the conditional base rate, and the result replicates in the holdout.
+- Short monetisation is structurally blocked. The HKEX designation criteria
+  (about HK$3bn market capitalisation and >= 60% turnover ratio) exclude
+  over 90% of the stocks where the effect lives. In the shortable minority
+  the effect is weak or absent.
+- The viable use is avoidance and exits in long books (Strategies B/C).
+  That needs no borrow, intraday or order-book data.
+
+**Cheapest defensible next step:** re-run the frozen pipeline on the free,
+survivorship-free Webb-site dump (recommendation above). Do not buy
+intraday, order-book or securities-lending data for this programme
+(docs/07).

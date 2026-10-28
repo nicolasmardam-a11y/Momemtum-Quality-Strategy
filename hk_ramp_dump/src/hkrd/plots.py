@@ -27,6 +27,7 @@ def event_case(ax_p, ax_v, close: pd.Series, value: pd.Series, ev, pad: int = 60
     v = value.reindex(c.index).fillna(0)
     ax_p.plot(c.index, c.to_numpy(), color=INK, lw=1.2)
     ax_p.set_yscale("log")
+    ax_p.set_ylabel("HK$ (traded)", fontsize=7, color=MUTED)
     for d, col, lab in ((ev.run_start_date, MUTED, "run start"), (ev.first_signal_date, ACCENT, "first signal"),
                         (ev.peak_date, DOWN, "peak"), (ev.trough_date, UP, "trough")):
         ax_p.axvline(d, color=col, lw=0.8, ls="--")
@@ -47,12 +48,14 @@ def event_gallery(events: pd.DataFrame, close: pd.DataFrame, value: pd.DataFrame
         return
     cols = 3
     rows = int(np.ceil(n / cols))
-    fig = plt.figure(figsize=(12, 3.6 * rows))
-    gs = fig.add_gridspec(rows * 3, cols, hspace=0.9, wspace=0.25)
+    fig = plt.figure(figsize=(12, 4.2 * rows))
+    # 4 grid rows per event row: price (2), traded value (1), spacer (1)
+    gs = fig.add_gridspec(rows * 4, cols, hspace=0.5, wspace=0.25,
+                          height_ratios=[1, 1, 0.8, 0.55] * rows)
     for k, ev in enumerate(events.itertuples()):
         r, c = divmod(k, cols)
-        ax_p = fig.add_subplot(gs[r * 3:r * 3 + 2, c])
-        ax_v = fig.add_subplot(gs[r * 3 + 2, c], sharex=ax_p)
+        ax_p = fig.add_subplot(gs[r * 4:r * 4 + 2, c])
+        ax_v = fig.add_subplot(gs[r * 4 + 2, c], sharex=ax_p)
         event_case(ax_p, ax_v, close[ev.code], value[ev.code], ev)
         plt.setp(ax_p.get_xticklabels(), visible=False)
     fig.suptitle(title, fontsize=11, color=INK, x=0.01, y=1.0 + 0.04 / rows, ha="left")

@@ -62,3 +62,14 @@ ratio >= 3x) are listed, ranked by `p_D_two_stage_dd20_40`.
 - Add HKEXnews headlines (H3) and CCASS concentration (H5) as watchlist
   annotations before using them as model features. Annotation first lets
   their value be judged out of sample.
+
+## Sample output (2026-10-27 close)
+
+`outputs/watchlist/2026-10-27.csv` and `latest.md`:
+- 17 stocks were in the run-up state out of 1,994 that traded.
+- The highest Model D crash probabilities (>= 40% within 20 days) were
+  0.18 to 0.25, against an 8% base rate for run-up names.
+- **None of the 17 was on the designated short-selling list.** Five had
+  ADV >= HK$5m (avoid/exit only); the rest were thin or illiquid.
+
+That single day restates the memo's central finding.

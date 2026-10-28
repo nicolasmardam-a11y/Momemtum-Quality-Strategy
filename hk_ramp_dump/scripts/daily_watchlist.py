@@ -95,6 +95,11 @@ def main():
     X["stage1_runup"] = candidate_mask(X, cf["ret_20_min"], cf["value_ratio_20_min"])
     for (name, tgt), m in ((k, v) for k, v in models.items() if isinstance(k, tuple)):
         X[f"p_{name}_{tgt}"] = m.predict_proba(X)
+    # Separate models per threshold are not constrained to be ordered; a larger
+    # drop can never be likelier than a smaller one, so enforce monotonicity.
+    for name in ("D_two_stage", "C_lightgbm"):
+        X[f"p_{name}_dd20_30"] = np.maximum(X[f"p_{name}_dd20_30"], X[f"p_{name}_dd20_40"])
+        X[f"p_{name}_dd20_20"] = np.maximum(X[f"p_{name}_dd20_20"], X[f"p_{name}_dd20_30"])
     X["rule_score"] = RulesModel(cf["ret_20_min"], cf["value_ratio_20_min"]).score(X)
     X["warnings"] = [", ".join(k for k, f in WARNINGS.items() if f(row)) for _, row in X.iterrows()]
 
