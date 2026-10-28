@@ -1,0 +1,59 @@
+# PRE-REGISTERED GO / NO-GO CRITERIA
+#
+# Written and committed before any model, strategy or holdout result was
+# computed. scripts/run_holdout.py records the SHA-256 of this file in its
+# output; editing this file after the holdout run invalidates the holdout.
+#
+# Holdout window: sample.holdout in research.yaml (2024-07-01 .. 2026-10-27).
+# Configuration selection is by rule (below), using development + validation
+# data only. Nothing is re-tuned after the holdout is opened.
+
+selection_rule:
+  # For each strategy, the configuration carried into the holdout is the one
+  # with the highest validation-period mean net return per trade (Strategy A)
+  # or Sharpe (B, C) among the pre-specified grid, subject to the minimum
+  # trade count. Ties -> the simpler configuration (shorter hold, fewer rules).
+  strategy_a_grid:
+    model: [A_rules, B_regime_hmm, D_two_stage]
+    hold_days: [5, 10, 20]
+    stop_loss: [0.30, 0.50]
+  min_validation_trades: 20
+  base_case: {participation: 0.02, nav_hkd: 50_000_000, spread_mult: 1.0, borrow_mult: 1.0, delay_days: 0}
+
+prediction:                       # statistical identifiability (candidate population, target dd20_40)
+  min_holdout_positives: 30
+  pr_auc_lift_min: 2.0            # PR-AUC / base rate
+  precision_top10pct_lift_min: 1.5
+  brier_must_beat_base_rate: true
+  must_beat_random_alert_p95: true
+
+strategy_a_short:                 # executable shorting of suspected ramps
+  min_trades: 30
+  min_distinct_stocks: 15
+  mean_net_return_per_trade_gt: 0.0
+  bootstrap_ci05_gt: 0.0          # event-level bootstrap, 90% two-sided CI lower bound
+  sharpe_min: 0.75                # on daily P&L of the strategy
+  top5_stock_profit_share_max: 0.50
+  pnl_ex_top5_must_be_positive: true
+  stress_must_stay_positive:      # mean net return per trade
+    - {spread_mult: 2.0}
+    - {borrow_mult: 2.0}
+    - {delay_days: 1}
+    - {participation: 0.01}
+  same_sign_dev_and_validation: true
+  min_avg_gross_deployed_hkd: 5_000_000
+
+strategy_b_liquidation:           # early-warning exits on a long momentum book
+  sharpe_improvement_min: 0.10
+  or_max_drawdown_reduction_rel: 0.20
+  max_annual_return_cost: 0.01    # overlay may not cost more than 1%/yr
+
+strategy_c_ranking:               # avoid top-decile crash risk in a long book
+  sharpe_improvement_min: 0.10
+  top_decile_must_underperform: true
+  block_bootstrap_p_max: 0.10
+
+verdicts:
+  GO: "all criteria for the strategy pass on the holdout"
+  NO_GO_STAT_ONLY: "prediction criteria pass, strategy criteria fail: statistically interesting but not tradable"
+  NO_GO: "prediction criteria fail"
