@@ -14,6 +14,7 @@ only: survivorship-biased (see section 6).
 | A: short suspected ramps | **NO-GO** (fails 8 of 10 criteria) | Stop. Do not fund intraday or borrow data for this. |
 | B: early-warning exits on a long book | **GO** (criteria met; not statistically significant) | Paper-trade only. **No capital** until a survivorship-free re-test and 12 months of live paper results. |
 | C: crash-risk ranking / avoidance | **NO-GO: statistically interesting but not tradable** | Use as a **risk screen**, not a return source. |
+| D: go long the ramps *(added after the holdout, exploratory, not pre-registered)* | **No** (−5% to −11% net per trade in every variant, dev and validation) | Do not pursue. |
 
 **Prediction itself: passes.** Models C and D clear every pre-registered
 statistical criterion on the untouched holdout. The rules model (A) and
@@ -85,6 +86,17 @@ rate.
 4. **Costs are not the problem**, and that matters: lower commissions or
    better execution cannot rescue it. Round-trip explicit costs are about
    0.44%; the loss is in the gross price path.
+
+**Going long the ramps fails too** (Strategy D, docs/05, tested after the
+holdout on development and validation data only):
+- buying run-up stocks for 20 days loses 7.8% to 11.1% per trade net;
+- even with an optimistic minimum spread it loses 4.8% to 9.3%;
+- that holds for the model's lowest-risk group as well.
+
+The survivors' upside is a lottery-ticket mean (+2.6% for the low-risk
+group) over a negative median (−2.9%). It does not cover the cost of
+trading HK penny stocks. **Ramp stocks lose money from both sides; the
+edge is avoiding them.**
 
 ## 5. What does work, modestly
 

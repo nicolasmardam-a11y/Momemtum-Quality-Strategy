@@ -188,6 +188,56 @@ tradable.**
   top decile does not fall. Long/short loses 10.6%/yr (dev) and 5.0%/yr
   (holdout).
 
+## Strategy D: go long the ramps (added after the holdout; exploratory)
+
+*Added at the user's request after the holdout had been opened. The holdout
+therefore cannot validate it; only development OOS and validation data are
+used. It is not part of the pre-registered verdict.*
+Script: `scripts/strategy_d_long_ramps.py`.
+Output: `outputs/post_holdout/strategy_d_long_ramps.csv`.
+
+**Idea.** The run-up names that do not crash keep rising (mean worst move
+against a short is +26% in 20 days), so buy them, preferably the ones the
+model rates low crash risk.
+
+**Design.**
+- Universe: candidate (run-up state) stock-days, split by Model D's
+  out-of-sample crash probability, ranked within each walk-forward fold.
+- Buy at the t+1 open with the same engine as Strategy A (ticks, lots,
+  participation caps, HKEX costs, suspensions).
+- Hold 20 trading days; 30% stop on the close, executed at the next open.
+- HK$50m NAV, 2% per name.
+
+| Group | Period | Paper mean (t+1 open to t+20) | Paper median | Trades | Net per trade, estimated spread | 90% CI | Net, tick-only spread (optimistic) | 90% CI | Win rate |
+|---|---|---|---|---|---|---|---|---|---|
+| Low risk (bottom 30%) | dev 2016-22 | +2.6% | −2.9% | 845 | **−7.8%** | [−9.4%, −6.4%] | **−5.1%** | [−6.7%, −3.6%] | 29% |
+| Low risk | val 2023-24H1 | −2.0% | −6.4% | 264 | −7.7% | [−11.1%, −3.8%] | −4.8% | [−8.8%, −0.6%] | 27% |
+| All run-ups | dev | +0.5% | −5.2% | 914 | −9.0% | [−10.3%, −7.6%] | −5.8% | [−7.3%, −4.1%] | 29% |
+| All run-ups | val | −1.3% | −7.3% | 260 | −10.8% | [−13.7%, −7.8%] | −8.5% | [−11.4%, −5.4%] | 24% |
+| High risk (top 30%) | dev | −1.2% | −8.3% | 676 | −11.1% | [−13.9%, −7.9%] | −9.3% | [−11.9%, −6.4%] | 27% |
+| High risk | val | −1.2% | −7.8% | 271 | −10.1% | [−14.7%, −5.4%] | −8.0% | [−13.0%, −2.9%] | 30% |
+
+At 5% ADV participation the results are similar (−8% to −12%).
+
+**Where the money goes** (low-risk group, dev, estimated spread):
+- the paper mean is +2.6%;
+- the engine's gross result is −6.4%, after spread and impact on entry and
+  exit, tick rounding on penny stocks, stops that gap through, and fills
+  concentrated on liquid days;
+- explicit costs take a further 1.4%, higher than for shorts because the
+  HK$50 minimum brokerage bites on small tickets;
+- net: −7.8%.
+
+With the optimistic tick-only spread, net is still −5.1%.
+
+**Result.** Buying run-ups loses money in every group, period, spread
+assumption and participation level. The crash-risk model does order the
+outcomes correctly: low risk loses least, high risk most. But even the
+best group cannot overcome the trading cost of illiquid, volatile, low-priced
+stocks, whose typical (median) path from entry is already negative.
+**Verdict: no.** Ramp stocks lose money in both directions once
+implementation is honest. The only usable edge is avoiding them (B, C).
+
 ## Capacity
 
 Strategy A deploys HK$0.3m (NAV HK$10m) to HK$2.4m (NAV HK$200m) on

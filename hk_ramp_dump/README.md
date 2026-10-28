@@ -18,7 +18,7 @@ models, an execution-aware backtester and a pre-registered GO/NO-GO test.
 | 3 | Daily event-detection algorithm | [`src/hkrd/events.py`](src/hkrd/events.py), [`docs/03_event_detection.md`](docs/03_event_detection.md) |
 | 4 | Event database and case figures | `outputs/research/event_db.csv`, `outputs/figures/` |
 | 5 | Predictive models with OOS metrics | [`src/hkrd/models.py`](src/hkrd/models.py), [`docs/04_models.md`](docs/04_models.md) |
-| 6 | Execution-aware backtest (A/B/C) | [`src/hkrd/backtest.py`](src/hkrd/backtest.py), [`docs/05_backtests.md`](docs/05_backtests.md) |
+| 6 | Execution-aware backtest (A/B/C; D = long the ramps, added after the holdout) | [`src/hkrd/backtest.py`](src/hkrd/backtest.py), [`docs/05_backtests.md`](docs/05_backtests.md) |
 | 7 | Live monitoring design and daily watchlist | [`docs/06_live_monitoring.md`](docs/06_live_monitoring.md), [`scripts/daily_watchlist.py`](scripts/daily_watchlist.py) |
 | 8 | GO/NO-GO memo | [`docs/07_go_no_go_memo.md`](docs/07_go_no_go_memo.md) |
 
@@ -35,6 +35,8 @@ python scripts/fetch_pilot_data.py           # ~15 min: HKEX lists, 631 short-se
 python scripts/run_research.py all           # events (~7 min), dataset (~4 min), walk-forward models (~15 min)
 python scripts/run_backtests.py              # strategies A/B/C on OOS predictions (~3 min)
 python scripts/run_holdout.py                # ONCE: refuses unless go_no_go.yaml is committed and unmodified
+python scripts/robustness.py                 # post-hoc: Strategy B placebo test, Strategy C by year
+python scripts/strategy_d_long_ramps.py      # post-hoc: long the ramps (dev/validation data only)
 python scripts/daily_watchlist.py            # after 16:10 HKT: today's risk-ranked watchlist
 python -m pytest -q tests                    # 34 unit and integration tests
 ```
