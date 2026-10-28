@@ -60,3 +60,14 @@ Read `reports/dashboard/latest/metrics.json` for the headline stats, or open
 
 _Simulated / research. **Not investment advice. No live trading.** All
 performance figures are hypothetical backtest/paper results._
+
+---
+
+## Separate research package: HKEX ramp-and-dump detection
+
+[`hk_ramp_dump/`](hk_ramp_dump/README.md) is a self-contained study. It asks
+whether ramp-and-dump collapses in Hong Kong equities can be predicted from
+daily data and monetised net of HKEX costs, shortability and liquidity. It
+has its own requirements, pre-registered GO/NO-GO criteria and a final memo
+([`hk_ramp_dump/docs/07_go_no_go_memo.md`](hk_ramp_dump/docs/07_go_no_go_memo.md)).
+It shares no code with the bot above.

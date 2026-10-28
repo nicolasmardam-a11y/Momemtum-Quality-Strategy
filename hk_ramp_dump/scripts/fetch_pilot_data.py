@@ -19,7 +19,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import pandas as pd  # noqa: E402
 
 from hkrd import data  # noqa: E402
 from hkrd.config import load_config  # noqa: E402
@@ -66,5 +65,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    pd.options.mode.copy_on_write = True
     main()

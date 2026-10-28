@@ -84,21 +84,23 @@ class Market:
     adv: pd.DataFrame              # ADV20 traded value known at close t
     shortable: pd.DataFrame        # designated list in force on each date
     board_lot: pd.Series           # by code (current lots: a pilot limitation)
+    raw_factor: pd.DataFrame | None = None   # adjusted x factor = traded price (for ticks)
 
     @classmethod
     def from_panel(cls, panel: pd.DataFrame, shortable: pd.DataFrame, board_lot: pd.Series,
                    spread: pd.DataFrame | None = None) -> "Market":
-        w = {c: panel.pivot(index="date", columns="code", values=c).sort_index()
-             for c in ["open", "high", "low", "close", "value"]}
+        cols = ["open", "high", "low", "close", "value"] + (["raw_factor"] if "raw_factor" in panel else [])
+        w = {c: panel.pivot(index="date", columns="code", values=c).sort_index() for c in cols}
         r = np.log(w["close"]).diff()
         sigma = r.rolling(20, min_periods=10).std()
         adv = w["value"].fillna(0).rolling(20, min_periods=10).mean()
         if spread is None:
             spread = pd.DataFrame(0.0, index=w["close"].index, columns=w["close"].columns)
         sh = shortable.reindex(index=w["close"].index, columns=w["close"].columns).fillna(False).astype(bool)
+        rf = w["raw_factor"].ffill().fillna(1.0) if "raw_factor" in w else None
         return cls(w["open"], w["high"], w["low"], w["close"], w["value"],
                    spread.reindex_like(w["close"]).fillna(0.0), sigma, adv, sh,
-                   board_lot.reindex(w["close"].columns))
+                   board_lot.reindex(w["close"].columns), rf)
 
 
 class EventBacktester:
@@ -125,7 +127,10 @@ class EventBacktester:
     def _exec_price(self, base: float, i: int, j: int, fill_value: float, sell: bool) -> float:
         m, ex = self.m, self.ex
         d = m.close.index[i].date()
-        tk = tick_size(base, d)
+        # Engine prices are split-adjusted; ticks apply to the price actually
+        # traded, so convert to raw, round there, and convert back.
+        f = float(m.raw_factor.iat[i, j]) if m.raw_factor is not None else 1.0
+        tk = tick_size(base * f, d) / f
         hs = max(0.5 * tk / base, 0.5 * m.spread.iat[i, j]) * ex.spread_mult
         sig = m.sigma.iat[i, j] if np.isfinite(m.sigma.iat[i, j]) else 0.05
         imp = ex.impact_k * sig * np.sqrt(min(fill_value / max(m.value.iat[i, j], 1.0), 1.0))
@@ -252,6 +257,10 @@ class EventBacktester:
                     rec = {"code": s.code, "signal_date": d, "score": s.score, "tier": tier,
                            "first_fill_idx": i + 1 + ex.delay_days,
                            "target_value": r.max_position_nav * r.nav}
+                    k = min(i + 1 + ex.delay_days, len(dates) - 1)
+                    if short and sp.require_designated and not m.shortable.iat[k, j]:
+                        failures.append({**rec, "reason": "not_designated"})
+                        continue
                     if short and self.rng.random() < sp.locate_fail[tier]:
                         failures.append({**rec, "reason": "locate_failed"})
                         continue
@@ -286,14 +295,15 @@ def portfolio_backtest(weights: pd.DataFrame, close: pd.DataFrame, traded: pd.Da
                        spread_mult: float = 1.0) -> pd.DataFrame:
     """Long-only weight-based portfolio.
 
-    `weights` are targets decided at close t. They are applied to returns from
-    close t+1 onward (one extra day of lag versus an opening-auction fill: a
-    conservative stand-in for trading at t+1 during the day). Positions in
-    stocks that do not trade on a day cannot be changed (frozen at drifted
-    weight) — that is how suspensions trap a liquidation.
+    `weights` are targets decided at close t; NaN means "hold the drifted
+    weight". Targets are applied to returns from close t+1 onward (one extra
+    day of lag versus an opening-auction fill: a conservative stand-in for
+    trading at t+1 during the day). Positions in stocks that do not trade on a
+    day cannot be changed (frozen at drifted weight) — that is how suspensions
+    trap a liquidation.
     """
     ret = close.pct_change(fill_method=None).fillna(0.0)
-    tgt = weights.reindex_like(close).shift(1).fillna(0.0)
+    tgt = weights.reindex_like(close).shift(1)
     can = traded.reindex_like(close).fillna(False).astype(bool).to_numpy()
     R = ret.to_numpy()
     T = tgt.to_numpy()
@@ -303,7 +313,7 @@ def portfolio_backtest(weights: pd.DataFrame, close: pd.DataFrame, traded: pd.Da
     out = []
     for i in range(len(dates)):
         t = T[i]
-        new = np.where(can[i], t, w)
+        new = np.where(can[i] & ~np.isnan(t), t, w)
         s = new.sum()
         if s > 1.0:
             # cannot exceed fully invested: scale the tradable part down

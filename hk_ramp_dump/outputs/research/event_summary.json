@@ -1,0 +1,21 @@
+{
+  "n_episodes": 4923,
+  "n_stocks": 1574,
+  "by_category": {
+    "C_volatile": 2667,
+    "A_ramp_dump": 1434,
+    "B_sustained": 771,
+    "censored": 51
+  },
+  "A_by_board": {
+    "MAIN": 1066,
+    "GEM": 368
+  },
+  "A_shortable_at_peak": 90,
+  "A_peak_since_2016_05": 1185,
+  "A_median_run_return": 1.7934266820537255,
+  "A_median_drawdown": -0.5101010008571509,
+  "A_median_mean_value_run_hkd": 6009657.284858241,
+  "A_with_mean_value_ge_5m": 766,
+  "A_median_decline_remaining_at_first_signal": 0.7265804750507502
+}

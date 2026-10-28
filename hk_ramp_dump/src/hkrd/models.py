@@ -73,7 +73,7 @@ class RegimeModel:
         self.n_states, self.n_iter, self.n_tickers, self.seed = n_states, n_iter, fit_sample_tickers, seed
 
     def _obs(self, X):
-        o = X[self.obs_cols].to_numpy(dtype=float)
+        o = X[self.obs_cols].to_numpy(dtype=float, copy=True)
         o[:, 0] = np.clip(o[:, 0], -0.5, 0.5)
         return o
 
@@ -157,7 +157,7 @@ class GBMModel:
         rng = np.random.default_rng(self.seed)
         keep = ok & ((yy == 1) | (rng.random(len(yy)) < self.neg))
         w = np.where(yy[keep] == 1, 1.0, 1.0 / self.neg)
-        self.model = lgb.LGBMClassifier(**self.params, random_state=self.seed, verbose=-1)
+        self.model = lgb.LGBMClassifier(**{**self.params, "random_state": self.seed, "verbose": -1})
         self.model.fit(X.loc[keep, self.features], yy[keep], sample_weight=w)
         return self
 

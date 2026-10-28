@@ -3,10 +3,14 @@
 Canonical panel (long format, one row per stock-day, sorted by code, date):
 
     code (int), date (datetime64), open, high, low, close, volume,
-    value (HK$ traded value), traded (bool: volume > 0), quality_mask (bool)
+    value (HK$ traded value), traded (bool: volume > 0), quality_mask (bool),
+    raw_factor (adjusted price x raw_factor = price actually traded that day)
 
-Prices are split/consolidation-adjusted. `value` = close * volume, which is
-invariant to share-count adjustments. Every downstream module consumes only
+Prices are split/consolidation-adjusted, which is right for returns but wrong
+for anything that depends on the traded price level (tick size, penny-stock
+filters): HK small caps consolidate often, so a stock that traded at HK$0.05
+can show HK$200 after adjustment. Those uses go through raw_factor. `value` =
+close * volume, which is invariant to share-count adjustments. Every downstream module consumes only
 this schema, so swapping the pilot source (yfinance, current listings only)
 for a survivorship-free source (Webb-site dump, Capital IQ) means writing one
 adapter that emits the same columns.
@@ -31,7 +35,7 @@ DS_FILE_BASE = ("https://www.hkex.com.hk/-/media/HKEX-Market/Services/Trading/Se
                 "Securities-Lists/Designated-Securities-Eligible-for-Short-Selling/")
 
 PANEL_COLUMNS = ["code", "date", "open", "high", "low", "close", "volume", "value",
-                 "traded", "quality_mask"]
+                 "traded", "quality_mask", "raw_factor"]
 
 
 def _get(url: str, retries: int = 4) -> bytes:
@@ -142,7 +146,7 @@ def fetch_yahoo_prices(codes: list[int], start: str, batch: int = 60, sleep: flo
         syms = [yahoo_symbol(c) for c in chunk]
         for attempt in range(4):
             try:
-                raw = yf.download(syms, start=start, auto_adjust=False, actions=False,
+                raw = yf.download(syms, start=start, auto_adjust=False, actions=True,
                                   group_by="ticker", progress=False, threads=True)
                 break
             except Exception as e:
@@ -161,6 +165,7 @@ def fetch_yahoo_prices(codes: list[int], start: str, batch: int = 60, sleep: flo
                 "open": d["Open"].to_numpy(), "high": d["High"].to_numpy(),
                 "low": d["Low"].to_numpy(), "close": d["Close"].to_numpy(),
                 "adj_close": d["Adj Close"].to_numpy(), "volume": d["Volume"].to_numpy(),
+                "split": d["Stock Splits"].to_numpy() if "Stock Splits" in d else 0.0,
             }))
         log.info("fetched %d/%d", min(i + batch, len(codes)), len(codes))
         time.sleep(sleep)
@@ -209,7 +214,19 @@ def build_panel(prices: pd.DataFrame, dq: dict) -> pd.DataFrame:
         return s.rolling(2 * k + 1, center=True, min_periods=1).max().astype(bool)
 
     p["quality_mask"] = p.groupby("code", group_keys=False)[["close"]].apply(_mask)
+    p["raw_factor"] = raw_price_factor(p)
     return p[PANEL_COLUMNS].reset_index(drop=True)
+
+
+def raw_price_factor(p: pd.DataFrame) -> pd.Series:
+    """Product of split ratios dated after each row (Yahoo convention: a 2-for-1
+    split is 2.0, a 10-into-1 consolidation is 0.1). Rows must be sorted by
+    code, date. Missing split data -> factor 1 (adjusted = raw)."""
+    if "split" not in p:
+        return pd.Series(1.0, index=p.index)
+    s = p["split"].fillna(0).where(lambda x: x > 0, 1.0)
+    rev = s[::-1].groupby(p["code"][::-1]).cumprod()[::-1]
+    return rev / s
 
 
 def save_parquet(df: pd.DataFrame, path: Path) -> None:

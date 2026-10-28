@@ -1,0 +1,45 @@
+{
+  "exit_on_C_alert_alerts_on_holdings": 4584,
+  "exit_on_C_alert_mean_fwd20_after_alert": -0.011549014355173167,
+  "exit_on_C_alert_share_alerts_followed_by_loss": 0.5938045375218151,
+  "exit_on_C_alert_share_followed_by_20pct_drop": 0.19197207678883071,
+  "exit_on_D_alert_alerts_on_holdings": 843,
+  "exit_on_D_alert_mean_fwd20_after_alert": 0.004783997627164781,
+  "exit_on_D_alert_share_alerts_followed_by_loss": 0.5432977461447213,
+  "exit_on_D_alert_share_followed_by_20pct_drop": 0.25741399762752076,
+  "momentum_top50": {
+    "n_days": 2091,
+    "ann_return": -0.11706162245204876,
+    "ann_vol": 0.25117464652387533,
+    "sharpe": -0.36924239887003296,
+    "sortino": -0.48726879792537175,
+    "max_drawdown": -0.7963400841641937,
+    "worst_day": -0.08467656803928705,
+    "cvar_5": -0.04003198111861748,
+    "avg_turnover_daily": 0.020912587935049593
+  },
+  "exit_on_C_alert": {
+    "n_days": 2091,
+    "ann_return": -0.094648858101825,
+    "ann_vol": 0.20264109700370872,
+    "sharpe": -0.38876892414731307,
+    "sortino": -0.5092573166159687,
+    "max_drawdown": -0.7161920010555207,
+    "worst_day": -0.06574234415419054,
+    "cvar_5": -0.03255634360504102,
+    "avg_turnover_daily": 0.019893118958781656
+  },
+  "exit_on_D_alert": {
+    "n_days": 2091,
+    "ann_return": -0.11442337130679603,
+    "ann_vol": 0.23188999896833817,
+    "sharpe": -0.4073498648051129,
+    "sortino": -0.540636461357811,
+    "max_drawdown": -0.753949530839956,
+    "worst_day": -0.07370261210437148,
+    "cvar_5": -0.037077564613551356,
+    "avg_turnover_daily": 0.020499418301092337
+  },
+  "exit_on_C_alert_vs_base_p": 0.336,
+  "exit_on_D_alert_vs_base_p": 0.548
+}

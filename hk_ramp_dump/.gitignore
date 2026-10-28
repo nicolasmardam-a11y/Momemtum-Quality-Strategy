@@ -1,3 +1,4 @@
 data/raw/
 data/store/
 outputs/**/*.parquet
+outputs/models/

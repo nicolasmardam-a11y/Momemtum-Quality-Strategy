@@ -55,3 +55,13 @@ def test_sensitivity_grid_shape(panel):
             "post_window": [20, 60], "drawdown": [0.3, 0.4]}
     g = events.sensitivity_grid(c, v, m, None, grid, events.EventParams())
     assert len(g) == 2 * 1 * 1 * 2 * 2
+
+
+def test_raw_price_factor_consolidation():
+    from hkrd.data import raw_price_factor
+
+    p = pd.DataFrame({"code": [1] * 4 + [2] * 2, "split": [0, 0, 0.1, 0, 0, 2.0]})
+    f = raw_price_factor(p)
+    # before a 10-into-1 consolidation the traded price is 1/10 of the adjusted one
+    assert list(f[:4]) == [0.1, 0.1, 1.0, 1.0]
+    assert list(f[4:]) == [2.0, 1.0]

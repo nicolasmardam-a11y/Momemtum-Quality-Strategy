@@ -8,8 +8,9 @@ Definition (all parameters in config `events`):
    `baseline_window` days (t-L-B..t-L-1), floored to avoid divide-by-zero on
    dormant stocks.
 2. Qualifying days closer than `episode_gap_days` merge into one episode.
-3. Peak = highest close within the episode. Trough = lowest close in
-   (peak, peak + post_window].
+3. Peak = highest close from the first qualifying day to `run_days` after
+   the last one (prices often keep rising after turnover stops qualifying
+   as abnormal). Trough = lowest close in (peak, peak + post_window].
 4. Category:
    A  ramp_dump          trough / peak - 1 <= -drawdown
    B  sustained          max drawdown within `sustained_window` days < sustained_max_drawdown
@@ -104,7 +105,7 @@ def detect_events(close: pd.DataFrame, value: pd.DataFrame, mask: pd.DataFrame,
         valid = np.flatnonzero(~np.isnan(c))
         last_valid = valid[-1]
         for s, e in _episodes(idx, p.episode_gap_days):
-            seg = c[s:e + 1]
+            seg = c[s:min(e + p.run_days, last_valid) + 1]
             pk = s + int(np.nanargmax(seg))
             # run start: trough of the lookback window ending at the first signal
             lo = max(s - p.run_days, 0)

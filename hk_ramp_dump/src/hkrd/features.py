@@ -34,8 +34,14 @@ def _f32(x: pd.DataFrame) -> pd.DataFrame:
     return x.astype(np.float32)
 
 
-def wide_features(o, h, l, c, v, market: pd.Series | None, base_win: int = 120) -> dict[str, pd.DataFrame]:
-    """Return {feature_name: wide frame}. Inputs are wide frames (date x code)."""
+def wide_features(o, h, l, c, v, market: pd.Series | None, base_win: int = 120,
+                  raw_close: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
+    """Return {feature_name: wide frame}. Inputs are wide frames (date x code).
+
+    `raw_close` is the price actually traded (adjusted x raw_factor); price-level
+    features (tick size, log price) use it. Defaults to `c` when unavailable.
+    """
+    raw = c if raw_close is None else raw_close
     F: dict[str, pd.DataFrame] = {}
     lc = np.log(c)
     for w in (1, 3, 5, 10, 20, 60):
@@ -78,9 +84,9 @@ def wide_features(o, h, l, c, v, market: pd.Series | None, base_win: int = 120) 
     F["zero_days_120"] = (vv <= 0).astype(float).rolling(base_win, min_periods=60).mean()
     F["amihud_60"] = np.log1p((r1.abs() / vv.replace(0, np.nan) * 1e6).rolling(60, min_periods=20).median())
     F["spread_ar_20"] = _abdi_ranaldo(h, l, c, 20)
-    F["log_price"] = lc
-    ticks = tick_size_array(c.to_numpy().ravel(), np.repeat(c.index.to_numpy(), c.shape[1]))
-    F["tick_rel"] = pd.DataFrame(ticks.reshape(c.shape), index=c.index, columns=c.columns) / c
+    F["log_price"] = np.log(raw)
+    ticks = tick_size_array(raw.to_numpy().ravel(), np.repeat(raw.index.to_numpy(), raw.shape[1]))
+    F["tick_rel"] = pd.DataFrame(ticks.reshape(raw.shape), index=raw.index, columns=raw.columns) / raw
 
     # Distribution-phase hypotheses
     prev_hi20 = h.shift(1).rolling(20, min_periods=10).max()

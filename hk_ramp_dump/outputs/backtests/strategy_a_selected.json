@@ -1,0 +1,5 @@
+{
+  "model": "A_rules",
+  "hold_days": 20,
+  "stop_loss": 0.3
+}
